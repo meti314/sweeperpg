@@ -1,0 +1,3873 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweeper RPG</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0a0a1a;color:#e0e0e0;font-family:'Segoe UI',Tahoma,sans-serif;overflow:hidden;height:100vh;width:100vw;}
+#app{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+
+/* MENU */
+.menu-screen{text-align:center;max-width:700px;width:90%;}
+.menu-screen h1{font-size:3em;color:#ffd700;text-shadow:0 0 20px #ffd70066;margin-bottom:10px;letter-spacing:3px;}
+.menu-screen .subtitle{color:#aaa;margin-bottom:30px;font-size:1.1em;}
+.btn{background:linear-gradient(135deg,#2a1a4e,#1a1a3e);border:2px solid #ffd700;color:#ffd700;padding:12px 32px;font-size:1.1em;cursor:pointer;border-radius:8px;transition:all .2s;margin:5px;}
+.btn:hover{background:linear-gradient(135deg,#3a2a6e,#2a2a5e);transform:scale(1.05);box-shadow:0 0 15px #ffd70044;}
+.btn-small{padding:6px 16px;font-size:.85em;}
+.btn-danger{border-color:#ff4444;color:#ff4444;}
+.btn-danger:hover{box-shadow:0 0 15px #ff444444;}
+.btn-success{border-color:#44ff44;color:#44ff44;}
+
+.upgrades-panel{margin-top:20px;background:#111128;border:1px solid #333;border-radius:10px;padding:20px;}
+.upgrades-panel h3{color:#bb88ff;margin-bottom:15px;}
+.upgrade-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #222;transition:background .2s;}
+.upgrade-row:hover{background:#1a1a3a;}
+.upgrade-info{text-align:left;flex:1;}
+.upgrade-name{color:#ddd;font-weight:bold;}
+.upgrade-desc{color:#888;font-size:.8em;}
+.upgrade-level{color:#ffd700;margin:0 15px;min-width:60px;}
+.soul-points-display{color:#bb88ff;font-size:1.3em;margin:15px 0;}
+
+/* GAME BOARD */
+.game-screen{display:flex;width:100%;height:100%;padding:10px;gap:10px;}
+.left-panel{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+.center-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+.right-panel{width:240px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+
+.panel{background:#111128;border:1px solid #333;border-radius:8px;padding:12px;}
+.panel h3{color:#ffd700;margin-bottom:8px;font-size:.95em;border-bottom:1px solid #333;padding-bottom:5px;}
+.stat-row{display:flex;justify-content:space-between;padding:3px 0;font-size:.85em;}
+.stat-name{color:#aaa;}
+.stat-val{color:#fff;font-weight:bold;}
+.stat-bonus{color:#44ff44;font-size:.8em;}
+.hp-bar{height:18px;background:#333;border-radius:9px;overflow:hidden;margin:5px 0;}
+.hp-fill{height:100%;background:linear-gradient(90deg,#ff4444,#44ff44);border-radius:9px;transition:width .3s;}
+.xp-bar{height:8px;background:#333;border-radius:4px;overflow:hidden;margin:5px 0;}
+.xp-fill{height:100%;background:linear-gradient(90deg,#4488ff,#88bbff);border-radius:4px;transition:width .3s;}
+
+.board{display:inline-grid;gap:2px;background:#222;padding:4px;border-radius:8px;border:2px solid #444;}
+.cell{display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;border-radius:4px;transition:all .15s;user-select:none;position:relative;line-height:1.1;text-align:center;flex-direction:column;}
+.cell-hidden{background:linear-gradient(135deg,#2a2a4a,#1a1a3a);border:1px solid #444;}
+.cell-hidden:hover{background:linear-gradient(135deg,#3a3a6a,#2a2a5a);border-color:#666;}
+.cell-hidden.adjacent{border-color:#ffd700;box-shadow:0 0 5px #ffd70044;}
+.cell-revealed{background:#0d0d20;border:1px solid #222;}
+.cell-player{background:linear-gradient(135deg,#2a4a2a,#1a3a1a)!important;border-color:#44ff44!important;box-shadow:0 0 8px #44ff4444;}
+.cell-exit{background:linear-gradient(135deg,#4a4a1a,#3a3a0a)!important;border-color:#ffd700!important;}
+.cell-flag{background:linear-gradient(135deg,#4a1a1a,#3a0a0a)!important;}
+.cell-monster{background:linear-gradient(135deg,#3a1010,#2a0808)!important;border-color:#6a2222!important;}
+.cell-boss{background:linear-gradient(135deg,#4a1030,#3a0820)!important;border-color:#ff4488!important;box-shadow:0 0 8px #ff448844;animation:bossGlow 2s ease-in-out infinite;}
+@keyframes bossGlow{0%,100%{box-shadow:0 0 8px #ff448844;}50%{box-shadow:0 0 15px #ff4488aa;}}
+.cell-treasure{background:linear-gradient(135deg,#3a3010,#2a2008)!important;border-color:#ffd700!important;box-shadow:0 0 8px #ffd70044;animation:treasureGlow 2s ease-in-out infinite;}
+@keyframes treasureGlow{0%,100%{box-shadow:0 0 8px #ffd70044;}50%{box-shadow:0 0 15px #ffd700aa;}}
+.cell .danger-count{color:#ff8844;font-size:1.2em;}
+.cell .danger-sum{color:#ff4444;font-size:.65em;}
+.cell .player-icon{font-size:1.3em;line-height:1;}
+.cell .under-info{font-size:.7em;line-height:1;margin-top:1px;font-weight:bold;}
+.cell-gold{background:linear-gradient(135deg,#3a3a1a,#2a2a0a)!important;border-color:#ffd700!important;}
+.cell-shop{background:linear-gradient(135deg,#1a2a4a,#0a1a3a)!important;border-color:#44aaff!important;}
+.cell-npc{background:linear-gradient(135deg,#2a1a3a,#1a0a2a)!important;border-color:#bb88ff!important;}
+.gold-display{color:#ffd700;font-size:1em;padding:5px 0;text-align:center;border-bottom:1px solid #333;margin-bottom:5px;}
+.dialogue-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:90;}
+.dialogue-box{background:#111128;border:2px solid #bb88ff;border-radius:15px;padding:25px;max-width:550px;width:90%;animation:popIn .3s ease-out;}
+.dialogue-box .npc-header{display:flex;align-items:center;gap:12px;margin-bottom:15px;}
+.dialogue-box .npc-icon{font-size:2.5em;}
+.dialogue-box .npc-name{font-size:1.3em;color:#bb88ff;font-weight:bold;}
+.dialogue-box .npc-role{font-size:.8em;color:#888;}
+.dialogue-text{color:#ddd;font-size:.95em;line-height:1.6;margin-bottom:15px;min-height:60px;padding:10px;background:#0a0a1a;border-radius:8px;border-left:3px solid #bb88ff;}
+.dialogue-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.quest-badge{display:inline-block;background:#2a1a4e;color:#ffd700;padding:3px 10px;border-radius:10px;font-size:.75em;margin:3px 0;}
+.quest-tracker{margin-top:5px;font-size:.75em;color:#ffd700;padding:3px 6px;background:#1a1a0e;border-radius:4px;}
+.shop-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:90;}
+.shop-box{background:#111128;border:2px solid #44aaff;border-radius:15px;padding:25px;max-width:650px;width:90%;max-height:80vh;overflow-y:auto;animation:popIn .3s ease-out;}
+.shop-box h2{color:#44aaff;text-align:center;margin-bottom:5px;}
+.shop-tabs{display:flex;gap:5px;margin:10px 0;justify-content:center;}
+.shop-tab{padding:6px 18px;border-radius:6px;cursor:pointer;border:1px solid #333;background:#1a1a2e;color:#aaa;transition:all .2s;}
+.shop-tab.active{border-color:#44aaff;color:#44aaff;background:#1a2a3e;}
+.shop-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin:4px 0;background:#0a0a1a;border-radius:6px;border:1px solid #222;transition:all .2s;}
+.shop-item:hover{border-color:#44aaff;background:#0f1025;}
+.shop-item-info{flex:1;}
+.shop-item-name{font-weight:bold;font-size:.9em;}
+.shop-item-desc{font-size:.75em;color:#888;margin-top:2px;}
+.shop-item-price{color:#ffd700;font-weight:bold;margin-left:10px;white-space:nowrap;}
+.shop-btn{padding:4px 14px;border-radius:5px;cursor:pointer;font-size:.8em;border:1px solid;transition:all .2s;}
+.shop-btn-buy{border-color:#44ff44;color:#44ff44;background:#0a1a0a;}
+.shop-btn-buy:hover:not(:disabled){background:#1a2a1a;}
+.shop-btn-sell{border-color:#ff8844;color:#ff8844;background:#1a0a0a;}
+.shop-btn-sell:hover:not(:disabled){background:#2a1a0a;}
+.shop-btn:disabled{opacity:.3;cursor:default;}
+.d0{color:#444!important;}
+.d1 .danger-count{color:#4488ff!important;}
+.d2 .danger-count{color:#44bb44!important;}
+.d3 .danger-count{color:#ffbb00!important;}
+.d4 .danger-count{color:#ff6600!important;}
+.d5 .danger-count{color:#ff2222!important;}
+
+.paperdoll{position:relative;width:210px;height:310px;margin:5px auto;}
+.paperdoll-body{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:4.5em;opacity:.15;pointer-events:none;user-select:none;}
+.eq-slot{position:absolute;background:#1a1a2e;border:2px solid #333;border-radius:8px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:1;}
+.eq-slot:hover{border-color:#ffd700;background:#222244;transform:scale(1.08);z-index:2;}
+.eq-slot.has-item{border-color:#555;}
+.eq-slot .eq-icon{font-size:1.4em;line-height:1;}
+.eq-slot .eq-label{font-size:.55em;color:#666;margin-top:1px;}
+.eq-slot .eq-item-name{font-size:.55em;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+.eq-slot-helmet{width:60px;height:50px;left:75px;top:0;}
+.eq-slot-armor{width:70px;height:65px;left:70px;top:55px;}
+.eq-slot-weapon{width:55px;height:60px;left:0;top:55px;}
+.eq-slot-shield{width:55px;height:60px;left:155px;top:55px;}
+.eq-slot-bracers{width:55px;height:50px;left:0;top:130px;}
+.eq-slot-accessory{width:55px;height:50px;left:150px;top:130px;}
+.eq-slot-boots{width:60px;height:50px;left:75px;top:195px;}
+.eq-slot-special{width:64px;height:45px;left:73px;top:250px;}
+.quest-complete-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:110;}
+.quest-complete-box{background:#111128;border:3px solid #ffd700;border-radius:15px;padding:35px;text-align:center;max-width:450px;box-shadow:0 0 40px #ffd70044,0 0 80px #ffd70022;animation:popIn .4s ease-out;}
+.quest-complete-box h2{color:#ffd700;font-size:1.8em;margin-bottom:10px;text-shadow:0 0 15px #ffd70066;}
+.quest-complete-box .quest-reward{color:#44ff44;font-size:1.1em;margin:15px 0;padding:10px;background:#0a1a0a;border-radius:8px;border:1px solid #44ff44;}
+.eq-tooltip{position:absolute;background:#111128;border:1px solid #666;border-radius:6px;padding:8px 10px;font-size:.75em;z-index:50;pointer-events:none;min-width:160px;box-shadow:0 4px 15px rgba(0,0,0,.7);left:50%;transform:translateX(-50%);bottom:calc(100% + 6px);color:#ddd;line-height:1.4;display:none;}
+.eq-slot:hover .eq-tooltip{display:block;}
+.eq-tooltip .tt-name{font-weight:bold;margin-bottom:3px;}
+.eq-tooltip .tt-stat{color:#aaa;}
+.eq-tooltip .tt-stat span{font-weight:bold;}
+.equip-slot{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin:3px 0;background:#1a1a2e;border-radius:5px;font-size:.8em;border:1px solid #333;cursor:pointer;transition:all .2s;}
+.equip-slot:hover{border-color:#ffd700;background:#222244;}
+.equip-slot .slot-name{color:#888;min-width:60px;}
+.equip-slot .item-name{color:#44ff44;flex:1;text-align:right;}
+.equip-empty .item-name{color:#555;}
+
+.ability-tag{display:inline-block;background:#2a1a4e;color:#bb88ff;padding:2px 8px;border-radius:10px;font-size:.7em;margin:2px;}
+
+.inventory-item{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin:3px 0;background:#1a1a2e;border-radius:5px;font-size:.78em;border:1px solid #333;cursor:pointer;transition:all .2s;}
+.inventory-item:hover{border-color:#ffd700;background:#222244;}
+.inventory-item .rarity-common{color:#aaa;}
+.inventory-item .rarity-uncommon{color:#44ff44;}
+.inventory-item .rarity-rare{color:#4488ff;}
+.inventory-item .rarity-epic{color:#bb44ff;}
+.inventory-item .rarity-legendary{color:#ffd700;}
+
+.log-panel{flex:1;overflow-y:auto;max-height:200px;}
+.log-entry{font-size:.75em;padding:2px 0;border-bottom:1px solid #1a1a2a;}
+.log-entry.log-danger{color:#ff6644;}
+.log-entry.log-good{color:#44ff44;}
+.log-entry.log-info{color:#88aaff;}
+.log-entry.log-epic{color:#bb88ff;}
+
+/* COMBAT OVERLAY */
+.combat-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;}
+.combat-header{display:flex;justify-content:space-between;margin-bottom:10px;align-items:flex-end;}
+.combat-entity{text-align:center;}
+.combat-entity .name{font-size:1.2em;font-weight:bold;margin-bottom:5px;}
+.combat-entity .combat-hp-bar{width:200px;height:14px;background:#333;border-radius:7px;overflow:hidden;}
+.combat-entity .combat-hp-fill{height:100%;border-radius:7px;transition:width .3s;}
+.player-hp-fill{background:linear-gradient(90deg,#ff4444,#44ff44);}
+.monster-hp-fill{background:linear-gradient(90deg,#ff2222,#ff8844);}
+.combat-entity .hp-text{font-size:.8em;color:#aaa;margin-top:3px;}
+
+.combat-arena{border:3px solid #555;border-radius:10px;background:#0a0a1a;position:relative;overflow:hidden;}
+.combat-phase-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2em;color:#ffd700;text-shadow:0 0 20px #ffd700;pointer-events:none;z-index:10;opacity:0;transition:opacity .3s;}
+.combat-phase-text.visible{opacity:1;}
+
+.attack-bar-container{margin-top:15px;height:40px;position:relative;display:none;}
+.attack-bar{width:100%;height:24px;background:#222;border-radius:12px;overflow:hidden;position:relative;border:2px solid #555;}
+.attack-zone{position:absolute;height:100%;top:0;}
+.attack-zone-miss{background:#331111;width:100%;}
+.attack-zone-weak{background:#332211;position:absolute;}
+.attack-zone-good{background:#223311;position:absolute;}
+.attack-zone-crit{background:#113322;position:absolute;}
+.attack-marker{position:absolute;top:-2px;width:4px;height:28px;background:#fff;border-radius:2px;transition:none;z-index:2;box-shadow:0 0 8px #fff;}
+.attack-label{text-align:center;margin-top:4px;font-size:.85em;color:#aaa;}
+
+.combat-info{margin-top:10px;font-size:.9em;color:#aaa;text-align:center;}
+.combat-abilities{display:flex;gap:8px;margin-top:10px;justify-content:center;}
+.ability-btn{background:#1a1a3e;border:2px solid #bb88ff;color:#bb88ff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em;transition:all .2s;}
+.ability-btn:hover:not(:disabled){background:#2a2a5e;transform:scale(1.05);}
+.ability-btn:disabled{opacity:.4;cursor:default;}
+
+/* ITEM FOUND OVERLAY */
+.item-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:90;}
+.item-card{background:#111128;border:2px solid #ffd700;border-radius:15px;padding:30px;text-align:center;max-width:400px;animation:popIn .3s ease-out;}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.item-card h2{margin-bottom:15px;}
+.item-card .item-stats{margin:15px 0;text-align:left;padding:10px;background:#0a0a1a;border-radius:8px;}
+.item-card .item-stats div{padding:3px 0;font-size:.9em;}
+
+/* GAME OVER */
+.gameover-screen{text-align:center;max-width:500px;}
+.gameover-screen h1{font-size:2.5em;color:#ff4444;margin-bottom:10px;}
+.gameover-screen .stats-summary{background:#111128;border-radius:10px;padding:20px;margin:20px 0;}
+.gameover-screen .stats-summary .stat-row{font-size:1em;padding:5px 0;}
+.reward-display{color:#bb88ff;font-size:1.5em;margin:15px 0;}
+
+/* LEVEL COMPLETE */
+.level-complete{text-align:center;padding:40px;}
+.level-complete h2{color:#ffd700;font-size:2em;margin-bottom:20px;}
+
+/* MONSTER SPRITE */
+.monster-sprite{font-size:3em;margin-bottom:10px;}
+
+/* TOOLTIP */
+.tooltip{position:absolute;background:#1a1a3e;border:1px solid #555;border-radius:6px;padding:8px 12px;font-size:.8em;z-index:50;pointer-events:none;max-width:250px;box-shadow:0 4px 15px rgba(0,0,0,.5);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#0a0a1a;}
+::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+
+/* CONSUMABLES */
+.consumable-item{display:flex;align-items:center;gap:6px;padding:4px 6px;margin:2px 0;background:#1a1a2e;border-radius:5px;font-size:.75em;border:1px solid #333;transition:all .2s;}
+.consumable-item:hover{border-color:#44aaff;background:#1a2a3e;}
+.consumable-use-btn{background:none;border:1px solid #44aaff;color:#44aaff;padding:1px 7px;border-radius:4px;cursor:pointer;font-size:.85em;transition:all .2s;margin-left:auto;}
+.consumable-use-btn:hover{background:#1a2a3e;border-color:#88ccff;}
+.spyglass-banner{background:#1a1a3e;border:1px solid #44aaff;color:#44aaff;padding:4px 16px;border-radius:6px;font-size:.85em;white-space:nowrap;margin-bottom:6px;text-align:center;animation:popIn .3s ease-out;}
+.boss-ping{animation:bossPing 0.5s ease-in-out 6 !important;box-shadow:0 0 12px #ff4488 !important;border-color:#ff4488 !important;}
+@keyframes bossPing{0%,100%{box-shadow:0 0 4px #ff448844;opacity:.6;}50%{box-shadow:0 0 18px #ff4488cc;opacity:1;}}
+.cell-danger-hint{background:linear-gradient(135deg,#3a2020,#2a1515)!important;border-color:#884444!important;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+.left-panel,.right-panel{width:180px;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ===================== UTILITIES =====================
+const $ = id => document.getElementById(id);
+const rng = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick = arr => arr[rng(0, arr.length - 1)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function calcCellSize() {
+  if (!game || !game.boardW) return 56;
+  const leftW = window.innerWidth <= 900 ? 180 : 220;
+  const rightW = window.innerWidth <= 900 ? 180 : 240;
+  const availW = window.innerWidth - leftW - rightW - 40; // padding + gaps
+  const availH = window.innerHeight - 30; // top/bottom padding
+  const gap = 2; // grid gap
+  const pad = 12; // board padding + border
+  const maxCellW = Math.floor((availW - pad - gap * (game.boardW - 1)) / game.boardW);
+  const maxCellH = Math.floor((availH - pad - gap * (game.boardH - 1)) / game.boardH);
+  return clamp(Math.min(maxCellW, maxCellH), 28, 72);
+}
+
+function calcCombatSize() {
+  const maxW = window.innerWidth - 60;
+  const maxH = window.innerHeight - 300; // room for header/stats/attack bars/info
+  const ratio = 500 / 350;
+  let cw = Math.min(maxW, 900);
+  let ch = cw / ratio;
+  if (ch > maxH) { ch = maxH; cw = ch * ratio; }
+  return { w: Math.max(400, Math.floor(cw)), h: Math.max(280, Math.floor(ch)) };
+}
+
+// ===================== AUDIO SYSTEM =====================
+let audioCtx = null;
+let sfxGain = null;
+let musicPlaying = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  sfxGain = audioCtx.createGain();
+  sfxGain.gain.value = 0.25;
+  sfxGain.connect(audioCtx.destination);
+}
+
+function playSfx(type) {
+  if (!audioCtx) initAudio();
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.connect(g);
+  g.connect(sfxGain);
+
+  switch(type) {
+    case 'hit': // player gets hit
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, t); osc.frequency.linearRampToValueAtTime(80, t+0.15);
+      g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0, t+0.15);
+      osc.start(t); osc.stop(t+0.15); break;
+    case 'attack': // player attacks
+      osc.type = 'square'; osc.frequency.setValueAtTime(300, t); osc.frequency.linearRampToValueAtTime(600, t+0.08);
+      g.gain.setValueAtTime(0.25, t); g.gain.linearRampToValueAtTime(0, t+0.12);
+      osc.start(t); osc.stop(t+0.12); break;
+    case 'crit': // critical hit
+      osc.type = 'square'; osc.frequency.setValueAtTime(400, t); osc.frequency.linearRampToValueAtTime(900, t+0.1);
+      g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0, t+0.2);
+      osc.start(t); osc.stop(t+0.2); break;
+    case 'miss': // missed attack / too slow
+      osc.type = 'sine'; osc.frequency.setValueAtTime(300, t); osc.frequency.linearRampToValueAtTime(100, t+0.3);
+      g.gain.setValueAtTime(0.2, t); g.gain.linearRampToValueAtTime(0, t+0.3);
+      osc.start(t); osc.stop(t+0.3); break;
+    case 'pickup': // item/gold pickup
+      osc.type = 'sine'; osc.frequency.setValueAtTime(500, t); osc.frequency.linearRampToValueAtTime(800, t+0.1);
+      g.gain.setValueAtTime(0.2, t); g.gain.linearRampToValueAtTime(0, t+0.15);
+      osc.start(t); osc.stop(t+0.15); break;
+    case 'equip':
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(400, t); osc.frequency.linearRampToValueAtTime(600, t+0.06);
+      g.gain.setValueAtTime(0.2, t); g.gain.linearRampToValueAtTime(0, t+0.12);
+      osc.start(t); osc.stop(t+0.12); break;
+    case 'victory': { // combat victory
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(400, t);
+      osc.frequency.setValueAtTime(500, t+0.1); osc.frequency.setValueAtTime(600, t+0.2);
+      osc.frequency.setValueAtTime(800, t+0.3);
+      g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0, t+0.5);
+      osc.start(t); osc.stop(t+0.5); break;
+    }
+    case 'defeat':
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, t);
+      osc.frequency.linearRampToValueAtTime(80, t+0.6);
+      g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0, t+0.6);
+      osc.start(t); osc.stop(t+0.6); break;
+    case 'levelup': {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523, t); osc.frequency.setValueAtTime(659, t+0.12);
+      osc.frequency.setValueAtTime(784, t+0.24); osc.frequency.setValueAtTime(1047, t+0.36);
+      g.gain.setValueAtTime(0.25, t); g.gain.linearRampToValueAtTime(0, t+0.5);
+      osc.start(t); osc.stop(t+0.5); break;
+    }
+    case 'quest': {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(600, t); osc.frequency.setValueAtTime(800, t+0.15);
+      osc.frequency.setValueAtTime(1000, t+0.3); osc.frequency.setValueAtTime(1200, t+0.45);
+      g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0, t+0.6);
+      osc.start(t); osc.stop(t+0.6); break;
+    }
+    case 'step':
+      osc.type = 'sine'; osc.frequency.setValueAtTime(150, t); osc.frequency.linearRampToValueAtTime(100, t+0.04);
+      g.gain.setValueAtTime(0.08, t); g.gain.linearRampToValueAtTime(0, t+0.04);
+      osc.start(t); osc.stop(t+0.04); break;
+    case 'dodge': // dodge phase start
+      osc.type = 'sine'; osc.frequency.setValueAtTime(250, t); osc.frequency.linearRampToValueAtTime(400, t+0.15);
+      g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0, t+0.2);
+      osc.start(t); osc.stop(t+0.2); break;
+    case 'shop':
+      osc.type = 'sine'; osc.frequency.setValueAtTime(440, t); osc.frequency.setValueAtTime(550, t+0.08);
+      g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0, t+0.15);
+      osc.start(t); osc.stop(t+0.15); break;
+    default:
+      osc.type = 'sine'; osc.frequency.setValueAtTime(440, t);
+      g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0, t+0.1);
+      osc.start(t); osc.stop(t+0.1);
+  }
+}
+
+// Background music from MP3 files
+let bgMusicAudio = null;
+let combatMusicAudio = null;
+let currentTrack = 'ambient';
+let crossfadeTimer = null;
+const CROSSFADE_MS = 1000;
+const AMBIENT_VOL = 0.3;
+const COMBAT_VOL = 0.35;
+
+function startMusic() {
+  if (musicPlaying) return;
+  musicPlaying = true;
+  if (!bgMusicAudio) {
+    bgMusicAudio = new Audio('Lochy, \u0141upy i Lamy.mp3');
+    bgMusicAudio.loop = true;
+    bgMusicAudio.volume = AMBIENT_VOL;
+  }
+  if (!combatMusicAudio) {
+    combatMusicAudio = new Audio('Lovers in the Dungeon.mp3');
+    combatMusicAudio.loop = true;
+    combatMusicAudio.volume = 0;
+  }
+  currentTrack = 'ambient';
+  bgMusicAudio.volume = AMBIENT_VOL;
+  bgMusicAudio.play().catch(()=>{});
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  if (crossfadeTimer) { clearInterval(crossfadeTimer); crossfadeTimer = null; }
+  if (bgMusicAudio) { bgMusicAudio.pause(); bgMusicAudio.volume = AMBIENT_VOL; }
+  if (combatMusicAudio) { combatMusicAudio.pause(); combatMusicAudio.volume = 0; }
+}
+
+function toggleMusic() {
+  if (musicPlaying) stopMusic(); else startMusic();
+}
+
+function crossfadeTo(target) {
+  if (crossfadeTimer) { clearInterval(crossfadeTimer); crossfadeTimer = null; }
+  const fadeOut = target === 'combat' ? bgMusicAudio : combatMusicAudio;
+  const fadeIn = target === 'combat' ? combatMusicAudio : bgMusicAudio;
+  const targetVol = target === 'combat' ? COMBAT_VOL : AMBIENT_VOL;
+  if (target === 'combat') fadeIn.currentTime = 0;
+  fadeIn.volume = 0;
+  fadeIn.play().catch(()=>{});
+  const steps = 20;
+  const stepMs = CROSSFADE_MS / steps;
+  let step = 0;
+  crossfadeTimer = setInterval(() => {
+    step++;
+    const t = step / steps;
+    fadeOut.volume = Math.max(0, (target === 'combat' ? AMBIENT_VOL : COMBAT_VOL) * (1 - t));
+    fadeIn.volume = targetVol * t;
+    if (step >= steps) {
+      clearInterval(crossfadeTimer);
+      crossfadeTimer = null;
+      fadeOut.pause();
+      fadeOut.volume = target === 'combat' ? AMBIENT_VOL : COMBAT_VOL;
+    }
+  }, stepMs);
+}
+
+function startCombatMusic() {
+  if (!musicPlaying) return;
+  currentTrack = 'combat';
+  crossfadeTo('combat');
+}
+
+function stopCombatMusic() {
+  if (!musicPlaying) return;
+  currentTrack = 'ambient';
+  crossfadeTo('ambient');
+}
+
+// ===================== MONSTER DATA =====================
+const MONSTER_TEMPLATES = [
+  // tier 0 (danger 0-1) - very weak, tutorial enemies
+  {name:'Zmutowany Karaluch',icon:'🪳',danger:0,hp:6,atk:1,def:0,spd:1,desc:'Przetrwal apokalipse i dwie deratyzacje. Dalej brzydki.',tier:0,
+    patterns:[{type:'scatter',count:3,speed:50,interval:2000,projSize:6}]},
+  {name:'Maly Szczur',icon:'🐁',danger:0,hp:5,atk:2,def:0,spd:2,desc:'Kiedys byl czyjms zwierzatkiem. Teraz grize.',tier:0,
+    patterns:[{type:'burst',count:3,speed:70,interval:1800,projSize:5}]},
+  {name:'Grzyb Trujacy',icon:'🍄',danger:0,hp:8,atk:1,def:1,spd:0,desc:'Nie, to NIE jest ten rodzaj grzyba. Nawet o tym nie mysl.',tier:0,
+    patterns:[{type:'expand',count:1,speed:25,interval:2500,projSize:5,maxRadius:60}]},
+  {name:'Robak',icon:'🪱',danger:1,hp:8,atk:2,def:0,spd:1,desc:'1 metr obrzydliwosci. Przynajmniej jest na diecie.',tier:0,
+    patterns:[{type:'scatter',count:4,speed:55,interval:1800,projSize:6}]},
+  {name:'Stonozka',icon:'🐛',danger:1,hp:10,atk:3,def:0,spd:2,desc:'100 nog i ani jednej pary porzadnych butow.',tier:0,
+    patterns:[{type:'fan',count:3,speed:65,interval:1600,projSize:5,arc:40}]},
+  // tier 1 (danger 1-2)
+  {name:'Sluz',icon:'🟢',danger:1,hp:15,atk:3,def:1,spd:1,desc:'Galaretka, ktora chce cie zjesc. I to nawet bez cukru.',tier:1,
+    patterns:[{type:'scatter',count:6,speed:90,interval:1200,projSize:8},{type:'rain',count:4,speed:70,interval:1800,projSize:7}]},
+  {name:'Szczur',icon:'🐀',danger:1,hp:12,atk:4,def:0,spd:3,desc:'Wiekszosc szczurow ucieka. Ten nie dostal notatki.',tier:1,
+    patterns:[{type:'burst',count:5,speed:130,interval:1000,projSize:5},{type:'fan',count:3,speed:110,interval:1500,projSize:5,arc:50}]},
+  {name:'Nietoperz',icon:'🦇',danger:2,hp:18,atk:5,def:1,spd:4,desc:'Lata z zawiazanymi oczami. A i tak trafia lepiej niz ty.',tier:1,
+    patterns:[{type:'wave',count:5,speed:110,interval:1100,projSize:6,amplitude:45},{type:'scatter',count:4,speed:100,interval:1400,projSize:6}]},
+  {name:'Pajak',icon:'🕷️',danger:2,hp:20,atk:4,def:2,spd:2,desc:'Utkał ci sweter. Niestety, jestes w nim uwieziony.',tier:1,
+    patterns:[{type:'spiral',count:8,speed:80,interval:1600,projSize:7},{type:'expand',count:1,speed:40,interval:2200,projSize:4,maxRadius:100}]},
+  {name:'Mala Sluz',icon:'💧',danger:1,hp:10,atk:2,def:0,spd:1,desc:'Sluz-junior. Marzy o byciu duza kaluzą.',tier:1,
+    patterns:[{type:'scatter',count:4,speed:60,interval:1500,projSize:7}]},
+  // tier 2 (danger 3-4)
+  {name:'Szkielet',icon:'💀',danger:3,hp:28,atk:6,def:2,spd:2,desc:'Schudl. Bardzo schudl. Stracil dosłownie wszystko.',tier:2,
+    patterns:[{type:'scatter',count:8,speed:120,interval:1000,projSize:6},{type:'line',count:4,speed:140,interval:1400,projSize:5},{type:'burst',count:6,speed:100,interval:1600,projSize:5}]},
+  {name:'Goblin',icon:'👺',danger:3,hp:25,atk:7,def:2,spd:4,desc:'Kradnie twoje zloto i twoja godnosc. Nic osobistego.',tier:2,
+    patterns:[{type:'fan',count:7,speed:150,interval:800,projSize:5,arc:65},{type:'burst',count:5,speed:120,interval:1200,projSize:5}]},
+  {name:'Zombie',icon:'🧟',danger:3,hp:40,atk:6,def:4,spd:1,desc:'Wolny, glupi i smierdzi. Jak kolega z pracy w poniedzialek.',tier:2,
+    patterns:[{type:'rain',count:8,speed:90,interval:1200,projSize:9},{type:'scatter',count:5,speed:80,interval:1500,projSize:8}]},
+  {name:'Wilk',icon:'🐺',danger:4,hp:30,atk:8,def:2,spd:5,desc:'Nie, nie mozesz go pogłaskac. Tak, probowalem.',tier:2,
+    patterns:[{type:'charge',count:2,speed:220,interval:1200,projSize:12},{type:'burst',count:6,speed:130,interval:1000,projSize:6},{type:'fan',count:4,speed:150,interval:1400,projSize:6,arc:40}]},
+  // tier 3 (danger 5-6)
+  {name:'Ork',icon:'👹',danger:5,hp:55,atk:14,def:6,spd:2,desc:'Dwa metry miesa, zero metrow intelektu. Ale i tak boli.',tier:3,
+    patterns:[{type:'scatter',count:8,speed:100,interval:1100,projSize:10},{type:'rain',count:6,speed:90,interval:1500,projSize:8}]},
+  {name:'Duch',icon:'👻',danger:4,hp:30,atk:10,def:2,spd:5,desc:'Umarl i nawet to go nie powstrzymalo. Docen upor.',tier:3,
+    patterns:[{type:'phase',count:5,speed:90,interval:1400,projSize:7}]},
+  {name:'Mroczny Mag',icon:'🧙',danger:5,hp:40,atk:16,def:3,spd:3,desc:'Skonczyl akademie z jedynkami. Z czarnej magii.',tier:3,
+    patterns:[{type:'homing',count:3,speed:70,interval:1800,projSize:6,turnRate:.02},{type:'spiral',count:8,speed:80,interval:2200,projSize:5}]},
+  {name:'Troll',icon:'🧌',danger:6,hp:80,atk:12,def:8,spd:1,desc:'Regeneruje sie szybciej niz ty jesz kolacje. I jest wiekszy.',tier:3,
+    patterns:[{type:'rain',count:8,speed:70,interval:1400,projSize:12},{type:'scatter',count:5,speed:90,interval:1600,projSize:10}]},
+  {name:'Bandyta',icon:'🗡️',danger:4,hp:35,atk:12,def:4,spd:4,desc:'Kiedys byl podatkowym. Teraz robi to samo, ale z nozem.',tier:3,
+    patterns:[{type:'fan',count:7,speed:150,interval:900,projSize:5,arc:45}]},
+  // tier 4 (danger 6-7)
+  {name:'Ognisty Zywiolak',icon:'🔥',danger:6,hp:50,atk:18,def:5,spd:3,desc:'Plonacy i wsciekly. Jak pizzę z pieca ale gorsza.',tier:4,
+    patterns:[{type:'spiral',count:10,speed:90,interval:1800,projSize:6},{type:'expand',count:1,speed:50,interval:2500,projSize:4,maxRadius:120}]},
+  {name:'Lodowy Zywiolak',icon:'❄️',danger:6,hp:50,atk:16,def:7,spd:2,desc:'Chodzaca kostka lodu. Nie, nie pasuje do drinka.',tier:4,
+    patterns:[{type:'rain',count:10,speed:60,interval:1200,projSize:8},{type:'scatter',count:6,speed:80,interval:1500,projSize:7}]},
+  {name:'Golem',icon:'🗿',danger:7,hp:100,atk:14,def:12,spd:1,desc:'Kamien z nogami. Nigdy nie przegrywa w "kamien, papier, nozyce".',tier:4,
+    patterns:[{type:'shockwave',count:1,speed:60,interval:2000,projSize:5},{type:'rain',count:7,speed:100,interval:1300,projSize:10}]},
+  {name:'Wampir',icon:'🧛',danger:7,hp:60,atk:18,def:5,spd:4,desc:'Elegancki, przystojny, pije krew. Idealny material na zięcia.',tier:4,
+    patterns:[{type:'homing',count:4,speed:80,interval:1500,projSize:6,turnRate:.025},{type:'fan',count:5,speed:120,interval:1200,projSize:5,arc:50}]},
+  {name:'Bazyliszek',icon:'🐍',danger:7,hp:70,atk:20,def:6,spd:3,desc:'Jeden jego wzrok i jestes kamień. Dosł. Nie patrz mu w oczy!',tier:4,
+    patterns:[{type:'beam',speed:1.5,interval:3000,projSize:15,duration:1500},{type:'scatter',count:6,speed:100,interval:1400,projSize:6}]},
+  // tier 5 (danger 8-10)
+  {name:'Upior',icon:'😈',danger:8,hp:70,atk:22,def:4,spd:5,desc:'Potepiona dusza z obsesja na punkcie zabijania. Terapia nie pomogla.',tier:5,
+    patterns:[{type:'phase',count:8,speed:110,interval:1200,projSize:6},{type:'homing',count:3,speed:90,interval:1600,projSize:5,turnRate:.03}]},
+  {name:'Smocze Piskle',icon:'🐲',danger:8,hp:90,atk:24,def:8,spd:3,desc:'Mlody smok. Slodki, gdyby nie te 3 metry ognia z pyska.',tier:5,
+    patterns:[{type:'beam',speed:2,interval:2500,projSize:18,duration:1800},{type:'scatter',count:10,speed:110,interval:1200,projSize:7}]},
+  {name:'Demon',icon:'😈',danger:9,hp:100,atk:28,def:8,spd:4,desc:'Wlasnie wrocil z piekla. Urlop mu nie wyszedl na zdrowie.',tier:5,
+    patterns:[{type:'spiral',count:12,speed:100,interval:1500,projSize:6},{type:'homing',count:5,speed:90,interval:1800,projSize:6,turnRate:.03},{type:'fan',count:9,speed:130,interval:1100,projSize:5,arc:70}]},
+  {name:'Lich',icon:'☠️',danger:9,hp:80,atk:30,def:6,spd:3,desc:'Nekromanta emeryt. Wciaz praktykuje, bo ZUS nie placi.',tier:5,
+    patterns:[{type:'spiral',count:10,speed:80,interval:1600,projSize:5},{type:'homing',count:4,speed:100,interval:1400,projSize:7,turnRate:.035},{type:'rain',count:8,speed:90,interval:1200,projSize:6}]},
+  {name:'Smok',icon:'🐉',danger:10,hp:150,atk:35,def:12,spd:3,desc:'Klasyczny smok. Chrapie, zieje ogniem i spi na zlocie. Jak dziadek.',tier:5,
+    patterns:[{type:'beam',speed:2.5,interval:2000,projSize:20,duration:2000},{type:'scatter',count:12,speed:120,interval:1000,projSize:8},{type:'rain',count:10,speed:100,interval:1100,projSize:9}]},
+];
+
+// ===================== EQUIPMENT DATA =====================
+const RARITY_COLORS = {common:'#aaa',uncommon:'#44ff44',rare:'#4488ff',epic:'#bb44ff',legendary:'#ffd700'};
+const EQUIPMENT_TEMPLATES = [
+  // Weapons (atkType: timing/rapid/charge/magic)
+  {name:'Zardzewialy Miecz',slot:'weapon',rarity:'common',str:2,def:0,spd:0,hp:0,luck:0,ability:null,atkType:'timing',onHit:null,desc:'Rdza dodaje +2 do tetanu. I do sily.'},
+  {name:'Sztylet',slot:'weapon',rarity:'common',str:1,def:0,spd:2,hp:0,luck:0,ability:null,atkType:'rapid',onHit:'poison',desc:'Maly, szybki, trujacy. Jak teściowa.'},
+  {name:'Topor Wojenny',slot:'weapon',rarity:'uncommon',str:5,def:0,spd:-1,hp:0,luck:0,ability:null,atkType:'charge',onHit:'stun',desc:'Ciezki jak twoje grzechy. Ale skuteczny.'},
+  {name:'Magiczna Rozdzka',slot:'weapon',rarity:'uncommon',str:4,def:0,spd:1,hp:0,luck:0,ability:'magicBolt',atkType:'magic',onHit:'weaken',desc:'Nie, to NIE jest patyk. To zaawansowana technologia.'},
+  {name:'Dlugi Miecz',slot:'weapon',rarity:'rare',str:7,def:1,spd:0,hp:0,luck:0,ability:null,atkType:'timing',onHit:'bleedM',desc:'Dlugi na tyle, ze kompensuje... rozne rzeczy.'},
+  {name:'Lodowy Miecz',slot:'weapon',rarity:'rare',str:6,def:0,spd:0,hp:0,luck:0,ability:'freeze',atkType:'timing',onHit:null,desc:'Idealny do drinków. I do zamrazania wrogow.'},
+  {name:'Sztylet Cienia',slot:'weapon',rarity:'rare',str:4,def:0,spd:4,hp:0,luck:2,ability:null,atkType:'rapid',onHit:'poison',desc:'Tak szybki ze sam nie wiesz kiedy kogoś dzgasz.'},
+  {name:'Ognisty Topor',slot:'weapon',rarity:'epic',str:9,def:0,spd:-1,hp:0,luck:0,ability:'burn',atkType:'charge',onHit:'stun',desc:'Podpala wrogow i twoje brwi. Warto!'},
+  {name:'Miecz Swiatla',slot:'weapon',rarity:'epic',str:10,def:2,spd:1,hp:0,luck:0,ability:'holyStrike',atkType:'timing',onHit:'bleedM',desc:'Swieci jak latarnia. Potwory nienawida tego triku!'},
+  {name:'Berlo Burzy',slot:'weapon',rarity:'epic',str:8,def:0,spd:2,hp:10,luck:0,ability:null,atkType:'magic',onHit:'weaken',desc:'Piorun nie trafi dwa razy? Sprawdz sam.'},
+  {name:'Kosa Smierci',slot:'weapon',rarity:'legendary',str:14,def:0,spd:2,hp:0,luck:0,ability:'lifeSteal',atkType:'timing',onHit:'bleedM',desc:'Smierc chce ja z powrotem. Powiedz ze nie ma cie.'},
+  {name:'Berlo Arcymaga',slot:'weapon',rarity:'legendary',str:12,def:3,spd:0,hp:20,luck:0,ability:'meteor',atkType:'magic',onHit:'weaken',desc:'Sprowadza meteory. Overreaction? Moze troche.'},
+  {name:'Szpony Nocy',slot:'weapon',rarity:'legendary',str:11,def:0,spd:5,hp:0,luck:3,ability:'stealth',atkType:'rapid',onHit:'poison',desc:'Trzy sekund i wrog juz nie wie co go ugryzlo.'},
+  // Armor
+  {name:'Skorzana Zbroja',slot:'armor',rarity:'common',str:0,def:2,spd:0,hp:5,luck:0,ability:null,desc:'Ze skory... czegos. Lepiej nie pytaj czego.'},
+  {name:'Kolczuga',slot:'armor',rarity:'uncommon',str:0,def:4,spd:-1,hp:10,luck:0,ability:null,desc:'10000 koleczek. Ktos to musial robic recznie. Biedak.'},
+  {name:'Szata Maga',slot:'armor',rarity:'uncommon',str:2,def:2,spd:1,hp:0,luck:0,ability:'magicShield',desc:'Wygladasz jak czarodziej. Przynajmniej z daleka.'},
+  {name:'Plytowa Zbroja',slot:'armor',rarity:'rare',str:0,def:7,spd:-2,hp:20,luck:0,ability:null,desc:'Jak czolg, ale osobisty. Siedzenie nie wchodzi w grę.'},
+  {name:'Elficka Tunika',slot:'armor',rarity:'rare',str:2,def:4,spd:3,hp:0,luck:2,ability:null,desc:'Lekka, wygodna, i mozesz wyglądac jakbyś tańczył.'},
+  {name:'Zbroja Smoka',slot:'armor',rarity:'epic',str:3,def:10,spd:0,hp:30,luck:0,ability:'fireResist',desc:'Ze smoka. Smok nie byl zadowolony z transakcji.'},
+  {name:'Zbroja Cienia',slot:'armor',rarity:'legendary',str:5,def:8,spd:5,hp:20,luck:3,ability:'shadowCloak',desc:'Wbudowany tryb niewidzialnosci. Żona dalej cie znajdzie.'},
+  // Helmets
+  {name:'Skorzany Helm',slot:'helmet',rarity:'common',str:0,def:1,spd:0,hp:3,luck:0,ability:null,desc:'Chroni glowe. Zawartosc glowy juz nie.'},
+  {name:'Zelazny Helm',slot:'helmet',rarity:'uncommon',str:0,def:3,spd:0,hp:5,luck:0,ability:null,desc:'Ciezki. Ale przynajmniej deszcz nie wchodzi w oczy.'},
+  {name:'Helm Berserkera',slot:'helmet',rarity:'rare',str:4,def:2,spd:0,hp:0,luck:0,ability:'rage',desc:'Zakladasz i nagle chcesz sie z kazdym bic. Nawet z meblami.'},
+  {name:'Korona Cieni',slot:'helmet',rarity:'epic',str:2,def:4,spd:2,hp:10,luck:0,ability:'stealth',desc:'Korona ktora czyni cie niewidzialnym. Ironia krolów.'},
+  {name:'Korona Krola',slot:'helmet',rarity:'legendary',str:5,def:5,spd:0,hp:25,luck:5,ability:'command',desc:'Z nadrukiem "JA TU RZĄDZE". Dziala na potwory.'},
+  // Accessories
+  {name:'Pierscien Sily',slot:'accessory',rarity:'common',str:3,def:0,spd:0,hp:0,luck:0,ability:null,desc:'Jeden pierscien by bic ich wszystkich.'},
+  {name:'Amulet Ochrony',slot:'accessory',rarity:'common',str:0,def:3,spd:0,hp:0,luck:0,ability:null,desc:'Babcia mowila ze chroni. Na razie dziala!'},
+  {name:'Buty Szybkosci',slot:'accessory',rarity:'uncommon',str:0,def:0,spd:4,hp:0,luck:0,ability:'dash',desc:'Biegasz szybciej. Uciekasz tez szybciej. Win-win.'},
+  {name:'Pierscien Zycia',slot:'accessory',rarity:'rare',str:0,def:0,spd:0,hp:30,luck:0,ability:'regen',desc:'+30 HP. Bo zycie jest wazne. Twoje przynajmniej.'},
+  {name:'Amulet Szczescia',slot:'accessory',rarity:'rare',str:0,def:0,spd:0,hp:0,luck:5,ability:null,desc:'Znaleziony w kieszeni martwego awanturnika. Dla NIEGO nie zadzialal.'},
+  {name:'Pierscien Wampira',slot:'accessory',rarity:'epic',str:3,def:0,spd:2,hp:0,luck:0,ability:'lifeSteal',desc:'Kradnie HP. Wampir chce go z powrotem, ale jest zajety.'},
+  {name:'Amulet Ognia',slot:'accessory',rarity:'epic',str:4,def:2,spd:0,hp:10,luck:0,ability:'fireShield',desc:'Goracy. Dosłownie. Nie trzymaj blisko skory.'},
+  {name:'Talizman Wiecznosci',slot:'accessory',rarity:'legendary',str:5,def:5,spd:3,hp:20,luck:3,ability:'immortal',desc:'Gwarancja: nie umrzesz. Raz. Potem sam sie martw.'},
+  // Shields
+  {name:'Drewniana Tarcza',slot:'shield',rarity:'common',str:0,def:3,spd:0,hp:5,luck:0,ability:null,desc:'Kiedys byla stolem. Awans zyciowy.'},
+  {name:'Tarcza Zelazna',slot:'shield',rarity:'uncommon',str:0,def:5,spd:-1,hp:10,luck:0,ability:null,desc:'Ciezka jak sumienie. Ale twardsza.'},
+  {name:'Tarcza Strazy',slot:'shield',rarity:'rare',str:0,def:7,spd:0,hp:15,luck:0,ability:'magicShield',desc:'Ma wbudowana barierkę. Nawet potwory sa pod wrazeniem.'},
+  {name:'Tarcza Smoka',slot:'shield',rarity:'epic',str:2,def:10,spd:0,hp:20,luck:0,ability:'fireResist',desc:'Ze smoczej luski. Smok jest wsciekly i szuka winnego.'},
+  {name:'Aegis',slot:'shield',rarity:'legendary',str:3,def:14,spd:0,hp:30,luck:2,ability:'magicShield',desc:'Tarcza bogow. Bogowie chca ja z powrotem. Udawaj ze nie slyszysz.'},
+  // Boots
+  {name:'Skorzane Buty',slot:'boots',rarity:'common',str:0,def:1,spd:2,hp:0,luck:0,ability:null,desc:'Buty. Robia to co buty. Nie oczekuj cudow.'},
+  {name:'Buty Zwiadowcy',slot:'boots',rarity:'uncommon',str:0,def:1,spd:4,hp:0,luck:1,ability:null,desc:'Lekkie jak piórko. Rownie latwo je zgubic.'},
+  {name:'Buty Wiatru',slot:'boots',rarity:'rare',str:0,def:2,spd:5,hp:0,luck:0,ability:'dash',desc:'Szybsze niz twoje decyzje zyciowe.'},
+  {name:'Buty Cienia',slot:'boots',rarity:'epic',str:1,def:3,spd:6,hp:0,luck:2,ability:'stealth',desc:'Cicho jak kot. Jesli kot biegałby 60 km/h.'},
+  {name:'Buty Hermesa',slot:'boots',rarity:'legendary',str:2,def:4,spd:8,hp:10,luck:3,ability:'dash',desc:'Hermes chce je z powrotem. Ale nie dogoni cie w nich.'},
+  // Bracers
+  {name:'Skorzane Karwasze',slot:'bracers',rarity:'common',str:1,def:1,spd:0,hp:0,luck:0,ability:null,desc:'Chronia nadgarstki. Moda jest drugorzędna.'},
+  {name:'Zelazne Karwasze',slot:'bracers',rarity:'uncommon',str:2,def:2,spd:0,hp:5,luck:0,ability:null,desc:'Cięzkie ale pewne. Jak obietnice kowala po piwie.'},
+  {name:'Karwasze Berserkera',slot:'bracers',rarity:'rare',str:4,def:1,spd:1,hp:0,luck:0,ability:'rage',desc:'Zakladasz i zaczynasz krzyczeć. To normalne.'},
+  {name:'Karwasze Mocy',slot:'bracers',rarity:'epic',str:6,def:3,spd:0,hp:10,luck:0,ability:null,desc:'Rece jak u byka. Podawanie soli staje sie ryzykowne.'},
+  {name:'Rekawice Tytana',slot:'bracers',rarity:'legendary',str:8,def:5,spd:1,hp:15,luck:0,ability:'rage',desc:'Mozesz otworzyc KAZDY sloik. I KAZDA czaszke.'},
+  // Special
+  {name:'Kamien Duszy',slot:'special',rarity:'uncommon',str:1,def:1,spd:1,hp:10,luck:1,ability:null,desc:'Swieci, grzeje i daje bonusy. Jak babcia.'},
+  {name:'Ksiega Wiedzy',slot:'special',rarity:'rare',str:3,def:0,spd:0,hp:0,luck:3,ability:'magicBolt',desc:'500 stron. Przeczytales 3. Reszta i tak strzela.'},
+  {name:'Kula Przepowiedni',slot:'special',rarity:'rare',str:0,def:2,spd:2,hp:15,luck:4,ability:null,desc:'Przewiduje przyszlosc. Glownie ta zla.'},
+  {name:'Serce Feniksa',slot:'special',rarity:'epic',str:3,def:3,spd:2,hp:25,luck:2,ability:'regen',desc:'Feniks sie odrodzil i chce serce z powrotem. Uciekaj.'},
+  {name:'Oko Otchlani',slot:'special',rarity:'legendary',str:6,def:4,spd:3,hp:20,luck:5,ability:'meteor',desc:'Patrzy na ciebie. Zawsze. Nawet pod prysznicem. Ale daje staty.'},
+  // New items with stat-altering abilities
+  {name:'Rog Bitewny',slot:'accessory',rarity:'rare',str:2,def:0,spd:0,hp:0,luck:0,ability:'warCry',desc:'TRUUUU! Sasiedzi nienawidza tego dzwieku.'},
+  {name:'Amulet Zelaza',slot:'accessory',rarity:'epic',str:0,def:5,spd:0,hp:15,luck:0,ability:'ironSkin',desc:'Skora twardsza niz twoj charakter. Dosłownie.'},
+  {name:'Buty Wichru',slot:'boots',rarity:'epic',str:0,def:2,spd:7,hp:0,luck:0,ability:'haste',desc:'Tak szybkie ze czas sie zalamuje. A ty tez.'},
+  {name:'Zwoj Klatwy',slot:'special',rarity:'epic',str:2,def:0,spd:0,hp:0,luck:2,ability:'curse',desc:'Napisany bazgroly 5-latka. Ale dziala!'},
+  {name:'Helm Lwa',slot:'helmet',rarity:'epic',str:3,def:3,spd:0,hp:10,luck:0,ability:'warCry',desc:'RAAWR! Potwory udaja ze sie nie boja. Ale sie boja.'},
+  {name:'Karwasze Lodowe',slot:'bracers',rarity:'epic',str:3,def:4,spd:0,hp:0,luck:0,ability:'freeze',desc:'Zimne rece = ciepłe serce. I zamrozony wrog.'},
+  {name:'Tarcza Klątwy',slot:'shield',rarity:'epic',str:0,def:8,spd:0,hp:15,luck:0,ability:'curse',desc:'Klnie wrogow za ciebie. Bardzo wulgarna tarcza.'},
+];
+
+// ===================== BOSS MONSTERS =====================
+const BOSS_TEMPLATES = [
+  {name:'Krol Goblinow',icon:'👑',danger:5,hp:80,atk:12,def:5,spd:3,desc:'Samozwanczy krol. Korona z puszki po piwie.',tier:2,isBoss:true,
+    patterns:[{type:'fan',count:9,speed:140,interval:700,projSize:6,arc:70},{type:'burst',count:10,speed:120,interval:1000,projSize:5},{type:'charge',count:3,speed:200,interval:1500,projSize:14}]},
+  {name:'Nekromanta',icon:'💀',danger:7,hp:110,atk:16,def:4,spd:3,desc:'Budzi martwych. Bo zywi go nie odwiedzaja.',tier:3,isBoss:true,
+    patterns:[{type:'homing',count:5,speed:85,interval:1200,projSize:7,turnRate:.03},{type:'spiral',count:12,speed:100,interval:1400,projSize:6},{type:'rain',count:8,speed:100,interval:1000,projSize:7}]},
+  {name:'Ognisty Wladca',icon:'🔥',danger:8,hp:150,atk:22,def:7,spd:3,desc:'Wiecznie podpalony i wsciekly. Jak grill na imprezie.',tier:4,isBoss:true,
+    patterns:[{type:'spiral',count:14,speed:110,interval:1200,projSize:7},{type:'expand',count:1,speed:80,interval:1800,projSize:5,maxRadius:140},{type:'beam',speed:2.5,interval:2500,projSize:20,duration:2000}]},
+  {name:'Straznik Otchlani',icon:'👁️',danger:9,hp:200,atk:26,def:8,spd:4,desc:'Jedno oko, zero litosci. Jak szef w poniedzialek.',tier:5,isBoss:true,
+    patterns:[{type:'homing',count:6,speed:100,interval:1000,projSize:7,turnRate:.035},{type:'fan',count:11,speed:160,interval:800,projSize:6,arc:80},{type:'shockwave',count:1,speed:80,interval:1600,projSize:6}]},
+  {name:'Cien Zar\'Kotha',icon:'👤',danger:10,hp:260,atk:30,def:10,spd:5,desc:'Duch krola. Wciaz wymaga podatkow. Nawet po smierci.',tier:5,isBoss:true,
+    patterns:[{type:'spiral',count:16,speed:120,interval:1000,projSize:6},{type:'beam',speed:3,interval:2000,projSize:22,duration:2200},{type:'homing',count:4,speed:110,interval:1200,projSize:8,turnRate:.04},{type:'phase',count:8,speed:100,interval:1400,projSize:7}]},
+];
+
+// ===================== MAP CONSUMABLES =====================
+const MAP_CONSUMABLES = [
+  {id:'vision',name:'Zwoj Wizji',icon:'👁️',desc:'Odkrywa pola w promieniu 3 od gracza.',basePrice:25,pricePerLvl:5},
+  {id:'tracker',name:'Krysztal Tropiciela',icon:'🔮',desc:'Mrugajaca lokalizacja bossa (3s).',basePrice:30,pricePerLvl:8},
+  {id:'spyglass',name:'Luneta Zwiadowcy',icon:'🔭',desc:'Kliknij 3 dowolne pola by odkryc.',basePrice:20,pricePerLvl:4},
+  {id:'compass',name:'Kompas Skarbow',icon:'💎',desc:'Odkrywa pola ze zlotem/ekwip./sklepem.',basePrice:35,pricePerLvl:6},
+  {id:'safety',name:'Kamien Bezpieczenstwa',icon:'🛡️',desc:'Odkrywa pola z potworami jako ❓.',basePrice:90,pricePerLvl:15,rare:true},
+];
+
+// Monster debuffs they can apply on hit
+const MONSTER_DEBUFFS = {
+  poison:{name:'Trucizna',icon:'☠️',duration:5000,dmgPerSec:2,desc:'Boli co sekunde. Jak kredyt hipoteczny.'},
+  slow:{name:'Spowolnienie',icon:'🐌',duration:3000,spdMult:0.5,desc:'Wolny jak internet na wsi.'},
+  weakness:{name:'Oslabianie',icon:'💔',duration:4000,strMult:0.6,desc:'Slabszy. Jak po weekendzie.'},
+  bleedP:{name:'Krwawienie',icon:'🩸',duration:4000,dmgPerSec:3,desc:'Kap kap kap. To twoja krew.'},
+};
+// Status effects player can apply to monsters
+const PLAYER_DEBUFFS = {
+  poison:{name:'Trucizna',icon:'☠️',duration:5000,dmgPerSec:0,desc:'Potwor zielenieje. Bardziej.'},
+  stun:{name:'Ogluszenie',icon:'💫',duration:1500,desc:'Potwor widzi gwiazdki. Ladne!'},
+  weaken:{name:'Oslabienie',icon:'💔',duration:4000,desc:'Potwor bije jak pluszak.'},
+  bleedM:{name:'Krwawienie',icon:'🩸',duration:5000,desc:'Potwor krwawi. Raczej nie przeprosi.'},
+};
+// Which monsters can debuff the player (by tier)
+const MONSTER_DEBUFF_TABLE = {
+  'Pajak':'slow','Nietoperz':'slow',
+  'Zombie':'weakness','Wilk':'bleedP',
+  'Mroczny Mag':'weakness','Bandyta':'bleedP',
+  'Ognisty Zywiolak':'poison','Lodowy Zywiolak':'slow',
+  'Wampir':'weakness','Bazyliszek':'slow',
+  'Upior':'weakness','Demon':'poison',
+  'Lich':'weakness','Smok':'poison',
+  'Krol Goblinow':'bleedP','Nekromanta':'weakness',
+  'Ognisty Wladca':'poison','Straznik Otchlani':'slow',
+  'Cien Zar\'Kotha':'weakness',
+};
+
+// ===================== RUNE PATTERNS (magic attack) =====================
+const RUNE_PATTERNS = [
+  {name:'Ignis', points:[{x:250,y:50},{x:130,y:280},{x:370,y:280}]},
+  {name:'Aqua', points:[{x:100,y:100},{x:250,y:270},{x:400,y:100}]},
+  {name:'Terra', points:[{x:250,y:50},{x:400,y:175},{x:250,y:300},{x:100,y:175}]},
+  {name:'Ventus', points:[{x:130,y:70},{x:370,y:70},{x:370,y:280},{x:130,y:280}]},
+  {name:'Fulgur', points:[{x:180,y:50},{x:300,y:150},{x:180,y:170},{x:320,y:300}]},
+  {name:'Umbra', points:[{x:250,y:50},{x:370,y:150},{x:320,y:290},{x:180,y:290},{x:130,y:150}]},
+  {name:'Lux', points:[{x:250,y:50},{x:300,y:160},{x:420,y:175},{x:320,y:250},{x:250,y:270},{x:180,y:250}]},
+  {name:'Mortem', points:[{x:150,y:70},{x:350,y:70},{x:350,y:175},{x:250,y:175},{x:250,y:300},{x:150,y:175}]},
+];
+
+// ===================== PERMANENT UPGRADES =====================
+const PERM_UPGRADES = [
+  {id:'hp',name:'Wytrzymalosc',desc:'+5 HP na poziom',icon:'❤️',perLevel:5,stat:'hp',maxLevel:20},
+  {id:'str',name:'Moc Duszy',desc:'+1 Sila na poziom',icon:'⚔️',perLevel:1,stat:'str',maxLevel:15},
+  {id:'def',name:'Odpornosc',desc:'+1 Obrona na poziom',icon:'🛡️',perLevel:1,stat:'def',maxLevel:15},
+  {id:'atkSpd',name:'Precyzja',desc:'+1 Szybkosc Ataku na poziom',icon:'⚡',perLevel:1,stat:'atkSpd',maxLevel:10},
+  {id:'dodgeSpd',name:'Refleks',desc:'+1 Szybkosc Uniku na poziom',icon:'💨',perLevel:1,stat:'dodgeSpd',maxLevel:10},
+  {id:'luck',name:'Fortuna',desc:'+1 Szczescie na poziom',icon:'🍀',perLevel:1,stat:'luck',maxLevel:10},
+  {id:'regen',name:'Regeneracja',desc:'Lecz 1 HP za odkryte pole',icon:'💚',perLevel:1,stat:'regen',maxLevel:5},
+];
+
+// ===================== ABILITY DESCRIPTIONS =====================
+const ABILITY_INFO = {
+  magicBolt:{name:'Mag. Pocisk',desc:'Pew pew, ale magicznie',combat:'Strzela kulą za 150% obr. Bo po co miecz?',cooldown:3},
+  freeze:{name:'Zamrozenie',desc:'Chlodno jak moja ex',combat:'Zamraza potwora na 2s. Slisko!',cooldown:4},
+  burn:{name:'Podpalenie',desc:'Hej, to sie pali!',combat:'Potwor plonie. Nie podlewaj.',cooldown:3},
+  holyStrike:{name:'Swiety Cios',desc:'Bóg patrzy i pomaga',combat:'200% obr. + leczenie. Bóg lubi ciebie.',cooldown:5},
+  lifeSteal:{name:'Kradziez Zycia',desc:'Twoje HP? Moje HP.',combat:'Kazdy atak kradnie 20% HP. Legalne? Watpliwe.',cooldown:0},
+  meteor:{name:'Meteor',desc:'Z nieba pada kamien. Duzy.',combat:'300% obr. Przesada? Nie, to METEOR.',cooldown:6},
+  magicShield:{name:'Mag. Tarcza',desc:'Bańka ochronna deluxe',combat:'Bańka absorbuje nastepny atak. Pop!',cooldown:5},
+  fireResist:{name:'Ognioodpornosc',desc:'Cieplutko, nie goracy',combat:'-25% obr. od ognia. Grillowanie anulowane.',cooldown:0},
+  shadowCloak:{name:'Plasz Cienia',desc:'Teraz mnie widzisz, teraz nie',combat:'2s niewidzialnosci. Pociski: "Gdzie on?!"',cooldown:6},
+  rage:{name:'Szal',desc:'AAAAAA!!!',combat:'+50% obr. na 3s, +25% bolu. WORTH IT!',cooldown:5},
+  stealth:{name:'Ukrycie',desc:'Ninja mode ON',combat:'1.5s niewidzialnosci. Ciiii.',cooldown:5},
+  command:{name:'Rozkaz',desc:'BO TAK POWIEDZIALEM',combat:'Potwor traci 30% obrony. Bo mu kazales.',cooldown:5},
+  dash:{name:'Unik',desc:'Wrrr i juz nie ma',combat:'Teleport w najbezpieczniejsze miejsce. Magia!',cooldown:3},
+  regen:{name:'Regeneracja',desc:'Jak jaszczurka, ale lepiej',combat:'Leczy 10% max HP. Nie odrasta ogon.',cooldown:4},
+  fireShield:{name:'Ognista Tarcza',desc:'Nie dotykaj mnie!',combat:'Niszczy pociski w poblizu. Goracy krąg.',cooldown:4},
+  immortal:{name:'Niesmiertelnosc',desc:'Umierasz? LOL nie.',combat:'Zamiast umrzec - 1 HP. Raz na walke. Ceń to.',cooldown:99},
+  warCry:{name:'Okrzyk Wojenny',desc:'TRUUUUU!!!',combat:'Potwor traci 40% ATK na 4s. Gluchnie ze strachu.',cooldown:5},
+  ironSkin:{name:'Zelazna Skora',desc:'Twardszy niz twoj charakter',combat:'+50% obrony na 4s. Nawet kulki odbija.',cooldown:5},
+  haste:{name:'Przyspieszenie',desc:'Szybszy niz WiFi',combat:'+3 do obu Szybkosci na 4s. Zoom zoom!',cooldown:5},
+  curse:{name:'Klatwa',desc:'Niecenzuralna klatwa',combat:'Potwor traci 50% obrony na 5s. Obrazliwe ale skuteczne.',cooldown:6},
+};
+
+// ===================== NPC & QUEST DATA =====================
+const NPC_TEMPLATES = [
+  {id:'borek',name:'Borek',icon:'🧔',role:'Stary Wojak (na emeryturze)',
+    lines:[
+      'O, zywy czlowiek! Dawno nie widzialem. Ostatni powiedzial "zaraz wracam" trzy lata temu.',
+      'Te lochy? Kiedys bylo tu krolestwo. Krol Zar\'Koth zwariowal i zamienił pałac w escape room. Z którego nikt nie ucieka.',
+      'Potwory tu rosna jak grzyby po deszczu. I sa rownie przyjemne do spotkania w ciemnosci.',
+    ],
+    questLine:'Sluchaj, te $MONSTER_PL tu wszedzie lazą. Pokonaj $TARGET i wroc. Dam ci zloto. Nie pytaj skad mam - w lochach nie ma podatkow.',
+    rewardLine:'Wrociles zywy?! Znaczy... oczywiscie ze wrociles. Nigdy nie watpilem. Oto twoje zloto, zasluzyles!',
+    postQuestLine:'A wiec pokonales te bestie! Kiedy bylem mlody to walczylem z trzema naraz. No dobra, z jednym. No dobra, ucieklam. Ale szybko! To tez umiejetnosc.',
+    quest:{type:'killSpecific',target:4,reward:{gold:80},rewardDesc:'80 zlota'}},
+  {id:'mirela',name:'Mirela',icon:'👩‍🔬',role:'Naukowiec (Lekko Szalona)',
+    lines:[
+      'ZYWA ISTOTA! Czekaj, muszę pobrac probkę... Zartuje. Chyba.',
+      'Badam te lochy od 3 lat. Moja praca doktorska brzmi "Dlaczego labirynty chca nas zjesc - analiza porównawcza". Promotor nie odpisal.',
+      'Krol Zar\'Koth mial zone, Isenthe. Próbowala go powstrzymac. Nie wyszlo. Klasyczny malzenski spor o budżet na nekromancie.',
+    ],
+    questLine:'Potrzebuje probek z $MONSTER_D. Zabij $TARGET sztuk i wroc z danymi. Tak, to łapówka naukowa. Naukowcy tez musza jesc.',
+    rewardLine:'Dane! Wspaniale! Znaczy, cieszę się ze zyjesz. Ale glownie dane. Oto twoja zaplata i mapa!',
+    postQuestLine:'Wiesz, napisalam o tobie w dzienniku badawczym. Rozdział 7: "Obiekt testowy A przezywa wbrew logice". Nie dziekuj, to komplement naukowy.',
+    quest:{type:'killSpecific',target:3,reward:{gold:40,revealMap:true},rewardDesc:'40 zlota + odkrycie mapy'},
+    canReveal:true},
+  {id:'grzegorz',name:'Grzegorz',icon:'🧑‍🦳',role:'Kupiec (Bez Towaru)',
+    lines:[
+      'Moja karawana... bestie zjadly towar, konie i prawie mnie. Ubezpieczenie tego nie pokryje.',
+      'Handlowalem na nizszych poziomach. Ludzie tam zyja! Maja nawet pizzerie. Bez sera, ale zawsze.',
+      'Moj wspólnik Tomasz gdzies tu jest. Albo juz go nie ma. W kazdym razie jest mi winien 100 zlota.',
+    ],
+    questLine:'Te $MONSTER_PL blokuja szlaki handlowe! Pokonaj $TARGET i droga bedzie wolna. Zaplac...znaczy, zaplACE ci 100 zlota.',
+    rewardLine:'Droga wolna! Tomasz pewnie dalej gdzies jest, ale przynajmniej karawany moga przejechac. Oto twoje 100 zlota!',
+    postQuestLine:'Wiesz co, juz mi sie tu podoba. Otworzę filię sklepu. "Grzegorz i Syn - Towary z Lochow". Syn jest wymyslony ale brzmi profesjonalniej.',
+    quest:{type:'killSpecific',target:3,reward:{gold:100},rewardDesc:'100 zlota'}},
+  {id:'xardas',name:'Xardas',icon:'🧙‍♂️',role:'Mag (Niepokojaco Radosny)',
+    lines:[
+      'O! Jeszcze zyjesz! Stawialem 3:1 ze nie. Coz, tracę zaklad z Borkiem.',
+      'Krol stworzyl Serce Otchlani z krwi i slodkiej papryki. Nie, czekaj, bez papryki. Sama krew. Mniej smaczne.',
+      'Kazdy poziom to kolejna warstwa koszmarów Serca. Ale spokojnie - najgorsze co moze sie stac to smierc. I to juz raz ci sie przydarzylo. Nie? Daj czas.',
+    ],
+    questLine:'Na dole pelno $MONSTER_D. Pokonaj $TARGET - to mi powie czy pieczec trzyma. Jak nie trzyma... cóz, to juz nie bedzie twoj problem. Pokaze ci mape!',
+    rewardLine:'Zyjesz! To znaczy ze pieczec trzyma. Albo ze miales KOSMALNE szczescie. Oto twoja nagroda i mapa okolicy!',
+    postQuestLine:'Wiesz ze statystycznie powinienes juz nie zyc? Nie mowie tego zeby cie zdenerwowac, mowie to bo jestem pod wrazeniem. Mam zaklad z Borkiem na twoje przezycie - nie zgin mi tu.',
+    quest:{type:'killSpecific',target:3,reward:{gold:60,revealMap:true},rewardDesc:'60 zlota + odkrycie mapy'},
+    canReveal:true},
+  {id:'kasia',name:'Kasia',icon:'👧',role:'Dziecko (Bardziej Twarde Niz Ty)',
+    lines:[
+      'Szukam taty. Wlazl do lochow i nie wrocil. Typowe.',
+      'Mama mowi ze tata to bohater. Tata mowi ze mama go wygonila. Prawda jest pewnie posrodku, na 4 pietrze lochow.',
+      'Weszlam tu sama! Mam kamien i sznurek. Jestem lepiej uzbrojona niz polowa awanturnikow tu na dole.',
+    ],
+    questLine:'Tata poszedl w strone $MONSTER_D. Pokonaj $TARGET z nich, to moze bedzie bezpieczniej! Prosze? Dam ci moje oszczednosci!',
+    rewardLine:'Pokonales je! Moze tata jest bezpieczniejszy! Mam tylko 30 zlota ale daje ci je wszystkie. I... *przytula*.',
+    postQuestLine:'Wiesz ze jestes teraz moim honorowym wujkiem? Nie pytalam, informuje. Wujku, jedz ostroznie na dol. Jak zginiesz to kto bedzie moim wujkiem? Myslalem?',
+    quest:{type:'killSpecific',target:2,reward:{gold:30},rewardDesc:'30 zlota + przytulenie'}},
+  {id:'aelindra',name:'Aelindra',icon:'🧝‍♀️',role:'Elfka (Jakby To Nie Bylo Jasne)',
+    lines:[
+      'Cicho! Sledze cos... tak naprawde to siedze tu od tygodnia i udaje ze mam plan.',
+      'Elfy pilnuja Serca Otchlani. Znaczy, pilnowaly. Teraz glownie wysylamy innych zeby pilnowali. Delegowanie!',
+      'Sciany sie ruszaja. Powoli. Jak kolejka w urzedzie. I równie przerażająco.',
+    ],
+    questLine:'Te $MONSTER_PL terroryzuja okolice! Pokonaj $TARGET. Elficki lud bedzie wdzieczny. Wdzięczność elfów = dużo złota.',
+    rewardLine:'Pokonales je! Elficka Rada przeslala nagrode. Normalnie wysylaja wierszyki z podziekowaniami, ale przekonalem ich ze wolisz zloto.',
+    postQuestLine:'Musisz wiedziec ze elfy pisza o tobie piesni. Niestety, tlumaczyc nie bede bo sa w elfickim i rymuja sie ze slowem "katastrofa". To komplement. Chyba.',
+    quest:{type:'killSpecific',target:5,reward:{gold:150},rewardDesc:'150 zlota'}},
+  {id:'bromir',name:'Bromir',icon:'⛏️',role:'Krasnolud (Wiecznie Spragniony)',
+    lines:[
+      'Ha! Ktos kto nie probuje mnie zjesc! Chodz, napij sie... czekaj, nie mam piwa. To jest KRYZYS.',
+      'Kuje broń z tego co znajde. Ostatni miecz zrobilem z latarki i nadziei. Dziala srednia.',
+      'Krasnoludy kopaly te tunele. Potem Zar\'Koth je "pozyczyl". Oddal? A wyglada jakby oddal?!',
+    ],
+    questLine:'Potrzebuje materialow z $MONSTER_D. Pobij $TARGET - z ich szczatków wykuje cos. Pewnie miecz. Albo otwieracz do piwa.',
+    rewardLine:'Ha! Przyniosles! Z tych materialow wykuje... hmm... no dobra, za malo na miecz. Ale otwieracz wyjdzie swietny! A tak serio, oto twoja zaplata.',
+    postQuestLine:'Z reszty materialów zrobilem sobie nowy mlot kowalski. Stary zgubilam. W czyjejs glowie. Nie pytaj. Jak bedziesz potrzebowal naprawy zbroi to wpadaj. Za doplata oczywiscie.',
+    quest:{type:'killSpecific',target:4,reward:{gold:70},rewardDesc:'70 zlota + niespodzianka'}},
+  {id:'aldric',name:'Sir Aldric',icon:'👻',role:'Duch (1-gwiazdkowa recenzja zycia)',
+    lines:[
+      'Jestem duchem. Tak, wiem, zaskoczenie. Umarlem tu 300 lat temu i nadal nie dostałem zwrotu za zbroję.',
+      'Sluzylam krolowi. Patrzylam jak tworzy Serce Otchlani. Potem umarlam. 2/10, nie polecam.',
+      'Blakam sie tu wiecznie. Przynajmniej nie place czynszu. Jedyny plus bycia duchem.',
+    ],
+    questLine:'Te $MONSTER_PL nie daja mi spokoju. Pokonaj $TARGET i moze wreszcie bede miec cisze. Nie spieszę sie, mam wiecznosc.',
+    rewardLine:'Spokój! Czuje jak moja dusza lzejsza... o 50 zlota. Tak, duch moze miec zloto. Nie pytaj o logike zaswiatow.',
+    postQuestLine:'Wiesz, od kiedy mi pomogles czuje sie lepiej. Dalej jestem martwy, ale przynajmniej mam pozytywne nastawienie. Polecam smierc - zero rachunkow, zero stresow. No, poza wiecznym bledoniem sie.',
+    quest:{type:'killSpecific',target:3,reward:{gold:50},rewardDesc:'50 zlota + blogoslawienstwo'}},
+];
+
+function getItemPrice(item) {
+  const base = {common:35,uncommon:80,rare:180,epic:400,legendary:800};
+  return base[item.rarity] || 50;
+}
+
+function generateShopStock(level) {
+  const pool = getAvailableEquipment(level);
+  const stock = [];
+  const count = 3 + Math.min(3, Math.floor(level / 2));
+  for (let i = 0; i < count; i++) {
+    const item = {...pick(pool)};
+    item.price = getItemPrice(item) + rng(-10, 20);
+    stock.push(item);
+  }
+  // Add a health potion
+  stock.push({name:'Mikstura Zdrowia',slot:'consumable',rarity:'common',hp:30+level*8,str:0,def:0,spd:0,luck:0,ability:null,desc:`Leczy ${30+level*8} HP. Smakuje jak stopy trolla. Ale dziala!`,price:20+level*5,isPotion:true});
+  // Map consumables (rare ones only from lvl 4+ with 40% chance)
+  const conCount = level >= 3 ? 2 : 1;
+  const conPool = MAP_CONSUMABLES.filter(mc => !mc.rare || (level >= 4 && Math.random() < 0.4));
+  const shuffled = [...conPool].sort(()=>Math.random()-0.5);
+  for(let i=0;i<Math.min(conCount, shuffled.length);i++){
+    const mc = shuffled[i];
+    const rar = mc.rare ? 'rare' : 'uncommon';
+    stock.push({name:mc.name,icon:mc.icon,desc:mc.desc,price:mc.basePrice+level*mc.pricePerLvl,isMapConsumable:true,consumableId:mc.id,rarity:rar,slot:'consumable'});
+  }
+  return stock;
+}
+
+// Map shape templates for non-rectangular boards
+const MAP_SHAPES = [
+  'rect','cave','cross','lshape','diamond','corridors','islands'
+];
+
+function generateMapMask(w, h, shape) {
+  const mask = Array.from({length:h}, () => Array(w).fill(false));
+  switch(shape) {
+    case 'rect':
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) mask[y][x]=true;
+      break;
+    case 'cave': {
+      // Random walk from center
+      const visited = new Set();
+      let cx=Math.floor(w/2), cy=Math.floor(h/2);
+      const target = Math.floor(w*h*0.65);
+      visited.add(`${cx},${cy}`);
+      mask[cy][cx]=true;
+      while(visited.size < target) {
+        const dir = rng(0,3);
+        const dx=[0,0,-1,1][dir], dy=[-1,1,0,0][dir];
+        cx=clamp(cx+dx,0,w-1); cy=clamp(cy+dy,0,h-1);
+        if(!visited.has(`${cx},${cy}`)) { visited.add(`${cx},${cy}`); mask[cy][cx]=true; }
+      }
+      break;
+    }
+    case 'cross':
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) {
+        const inH = y>=Math.floor(h*.25)&&y<Math.ceil(h*.75);
+        const inV = x>=Math.floor(w*.25)&&x<Math.ceil(w*.75);
+        mask[y][x] = inH||inV;
+      }
+      break;
+    case 'lshape':
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) {
+        mask[y][x] = y>=Math.floor(h*.4) || x<Math.ceil(w*.6);
+      }
+      break;
+    case 'diamond':
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) {
+        const dx=Math.abs(x-w/2)/(w/2), dy=Math.abs(y-h/2)/(h/2);
+        mask[y][x] = (dx+dy) < 1.1;
+      }
+      break;
+    case 'corridors': {
+      // Horizontal and vertical corridors with rooms
+      const cw=2;
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) {
+        const onHCorridor = Math.abs(y-Math.floor(h/2))<=cw;
+        const onVCorridor = Math.abs(x-Math.floor(w/3))<=cw || Math.abs(x-Math.floor(2*w/3))<=cw;
+        const inRoom = (x<4&&y<4)||(x>=w-4&&y>=h-4)||(x>=w-4&&y<4)||(x<4&&y>=h-4);
+        mask[y][x] = onHCorridor||onVCorridor||inRoom;
+      }
+      break;
+    }
+    case 'islands': {
+      // Two areas connected by narrow passage (choke point)
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) {
+        const leftIsland = x<Math.floor(w*.42) && y>1 && y<h-2;
+        const rightIsland = x>=Math.ceil(w*.58) && y>1 && y<h-2;
+        const bridge = x>=Math.floor(w*.42)&&x<Math.ceil(w*.58) && Math.abs(y-Math.floor(h/2))<=1;
+        mask[y][x] = leftIsland||rightIsland||bridge;
+      }
+      break;
+    }
+  }
+  return mask;
+}
+
+// ===================== GAME STATE =====================
+let save = JSON.parse(localStorage.getItem('sweeperRPG_save') || 'null') || {
+  soulPoints: 0,
+  totalRuns: 0,
+  bestLevel: 0,
+  bestKills: 0,
+  upgrades: {hp:0,str:0,def:0,atkSpd:0,dodgeSpd:0,luck:0,regen:0}
+};
+
+// Migrate old save: spd -> atkSpd + dodgeSpd
+if (save.upgrades.spd !== undefined) {
+  save.upgrades.atkSpd = (save.upgrades.atkSpd || 0) + Math.floor(save.upgrades.spd / 2);
+  save.upgrades.dodgeSpd = (save.upgrades.dodgeSpd || 0) + Math.ceil(save.upgrades.spd / 2);
+  delete save.upgrades.spd;
+  localStorage.setItem('sweeperRPG_save', JSON.stringify(save));
+}
+
+let game = null; // current run state
+let combatState = null;
+let animFrame = null;
+let canvas = null;
+let ctx = null;
+
+function newGame() {
+  initAudio();
+  startMusic();
+  const u = save.upgrades;
+  game = {
+    screen: 'board', // menu, board, combat, gameover, levelcomplete, itemfound
+    level: 1,
+    board: null,
+    boardW: 0,
+    boardH: 0,
+    playerPos: {x:0, y:0},
+    player: {
+      maxHp: 50 + u.hp * 5,
+      hp: 50 + u.hp * 5,
+      str: 5 + u.str,
+      def: 3 + u.def,
+      atkSpd: 2 + (u.atkSpd || 0),
+      dodgeSpd: 2 + (u.dodgeSpd || 0),
+      luck: 1 + u.luck,
+      regen: u.regen,
+    },
+    equipment: {weapon:null, armor:null, helmet:null, accessory:null, shield:null, boots:null, bracers:null, special:null},
+    inventory: [],
+    gold: 0,
+    monstersKilled: 0,
+    cellsExplored: 0,
+    equipmentFound: 0,
+    log: [],
+    foundItem: null,
+    quests: [],
+    questsCompleted: 0,
+    dialogueState: null, // {npc, lineIndex, questOffered}
+    shopState: null, // {stock, tab:'buy'|'sell'}
+    mapMask: null,
+    goldCollected: 0,
+    treasurePos: null,
+    consumables: [],
+    spyglassMode: null,
+    // Level branching system
+    levelNodes: {}, // nodeId -> {depth, parentId, board, boardW, boardH, mapMask, playerPos, treasurePos}
+    currentNodeId: '1',
+    nextNodeCounter: 2,
+  };
+  game.levelNodes['1'] = {depth: 1, parentId: null};
+  generateBoard();
+  render();
+}
+
+// ===================== BOARD GENERATION =====================
+function generateBoard() {
+  const lvl = game.level;
+  const w = Math.min(18, 9 + lvl);
+  const h = Math.min(14, 7 + lvl);
+  game.boardW = w;
+  game.boardH = h;
+
+  // Pick map shape
+  const shape = lvl === 1 ? 'rect' : pick(MAP_SHAPES);
+  const mask = generateMapMask(w, h, shape);
+  game.mapMask = mask;
+
+  // Count playable cells
+  let playable = 0;
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++) if(mask[y][x]) playable++;
+
+  // Level-scaled monster density: fewer early, ramps up
+  const densityByLvl = lvl <= 1 ? 0.16 : lvl <= 2 ? 0.20 : lvl <= 3 ? 0.25 : lvl <= 5 ? 0.30 : Math.min(0.45, 0.30 + (lvl - 5) * 0.03);
+  const monsterCount = Math.min(Math.floor(playable * densityByLvl), 4 + lvl * 4 + rng(0, 3));
+  const equipCount = Math.min(8, (lvl <= 2 ? 3 : 2) + Math.floor(lvl / 2) + rng(0, 2));
+  const goldCount = (lvl <= 2 ? 3 : 2) + Math.floor(lvl / 2) + rng(0, 2);
+  const npcCount = rng(1, Math.min(3, 1 + Math.floor(lvl / 2)));
+  const hasShop = rng(1, 3) <= 2; // 66% chance
+
+  // Create board
+  const board = [];
+  for (let y = 0; y < h; y++) {
+    board[y] = [];
+    for (let x = 0; x < w; x++) {
+      board[y][x] = {type: mask[y][x] ? 'empty' : 'wall', revealed:false, flagged:false, monster:null, equipment:null, dangerCount:0, dangerSum:0, goldAmount:0, npc:null, shopStock:null};
+    }
+  }
+
+  // Helper: find random empty playable cell
+  const findEmpty = () => {
+    for(let t=0;t<500;t++){const x=rng(0,w-1),y=rng(0,h-1);if(board[y][x].type==='empty')return{x,y};}
+    return null;
+  };
+
+  // Place player start
+  let start = findEmpty();
+  game.playerPos = {x: start.x, y: start.y};
+  board[start.y][start.x].revealed = true;
+  board[start.y][start.x].type = 'start';
+
+  // Place exits (1-2 exits for branching; find far spots)
+  const exitCount = (lvl >= 2 && Math.random() < 0.5) ? 2 : 1;
+  const exitPositions = [];
+  for (let e = 0; e < exitCount; e++) {
+    let bestP = null, maxDist = 0;
+    for (let tries = 0; tries < 80; tries++) {
+      const p = findEmpty();
+      if(!p) break;
+      let dist = Math.abs(p.x - start.x) + Math.abs(p.y - start.y);
+      // Also keep exits apart from each other
+      exitPositions.forEach(ep => { dist = Math.min(dist, Math.abs(p.x - ep.x) + Math.abs(p.y - ep.y)); });
+      if (dist > maxDist) { bestP = p; maxDist = dist; }
+    }
+    if (bestP) {
+      board[bestP.y][bestP.x].type = 'exit';
+      board[bestP.y][bestP.x].exitIndex = e;
+      exitPositions.push(bestP);
+    }
+  }
+
+  // Place entrance back to previous level (if not level 1)
+  const node = game.levelNodes[game.currentNodeId];
+  if (node && node.parentId) {
+    // Place entrance near start
+    let entrP = null, eDist = 999;
+    for (let tries = 0; tries < 40; tries++) {
+      const p = findEmpty();
+      if(!p) break;
+      const dist = Math.abs(p.x - start.x) + Math.abs(p.y - start.y);
+      if (dist < eDist && dist >= 2) { entrP = p; eDist = dist; }
+    }
+    if (entrP) {
+      board[entrP.y][entrP.x].type = 'entrance';
+      board[entrP.y][entrP.x].revealed = true;
+    }
+  }
+
+  // Available monsters - weighted by tier to keep early levels manageable
+  const maxTier = lvl <= 1 ? 1 : lvl <= 2 ? 2 : lvl <= 4 ? 3 : lvl <= 6 ? 4 : 5;
+  const availableMonsters = [];
+  MONSTER_TEMPLATES.forEach(m => {
+    if (m.tier > maxTier) return;
+    // Lower tiers appear more often at early levels
+    let weight = 1;
+    if (lvl <= 2) weight = m.tier <= 1 ? 3 : 1; // level 1-2: mostly weak
+    else if (lvl <= 4) weight = m.tier <= 1 ? 1 : m.tier <= 2 ? 3 : m.tier <= 3 ? 2 : 1; // level 3-4: mid focus
+    else if (lvl <= 6) weight = m.tier <= 2 ? 1 : m.tier <= 3 ? 3 : 2; // level 5-6: harder monsters
+    else weight = m.tier <= 2 ? 1 : m.tier <= 3 ? 2 : m.tier <= 4 ? 3 : 2; // level 7+: hardest focus
+    for (let i = 0; i < weight; i++) availableMonsters.push(m);
+  });
+
+  // Place monsters using cluster-based distribution
+  // Pick cluster centers (2-4 clusters), bias most monsters toward clusters
+  const clusterCount = rng(2, Math.min(4, 2 + Math.floor(lvl / 2)));
+  const clusters = [];
+  for (let i = 0; i < clusterCount; i++) {
+    const cp = findEmpty();
+    if (cp) clusters.push(cp);
+  }
+
+  // Helper: find empty cell near a cluster center
+  const findNearCluster = (cx, cy, radius) => {
+    for (let t = 0; t < 60; t++) {
+      const ox = rng(-radius, radius), oy = rng(-radius, radius);
+      const nx = cx + ox, ny = cy + oy;
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h && board[ny][nx].type === 'empty') return {x: nx, y: ny};
+    }
+    return null;
+  };
+
+  const scale = 1 + (lvl - 1) * 0.25;
+  const atkScale = 1 + (lvl - 1) * 0.3;
+  let placed = 0, attempts = 0;
+  while (placed < monsterCount && attempts < 500) {
+    let p;
+    // 70% of monsters placed near clusters, 30% randomly
+    if (clusters.length > 0 && Math.random() < 0.7) {
+      const cl = pick(clusters);
+      p = findNearCluster(cl.x, cl.y, 3 + Math.floor(lvl * 0.5));
+    }
+    if (!p) p = findEmpty();
+    if (!p) break;
+    const template = pick(availableMonsters);
+    board[p.y][p.x].type = 'monster';
+    board[p.y][p.x].monster = {
+      ...template,
+      hp: Math.floor(template.hp * scale),
+      maxHp: Math.floor(template.hp * scale),
+      atk: Math.floor(template.atk * atkScale),
+      def: Math.floor(template.def * scale),
+    };
+    placed++;
+    attempts++;
+  }
+
+  // Place boss (every 2 levels starting from level 2)
+  if (lvl >= 2 && lvl % 2 === 0) {
+    const bp = findEmpty();
+    if (bp) {
+      const availBosses = BOSS_TEMPLATES.filter(b => {
+        if (lvl <= 3) return b.tier <= 2;
+        if (lvl <= 5) return b.tier <= 3;
+        if (lvl <= 7) return b.tier <= 4;
+        return true;
+      });
+      const bossTemplate = pick(availBosses);
+      const bossScale = 1 + (lvl - 1) * 0.25;
+      const bossAtkScale = 1 + (lvl - 1) * 0.30;
+      board[bp.y][bp.x].type = 'monster';
+      board[bp.y][bp.x].monster = {
+        ...bossTemplate,
+        hp: Math.floor(bossTemplate.hp * bossScale),
+        maxHp: Math.floor(bossTemplate.hp * bossScale),
+        atk: Math.floor(bossTemplate.atk * bossAtkScale),
+        def: Math.floor(bossTemplate.def * bossScale),
+      };
+    }
+  }
+
+  // Place treasure location (level 2+): epic/legendary item guarded by monsters
+  game.treasurePos = null;
+  if (lvl >= 2) {
+    // Find a spot far from start for treasure
+    let treasureSpot = null, tMaxDist = 0;
+    for (let tries = 0; tries < 60; tries++) {
+      const p = findEmpty();
+      if (!p) continue;
+      const dist = Math.abs(p.x - start.x) + Math.abs(p.y - start.y);
+      if (dist > tMaxDist && dist > 4) { treasureSpot = p; tMaxDist = dist; }
+    }
+    if (treasureSpot) {
+      // Place epic/legendary item
+      const treasureEquip = EQUIPMENT_TEMPLATES.filter(e => e.rarity === 'epic' || e.rarity === 'legendary');
+      board[treasureSpot.y][treasureSpot.x].type = 'equipment';
+      board[treasureSpot.y][treasureSpot.x].equipment = {...pick(treasureEquip)};
+      game.treasurePos = {x: treasureSpot.x, y: treasureSpot.y};
+      // Place 3-5 guard monsters around the treasure
+      const guardCount = rng(3, 5);
+      for (let g = 0; g < guardCount; g++) {
+        const gp = findNearCluster(treasureSpot.x, treasureSpot.y, 2);
+        if (gp) {
+          const gt = pick(availableMonsters);
+          board[gp.y][gp.x].type = 'monster';
+          board[gp.y][gp.x].monster = {
+            ...gt,
+            hp: Math.floor(gt.hp * scale),
+            maxHp: Math.floor(gt.hp * scale),
+            atk: Math.floor(gt.atk * atkScale),
+            def: Math.floor(gt.def * scale),
+          };
+        }
+      }
+    }
+  }
+
+  // Place equipment
+  const availableEquip = getAvailableEquipment(lvl);
+  placed = 0; attempts = 0;
+  while (placed < equipCount && attempts < 500) {
+    const p = findEmpty();
+    if(!p) break;
+    board[p.y][p.x].type = 'equipment';
+    board[p.y][p.x].equipment = {...pick(availableEquip)};
+    placed++; attempts++;
+  }
+
+  // Place gold
+  for (let i = 0; i < goldCount; i++) {
+    const p = findEmpty();
+    if(!p) break;
+    board[p.y][p.x].type = 'gold';
+    board[p.y][p.x].goldAmount = rng(5, 15) + lvl * rng(3, 8);
+  }
+
+  // Place NPCs
+  const usedNpcs = new Set();
+  for (let i = 0; i < npcCount; i++) {
+    const p = findEmpty();
+    if(!p) break;
+    let npc;
+    for(let t=0;t<20;t++){npc=pick(NPC_TEMPLATES);if(!usedNpcs.has(npc.id))break;}
+    usedNpcs.add(npc.id);
+    board[p.y][p.x].type = 'npc';
+    board[p.y][p.x].npc = {...npc};
+  }
+
+  // Place shop
+  if (hasShop) {
+    const p = findEmpty();
+    if(p) {
+      board[p.y][p.x].type = 'shop';
+      board[p.y][p.x].shopStock = generateShopStock(lvl);
+    }
+  }
+
+  // Calculate danger numbers
+  recalcDangersFor(board, w, h);
+
+  game.board = board;
+  revealSafeNeighbors(start.x, start.y);
+}
+
+function recalcDangersFor(board, w, h) {
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if(board[y][x].type === 'wall') continue;
+      let count = 0, sum = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < w && ny >= 0 && ny < h && board[ny][nx].type === 'monster') {
+            count++; sum += board[ny][nx].monster.danger;
+          }
+        }
+      }
+      board[y][x].dangerCount = count;
+      board[y][x].dangerSum = sum;
+    }
+  }
+}
+
+function getAvailableEquipment(lvl) {
+  return EQUIPMENT_TEMPLATES.filter(e => {
+    if (lvl <= 2) return e.rarity === 'common' || e.rarity === 'uncommon';
+    if (lvl <= 4) return e.rarity !== 'legendary';
+    if (lvl <= 6) return true;
+    return true;
+  });
+}
+
+function revealSafeNeighbors(x, y) {
+  const cell = game.board[y][x];
+  if (cell.dangerCount > 0 || cell.type === 'monster') return;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < game.boardW && ny >= 0 && ny < game.boardH) {
+        const nc = game.board[ny][nx];
+        if (nc.type === 'wall') continue;
+        if (!nc.revealed && nc.type !== 'monster') {
+          nc.revealed = true;
+          game.cellsExplored++;
+          if (nc.dangerCount === 0 && nc.type !== 'equipment' && nc.type !== 'exit' && nc.type !== 'entrance' && nc.type !== 'gold' && nc.type !== 'npc' && nc.type !== 'shop') {
+            revealSafeNeighbors(nx, ny);
+          }
+        }
+      }
+    }
+  }
+}
+
+function revealMapArea(cx, cy, radius) {
+  for(let dy=-radius;dy<=radius;dy++){
+    for(let dx=-radius;dx<=radius;dx++){
+      const nx=cx+dx,ny=cy+dy;
+      if(nx>=0&&nx<game.boardW&&ny>=0&&ny<game.boardH){
+        const c=game.board[ny][nx];
+        if(c.type!=='wall'&&!c.revealed){c.revealed=true;game.cellsExplored++;}
+      }
+    }
+  }
+}
+
+// ===================== MAP CONSUMABLES LOGIC =====================
+function useConsumable(index) {
+  if (!game || game.screen !== 'board') return;
+  if (game.spyglassMode) return; // can't use while spyglass active
+  const item = game.consumables[index];
+  if (!item) return;
+  game.consumables.splice(index, 1);
+  switch(item.id) {
+    case 'vision': {
+      const px = game.playerPos.x, py = game.playerPos.y;
+      revealMapArea(px, py, 3);
+      addLog(`${item.icon} Zwoj Wizji — odkryto okolice!`, 'info');
+      playSfx('pickup');
+      break;
+    }
+    case 'tracker': {
+      let found = false;
+      for(let y=0;y<game.boardH;y++) for(let x=0;x<game.boardW;x++){
+        const c = game.board[y][x];
+        if(c.type==='monster' && c.monster && c.monster.isBoss){
+          c.bossHighlight = true;
+          found = true;
+        }
+      }
+      if(found){
+        addLog(`${item.icon} Krysztal — boss wykryty! Mruga przez 3s.`,'epic');
+        playSfx('pickup');
+        setTimeout(()=>{
+          for(let y=0;y<game.boardH;y++) for(let x=0;x<game.boardW;x++) game.board[y][x].bossHighlight=false;
+          render();
+        }, 3000);
+      } else {
+        addLog(`${item.icon} Krysztal — brak bossa na tym poziomie.`,'info');
+      }
+      break;
+    }
+    case 'spyglass': {
+      game.spyglassMode = {remaining: 3};
+      addLog(`${item.icon} Luneta — kliknij 3 pola by odkryc. [Esc = anuluj]`,'info');
+      playSfx('pickup');
+      break;
+    }
+    case 'compass': {
+      let count = 0;
+      for(let y=0;y<game.boardH;y++) for(let x=0;x<game.boardW;x++){
+        const c = game.board[y][x];
+        if(!c.revealed && (c.type==='gold'||c.type==='equipment'||c.type==='shop') && c.type!=='wall'){
+          c.revealed = true;
+          game.cellsExplored++;
+          count++;
+        }
+      }
+      addLog(`${item.icon} Kompas Skarbow — odkryto ${count} pol!`,'good');
+      playSfx('pickup');
+      break;
+    }
+    case 'safety': {
+      let count = 0;
+      for(let y=0;y<game.boardH;y++) for(let x=0;x<game.boardW;x++){
+        const c = game.board[y][x];
+        if(!c.revealed && c.type==='monster' && c.type!=='wall'){
+          c.revealed = true;
+          c.dangerRevealed = true;
+          game.cellsExplored++;
+          count++;
+        }
+      }
+      addLog(`${item.icon} Kamien Bezp. — wykryto ${count} zagrozen!`,'info');
+      playSfx('pickup');
+      break;
+    }
+  }
+  render();
+}
+
+function spyglassClick(x, y) {
+  if(!game.spyglassMode) return;
+  const cell = game.board[y][x];
+  if(cell.type==='wall' || cell.revealed) return;
+  cell.revealed = true;
+  game.cellsExplored++;
+  game.spyglassMode.remaining--;
+  if(game.spyglassMode.remaining <= 0){
+    addLog('Luneta — odkryto 3 pola!','good');
+    game.spyglassMode = null;
+  }
+  render();
+}
+
+function cancelSpyglass() {
+  if(game.spyglassMode){
+    game.spyglassMode = null;
+    addLog('Luneta anulowana.','info');
+    render();
+  }
+}
+
+// ===================== PLAYER STATS =====================
+function getPlayerStats() {
+  const p = game.player;
+  const eq = game.equipment;
+  let str = p.str, def = p.def, atkSpd = p.atkSpd, dodgeSpd = p.dodgeSpd, hp = p.maxHp, luck = p.luck;
+  const abilities = [];
+  for (const slot in eq) {
+    const item = eq[slot];
+    if (item) {
+      str += item.str || 0;
+      def += item.def || 0;
+      hp += item.hp || 0;
+      luck += item.luck || 0;
+      // Split spd based on slot type: weapons -> atkSpd, boots -> dodgeSpd, other -> split
+      const s = item.spd || 0;
+      if (s !== 0) {
+        if (slot === 'weapon') { atkSpd += s; }
+        else if (slot === 'boots') { dodgeSpd += s; }
+        else { atkSpd += Math.floor(s / 2); dodgeSpd += Math.ceil(s / 2); }
+      }
+      if (item.ability) abilities.push(item.ability);
+    }
+  }
+  return {str, def, atkSpd, dodgeSpd, maxHp: hp, luck, abilities};
+}
+
+// ===================== MOVEMENT & INTERACTION =====================
+function isAdjacent(x, y) {
+  const px = game.playerPos.x, py = game.playerPos.y;
+  if (Math.abs(x - px) > 1 || Math.abs(y - py) > 1 || (x === px && y === py)) return false;
+  if (y < 0 || y >= game.boardH || x < 0 || x >= game.boardW) return false;
+  if (game.board[y][x].type === 'wall') return false;
+  return true;
+}
+
+function movePlayer(x, y) {
+  if (game.screen !== 'board') return;
+  if (game.spyglassMode) return;
+  if (!isAdjacent(x, y)) return;
+
+  const cell = game.board[y][x];
+  if (cell.flagged) return;
+
+  if (!cell.revealed) {
+    cell.revealed = true;
+    game.cellsExplored++;
+    if (game.player.regen > 0) {
+      game.player.hp = Math.min(getPlayerStats().maxHp, game.player.hp + game.player.regen);
+    }
+  }
+
+  if (cell.type === 'monster' && cell.monster) {
+    game.playerPos = {x, y};
+    addLog(cell.monster.isBoss ? `BOSS: ${cell.monster.icon} ${cell.monster.name}!` : `Napotykasz: ${cell.monster.icon} ${cell.monster.name}!`, 'danger');
+    playSfx('dodge');
+    startCombat(cell.monster, x, y);
+    return;
+  }
+
+  if (cell.type === 'equipment' && cell.equipment) {
+    game.playerPos = {x, y};
+    game.equipmentFound++;
+    game.foundItem = cell.equipment;
+    cell.type = 'empty';
+    cell.equipment = null;
+    addLog(`Znaleziono: ${game.foundItem.name}!`, 'epic');
+    playSfx('pickup');
+    game.screen = 'itemfound';
+    render();
+    return;
+  }
+
+  if (cell.type === 'gold') {
+    game.playerPos = {x, y};
+    const amt = cell.goldAmount;
+    game.gold += amt;
+    game.goldCollected += amt;
+    cell.type = 'empty';
+    cell.goldAmount = 0;
+    addLog(`Znaleziono ${amt} zlota!`, 'good');
+    playSfx('pickup');
+    // 15% chance to find Luneta Zwiadowcy
+    if(Math.random() < 0.15){
+      const mc = MAP_CONSUMABLES.find(c=>c.id==='spyglass');
+      game.consumables.push({id:mc.id,name:mc.name,icon:mc.icon,desc:mc.desc});
+      addLog(`${mc.icon} Znaleziono ${mc.name} w zlotym stosie!`,'info');
+    }
+    revealSafeNeighbors(x, y);
+    render();
+    return;
+  }
+
+  if (cell.type === 'shop') {
+    game.playerPos = {x, y};
+    openShop(cell);
+    return;
+  }
+
+  if (cell.type === 'npc' && cell.npc) {
+    game.playerPos = {x, y};
+    openDialogue(cell.npc);
+    return;
+  }
+
+  if (cell.type === 'exit') {
+    game.playerPos = {x, y};
+    // Complete reachNext quests
+    game.quests.forEach(q => { if(q.type==='reachNext'&&!q.completed){q.progress++;} });
+    checkQuestCompletion();
+    // Save current level state
+    saveLevelState();
+    // Determine which exit this is and create/go to child node
+    const exitIdx = cell.exitIndex || 0;
+    const curNode = game.levelNodes[game.currentNodeId];
+    if (!curNode.childIds) curNode.childIds = [];
+    let targetNodeId = curNode.childIds[exitIdx];
+    if (!targetNodeId) {
+      targetNodeId = String(game.nextNodeCounter++);
+      curNode.childIds[exitIdx] = targetNodeId;
+      game.levelNodes[targetNodeId] = {depth: curNode.depth + 1, parentId: game.currentNodeId};
+    }
+    game.currentNodeId = targetNodeId;
+    game.level = game.levelNodes[targetNodeId].depth;
+    game.screen = 'levelcomplete';
+    playSfx('levelup');
+    addLog(`Znaleziono wyjscie! Poziom ${game.level} ---`, 'good');
+    render();
+    return;
+  }
+
+  if (cell.type === 'entrance') {
+    game.playerPos = {x, y};
+    saveLevelState();
+    const curNode = game.levelNodes[game.currentNodeId];
+    if (curNode && curNode.parentId) {
+      game.currentNodeId = curNode.parentId;
+      game.level = game.levelNodes[curNode.parentId].depth;
+      loadLevelState(curNode.parentId);
+      addLog(`Powrot na poziom ${game.level}`, 'info');
+      playSfx('step');
+      render();
+    }
+    return;
+  }
+
+  game.playerPos = {x, y};
+  playSfx('step');
+  revealSafeNeighbors(x, y);
+  render();
+}
+
+function toggleFlag(x, y) {
+  if (game.screen !== 'board') return;
+  const cell = game.board[y][x];
+  if (cell.revealed) return;
+  cell.flagged = !cell.flagged;
+  render();
+}
+
+function saveLevelState() {
+  const nodeId = game.currentNodeId;
+  const node = game.levelNodes[nodeId];
+  node.board = game.board;
+  node.boardW = game.boardW;
+  node.boardH = game.boardH;
+  node.mapMask = game.mapMask;
+  node.playerPos = {...game.playerPos};
+  node.treasurePos = game.treasurePos ? {...game.treasurePos} : null;
+}
+
+function loadLevelState(nodeId) {
+  const node = game.levelNodes[nodeId];
+  if (!node || !node.board) return;
+  game.board = node.board;
+  game.boardW = node.boardW;
+  game.boardH = node.boardH;
+  game.mapMask = node.mapMask;
+  game.playerPos = {...node.playerPos};
+  game.treasurePos = node.treasurePos;
+  game.screen = 'board';
+}
+
+function nextLevel() {
+  game.screen = 'board';
+  // Heal some HP
+  const stats = getPlayerStats();
+  game.player.hp = Math.min(stats.maxHp, game.player.hp + Math.floor(stats.maxHp * 0.4) + 10);
+  // Check if target level already has a saved board
+  const node = game.levelNodes[game.currentNodeId];
+  if (node && node.board) {
+    loadLevelState(game.currentNodeId);
+    addLog(`--- Powrot na poziom ${game.level} ---`, 'info');
+  } else {
+    addLog(`--- Poziom ${game.level} ---`, 'info');
+    generateBoard();
+  }
+  render();
+}
+
+// ===================== COMBAT SYSTEM =====================
+function startCombat(monster, cx, cy) {
+  game.spyglassMode = null;
+  const stats = getPlayerStats();
+  game.screen = 'combat';
+  startCombatMusic();
+  combatState = {
+    monster: {...monster},
+    monsterMaxHp: monster.maxHp || monster.hp,
+    cellX: cx,
+    cellY: cy,
+    phase: 'intro', // intro, dodge, attack, victory, defeat
+    phaseTimer: 0,
+    phaseText: '',
+    // player in arena
+    px: 250, py: 250,
+    pSize: 12,
+    pSpeed: 2 + stats.dodgeSpd * 0.3,
+    pInvincible: 0,
+    pVisible: true,
+    // projectiles
+    projectiles: [],
+    // attack bar
+    attackMarkerPos: 0,
+    attackMarkerDir: 1,
+    attackMarkerSpeed: Math.max(0.5, 1.5 + monster.danger * 0.2 - stats.atkSpd * 0.08),
+    attackReady: false,
+    timingTimer: 0,
+    timingDuration: 3000 + stats.atkSpd * 150,
+    // timing
+    lastTime: 0,
+    dodgeDuration: 5000 + monster.danger * 600,
+    dodgeElapsed: 0,
+    attackPatternIndex: 0,
+    spawnTimer: 0,
+    turnCount: 0,
+    // keys
+    keys: {},
+    // abilities
+    abilityCooldowns: {},
+    activeEffects: [],
+    // flags
+    frozen: false,
+    frozenTimer: 0,
+    burning: false,
+    burnTimer: 0,
+    burnDamage: 0,
+    defReduction: 0,
+    defReductionTimer: 0,
+    rageActive: false,
+    rageTimer: 0,
+    monsterAtkReduction: 0,
+    monsterAtkReductionTimer: 0,
+    defBoost: 0,
+    defBoostTimer: 0,
+    hasteActive: false,
+    hasteTimer: 0,
+    immortalUsed: false,
+    // beam
+    beamAngle: 0,
+    beamActive: false,
+    beamTimer: 0,
+    // attack minigame type
+    atkType: (game.equipment.weapon && game.equipment.weapon.atkType) || 'timing',
+    weaponOnHit: (game.equipment.weapon && game.equipment.weapon.onHit) || null,
+    // rapid attack
+    rapidClicks: 0,
+    rapidTimer: 0,
+    rapidDuration: 1700 + stats.atkSpd * 120,
+    // charge attack
+    chargeAmount: 0,
+    chargeDir: 1,
+    chargeSpeed: Math.max(15, 40 + monster.danger * 3 - stats.atkSpd * 2),
+    chargeLocked: false,
+    chargeTotalTimer: 0,
+    chargeDuration: 2500 + stats.atkSpd * 150,
+    // magic attack (rune drawing)
+    magicRune: null,
+    magicRuneProgress: 0,
+    magicTimer: 0,
+    magicDuration: 2500 + stats.atkSpd * 150,
+    // player debuffs (from monster)
+    playerDebuffs: {},
+    // monster debuffs (from player)
+    monsterDebuffs: {},
+    // damage log
+    dmgLog: '',
+    dmgLogTimer: 0,
+    // floating damage numbers
+    floatingDmg: [],
+    // combat journal (persistent log of all damage events)
+    combatJournal: [],
+  };
+
+  // Init ability cooldowns
+  stats.abilities.forEach(a => {
+    combatState.abilityCooldowns[a] = 0;
+  });
+
+  // Scale combat difficulty - more projectiles, faster, more frequent
+  const dangScale = 1 + monster.danger * 0.12;
+  const lvlScale = 1 + (game.level - 1) * 0.08;
+  combatState.monster.patterns = combatState.monster.patterns.map(p => ({
+    ...p,
+    count: Math.ceil(p.count * dangScale * lvlScale),
+    speed: Math.floor(p.speed * (1 + monster.danger * 0.03 + (game.level-1) * 0.03)),
+    interval: Math.max(400, Math.floor(p.interval * (1 - monster.danger * 0.02 - (game.level-1) * 0.015))),
+  }));
+
+  render();
+  setTimeout(() => {
+    if (combatState) {
+      combatState.phase = 'dodge';
+      combatState.phaseText = 'UNIKAJ!';
+      combatState.dodgeElapsed = 0;
+      combatState.lastTime = performance.now();
+      startCombatLoop();
+    }
+  }, 1000);
+}
+
+function startCombatLoop() {
+  canvas = document.getElementById('combatCanvas');
+  if (!canvas) return;
+  ctx = canvas.getContext('2d');
+  combatState.lastTime = performance.now();
+  combatLoop(performance.now());
+}
+
+function combatLoop(timestamp) {
+  if (!combatState || game.screen !== 'combat') return;
+  const dt = Math.min(timestamp - combatState.lastTime, 50);
+  combatState.lastTime = timestamp;
+
+  if (combatState.phase === 'dodge') {
+    updateDodgePhase(dt);
+  } else if (combatState.phase === 'attack') {
+    updateAttackPhase(dt);
+  }
+
+  // Update floating damage numbers
+  if (combatState.floatingDmg.length > 0) {
+    for (let i = combatState.floatingDmg.length - 1; i >= 0; i--) {
+      combatState.floatingDmg[i].age += dt;
+      combatState.floatingDmg[i].y -= dt * 0.04;
+      if (combatState.floatingDmg[i].age > 1200) combatState.floatingDmg.splice(i, 1);
+    }
+  }
+
+  renderCombat();
+  renderCombatUI();
+  animFrame = requestAnimationFrame(combatLoop);
+}
+
+function updateDodgePhase(dt) {
+  const cs = combatState;
+  cs.dodgeElapsed += dt;
+  cs.spawnTimer += dt;
+  cs.pInvincible = Math.max(0, cs.pInvincible - dt);
+
+  // Update frozen timer
+  if (cs.frozenTimer > 0) {
+    cs.frozenTimer -= dt;
+    if (cs.frozenTimer <= 0) cs.frozen = false;
+  }
+
+  // Update burn
+  if (cs.burning) {
+    cs.burnTimer -= dt;
+    if (cs.burnTimer <= 0) {
+      cs.monster.hp -= cs.burnDamage;
+      cs.burnTimer = 1000;
+      if (cs.monster.hp <= 0) {
+        combatVictory();
+        return;
+      }
+    }
+  }
+
+  // Update rage
+  if (cs.rageTimer > 0) {
+    cs.rageTimer -= dt;
+    if (cs.rageTimer <= 0) cs.rageActive = false;
+  }
+
+  // Def reduction
+  if (cs.defReductionTimer > 0) {
+    cs.defReductionTimer -= dt;
+    if (cs.defReductionTimer <= 0) cs.defReduction = 0;
+  }
+  // Monster atk reduction (war cry)
+  if (cs.monsterAtkReductionTimer > 0) {
+    cs.monsterAtkReductionTimer -= dt;
+    if (cs.monsterAtkReductionTimer <= 0) cs.monsterAtkReduction = 0;
+  }
+  // Def boost (iron skin)
+  if (cs.defBoostTimer > 0) {
+    cs.defBoostTimer -= dt;
+    if (cs.defBoostTimer <= 0) cs.defBoost = 0;
+  }
+  // Haste
+  if (cs.hasteTimer > 0) {
+    cs.hasteTimer -= dt;
+    if (cs.hasteTimer <= 0) { cs.hasteActive = false; cs.pSpeed = Math.max(1, cs.pSpeed - 1); }
+  }
+
+  // Player debuffs
+  for (const key in cs.playerDebuffs) {
+    const d = cs.playerDebuffs[key];
+    d.remaining -= dt;
+    if (d.remaining <= 0) { delete cs.playerDebuffs[key]; continue; }
+    if (d.dmgPerSec) {
+      d.tickTimer = (d.tickTimer||0) + dt;
+      if (d.tickTimer >= 1000) { d.tickTimer -= 1000; game.player.hp -= d.dmgPerSec; if(game.player.hp<=0){game.player.hp=0;combatDefeat();return;} }
+    }
+  }
+  // Monster debuffs
+  for (const key in cs.monsterDebuffs) {
+    const d = cs.monsterDebuffs[key];
+    d.remaining -= dt;
+    if (d.remaining <= 0) { delete cs.monsterDebuffs[key]; continue; }
+    if (d.dmgPerSec) {
+      d.tickTimer = (d.tickTimer||0) + dt;
+      if (d.tickTimer >= 1000) { d.tickTimer -= 1000; cs.monster.hp -= d.dmgPerSec; if(cs.monster.hp<=0){cs.monster.hp=0;combatVictory();return;} }
+    }
+  }
+  // Stun check - if monster is stunned, skip projectile spawning
+  const isStunned = !!cs.monsterDebuffs.stun;
+
+  // Damage log timer
+  if (cs.dmgLogTimer > 0) cs.dmgLogTimer -= dt;
+
+  // Player movement
+  let spdMult2 = 1;
+  if (cs.playerDebuffs.slow) spdMult2 = cs.playerDebuffs.slow.spdMult || 0.5;
+  const spd = cs.pSpeed * spdMult2;
+  if (cs.keys['ArrowLeft'] || cs.keys['KeyA']) cs.px -= spd * dt * 0.25;
+  if (cs.keys['ArrowRight'] || cs.keys['KeyD']) cs.px += spd * dt * 0.25;
+  if (cs.keys['ArrowUp'] || cs.keys['KeyW']) cs.py -= spd * dt * 0.25;
+  if (cs.keys['ArrowDown'] || cs.keys['KeyS']) cs.py += spd * dt * 0.25;
+  cs.px = clamp(cs.px, cs.pSize, 500 - cs.pSize);
+  cs.py = clamp(cs.py, cs.pSize, 350 - cs.pSize);
+
+  // Spawn projectiles
+  const pattern = cs.monster.patterns[cs.attackPatternIndex % cs.monster.patterns.length];
+  const interval = cs.frozen ? pattern.interval * 1.8 : pattern.interval;
+
+  if (cs.spawnTimer >= interval && !isStunned) {
+    cs.spawnTimer = 0;
+    spawnProjectiles(pattern);
+    // Always add one projectile aimed directly at the player
+    const angle = Math.atan2(cs.py - 30, cs.px - 250);
+    const aimSpd = (pattern.speed || 80) * 1.3;
+    cs.projectiles.push({
+      x: 250, y: 30,
+      vx: Math.cos(angle) * aimSpd / 60,
+      vy: Math.sin(angle) * aimSpd / 60,
+      size: pattern.projSize || 6, age: 0, movement: 'linear'
+    });
+  }
+
+  // Update projectiles
+  const speedMult = cs.frozen ? 0.5 : 1;
+  for (let i = cs.projectiles.length - 1; i >= 0; i--) {
+    const p = cs.projectiles[i];
+    p.age += dt;
+
+    if (p.movement === 'homing') {
+      const dx = cs.px - p.x, dy = cs.py - p.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if (dist > 0) {
+        const targetAngle = Math.atan2(dy, dx);
+        const currentAngle = Math.atan2(p.vy, p.vx);
+        let diff = targetAngle - currentAngle;
+        while (diff > Math.PI) diff -= Math.PI*2;
+        while (diff < -Math.PI) diff += Math.PI*2;
+        const turn = clamp(diff, -(p.turnRate||.02), (p.turnRate||.02));
+        const newAngle = currentAngle + turn;
+        const spd2 = Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+        p.vx = Math.cos(newAngle) * spd2;
+        p.vy = Math.sin(newAngle) * spd2;
+      }
+    }
+
+    if (p.movement === 'wave') {
+      p.wavePhase = (p.wavePhase || 0) + dt * 0.005;
+      const perpX = -p.baseVy, perpY = p.baseVx;
+      const len = Math.sqrt(perpX*perpX+perpY*perpY);
+      const waveOffset = Math.sin(p.wavePhase * 5) * (p.amplitude || 30);
+      p.x += p.vx * speedMult * dt * 0.06 + (perpX/len) * waveOffset * dt * 0.002;
+      p.y += p.vy * speedMult * dt * 0.06 + (perpY/len) * waveOffset * dt * 0.002;
+    } else {
+      p.x += p.vx * speedMult * dt * 0.06;
+      p.y += p.vy * speedMult * dt * 0.06;
+    }
+
+    // Remove if out of bounds or too old
+    if (p.x < -30 || p.x > 530 || p.y < -30 || p.y > 380 || p.age > 8000) {
+      cs.projectiles.splice(i, 1);
+      continue;
+    }
+
+    // Collision with player
+    if (cs.pInvincible <= 0 && cs.pVisible) {
+      const dx = p.x - cs.px, dy = p.y - cs.py;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < cs.pSize + p.size) {
+        const pstats = getPlayerStats();
+        const rawAtk = cs.monster.atk;
+        let atkVal = Math.max(1, rawAtk - (cs.monsterAtkReduction || 0));
+        if (cs.monsterDebuffs.weaken) atkVal = Math.floor(atkVal * 0.7);
+        const armorVal = pstats.def + (cs.defBoost || 0);
+        let dmg = Math.max(1, atkVal - armorVal);
+        if (cs.rageActive) dmg = Math.floor(dmg * 1.25);
+        if (pstats.abilities.includes('fireResist')) dmg = Math.floor(dmg * 0.75);
+        const weakStr = cs.playerDebuffs.weakness ? ' (oslabiony!)' : '';
+        cs.dmgLog = `Otrzymano ${dmg} dmg (atak:${atkVal} - pancerz:${armorVal})${weakStr}`;
+        cs.dmgLogTimer = 2500;
+        cs.combatJournal.push({type:'taken', text:`-${dmg} HP (atak ${atkVal} - obr ${armorVal} = ${dmg})${weakStr}`, color:'#ff4444'});
+        cs.floatingDmg.push({x: cs.px, y: cs.py - 15, text: `-${dmg}`, color: '#ff4444', age: 0});
+        playSfx('hit');
+        // Apply monster debuff
+        const debuffKey = MONSTER_DEBUFF_TABLE[cs.monster.name];
+        if (debuffKey && !cs.playerDebuffs[debuffKey] && Math.random() < 0.35) {
+          cs.playerDebuffs[debuffKey] = {...MONSTER_DEBUFFS[debuffKey], remaining: MONSTER_DEBUFFS[debuffKey].duration, tickTimer:0};
+          cs.dmgLog += ` +${MONSTER_DEBUFFS[debuffKey].name}!`;
+        }
+        if (game.player.hp - dmg <= 0 && pstats.abilities.includes('immortal') && !cs.immortalUsed) {
+          game.player.hp = 1;
+          cs.immortalUsed = true;
+          addLog('Niesmiertelnosc uratowala cie!', 'epic');
+        } else {
+          game.player.hp -= dmg;
+        }
+        cs.pInvincible = 500;
+        cs.projectiles.splice(i, 1);
+        if (game.player.hp <= 0) { game.player.hp = 0; combatDefeat(); return; }
+      }
+    }
+  }
+
+  // Phase timer text fade
+  cs.phaseTimer += dt;
+
+  // End dodge phase
+  if (cs.dodgeElapsed >= cs.dodgeDuration) {
+    cs.phase = 'attack';
+    cs.phaseTimer = 0;
+    cs.projectiles = [];
+    cs.turnCount++;
+    // Decrease ability cooldowns once per turn
+    for (const key in cs.abilityCooldowns) {
+      if (cs.abilityCooldowns[key] > 0) cs.abilityCooldowns[key]--;
+    }
+    // Setup attack minigame based on weapon type
+    const at = cs.atkType;
+    if (at === 'rapid') {
+      cs.phaseText = 'KLIKAJ SZYBKO!';
+      cs.rapidClicks = 0;
+      cs.rapidTimer = 0;
+      cs.attackReady = true;
+    } else if (at === 'charge') {
+      cs.phaseText = 'LADUJ MOC!';
+      cs.chargeAmount = 0;
+      cs.chargeDir = 1;
+      cs.chargeLocked = false;
+      cs.chargeTotalTimer = 0;
+      cs.attackReady = true;
+    } else if (at === 'magic') {
+      cs.phaseText = 'RYSUJ RUNE!';
+      cs.magicRune = pick(RUNE_PATTERNS);
+      cs.magicRuneProgress = 0;
+      cs.magicTimer = 0;
+      cs.attackReady = true;
+    } else {
+      cs.phaseText = 'ATAKUJ!';
+      cs.attackMarkerPos = 0;
+      cs.attackMarkerDir = 1;
+      cs.timingTimer = 0;
+      cs.attackReady = true;
+    }
+  }
+}
+
+function spawnProjectiles(pattern) {
+  const cs = combatState;
+  const arenaW = 500, arenaH = 350;
+
+  switch (pattern.type) {
+    case 'scatter': {
+      for (let i = 0; i < pattern.count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = pattern.speed * (0.8 + Math.random() * 0.4);
+        cs.projectiles.push({
+          x: arenaW/2 + (Math.random()-.5)*100,
+          y: 30 + Math.random()*30,
+          vx: Math.cos(angle) * spd / 60,
+          vy: Math.sin(angle) * spd / 60 + 1,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+    case 'burst': {
+      const cx = arenaW/2, cy = 50;
+      for (let i = 0; i < pattern.count; i++) {
+        const angle = (i / pattern.count) * Math.PI * 2 + Math.random() * 0.3;
+        cs.projectiles.push({
+          x: cx, y: cy,
+          vx: Math.cos(angle) * pattern.speed / 60,
+          vy: Math.sin(angle) * pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+    case 'fan': {
+      const arc = (pattern.arc || 60) * Math.PI / 180;
+      const baseAngle = Math.atan2(cs.py - 30, cs.px - arenaW/2);
+      for (let i = 0; i < pattern.count; i++) {
+        const a = baseAngle - arc/2 + (i / (pattern.count-1)) * arc;
+        cs.projectiles.push({
+          x: arenaW/2, y: 30,
+          vx: Math.cos(a) * pattern.speed / 60,
+          vy: Math.sin(a) * pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+    case 'rain': {
+      for (let i = 0; i < pattern.count; i++) {
+        cs.projectiles.push({
+          x: Math.random() * arenaW,
+          y: -10,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+    case 'spiral': {
+      const baseAngle = (cs.dodgeElapsed / 500) * Math.PI;
+      for (let i = 0; i < pattern.count; i++) {
+        const a = baseAngle + (i / pattern.count) * Math.PI * 2;
+        cs.projectiles.push({
+          x: arenaW/2, y: arenaH/3,
+          vx: Math.cos(a) * pattern.speed / 60,
+          vy: Math.sin(a) * pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+    case 'homing': {
+      for (let i = 0; i < pattern.count; i++) {
+        const edge = rng(0,3);
+        let sx, sy;
+        if (edge === 0) { sx = Math.random()*arenaW; sy = -10; }
+        else if (edge === 1) { sx = Math.random()*arenaW; sy = arenaH+10; }
+        else if (edge === 2) { sx = -10; sy = Math.random()*arenaH; }
+        else { sx = arenaW+10; sy = Math.random()*arenaH; }
+        const angle = Math.atan2(cs.py - sy, cs.px - sx);
+        cs.projectiles.push({
+          x: sx, y: sy,
+          vx: Math.cos(angle) * pattern.speed / 60,
+          vy: Math.sin(angle) * pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'homing',
+          turnRate: pattern.turnRate || 0.02
+        });
+      }
+      break;
+    }
+    case 'wave': {
+      for (let i = 0; i < pattern.count; i++) {
+        const angle = Math.atan2(cs.py - 30, cs.px - arenaW/2) + (i - pattern.count/2) * 0.3;
+        const vx = Math.cos(angle) * pattern.speed / 60;
+        const vy = Math.sin(angle) * pattern.speed / 60;
+        cs.projectiles.push({
+          x: arenaW/2, y: 30,
+          vx, vy, baseVx: vx, baseVy: vy,
+          size: pattern.projSize, age: 0, movement: 'wave',
+          amplitude: pattern.amplitude || 30, wavePhase: i * 1.5
+        });
+      }
+      break;
+    }
+    case 'charge': {
+      const angle = Math.atan2(cs.py - arenaH/3, cs.px - arenaW/2);
+      cs.projectiles.push({
+        x: arenaW/2, y: arenaH/3,
+        vx: Math.cos(angle) * pattern.speed / 60,
+        vy: Math.sin(angle) * pattern.speed / 60,
+        size: pattern.projSize * 2, age: 0, movement: 'linear'
+      });
+      break;
+    }
+    case 'phase': {
+      for (let i = 0; i < pattern.count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        cs.projectiles.push({
+          x: Math.random() * arenaW, y: Math.random() * arenaH,
+          vx: Math.cos(angle) * pattern.speed / 60,
+          vy: Math.sin(angle) * pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'phase',
+          phaseTimer: 0
+        });
+      }
+      break;
+    }
+    case 'beam': {
+      cs.beamActive = true;
+      cs.beamAngle = Math.atan2(cs.py - arenaH/3, cs.px - arenaW/2);
+      cs.beamTimer = pattern.duration || 1500;
+      cs.beamSpeed = pattern.speed || 1.5;
+      cs.beamDamage = cs.monster.atk;
+      break;
+    }
+    case 'shockwave': {
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        cs.projectiles.push({
+          x: arenaW/2, y: arenaH/2,
+          vx: Math.cos(a) * pattern.speed / 60,
+          vy: Math.sin(a) * pattern.speed / 60,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+    case 'expand': {
+      cs.projectiles.push({
+        x: cs.px + (Math.random()-.5)*100,
+        y: cs.py + (Math.random()-.5)*100,
+        vx: 0, vy: 0,
+        size: 3, age: 0, movement: 'expand',
+        maxRadius: pattern.maxRadius || 80,
+        expandSpeed: pattern.speed / 60
+      });
+      break;
+    }
+    case 'line': {
+      const startX = rng(0,1) ? 0 : arenaW;
+      for (let i = 0; i < pattern.count; i++) {
+        cs.projectiles.push({
+          x: startX, y: 50 + i * (arenaH / pattern.count),
+          vx: (startX === 0 ? 1 : -1) * pattern.speed / 60,
+          vy: 0,
+          size: pattern.projSize, age: 0, movement: 'linear'
+        });
+      }
+      break;
+    }
+  }
+}
+
+function updateAttackPhase(dt) {
+  const cs = combatState;
+  const at = cs.atkType;
+
+  if (at === 'timing' && cs.attackReady) {
+    cs.timingTimer += dt;
+    cs.attackMarkerPos += cs.attackMarkerDir * cs.attackMarkerSpeed * dt * 0.15;
+    if (cs.attackMarkerPos > 100) { cs.attackMarkerPos = 100; cs.attackMarkerDir = -1; }
+    if (cs.attackMarkerPos < 0) { cs.attackMarkerPos = 0; cs.attackMarkerDir = 1; }
+    if (cs.timingTimer >= cs.timingDuration) { cs.attackReady = false; dealDamage(0, 'Za wolno!'); return; }
+  } else if (at === 'rapid' && cs.attackReady) {
+    cs.rapidTimer += dt;
+    if (cs.rapidTimer >= cs.rapidDuration) { finishAttack(); return; }
+  } else if (at === 'charge' && cs.attackReady && !cs.chargeLocked) {
+    cs.chargeTotalTimer += dt;
+    cs.chargeAmount += cs.chargeDir * cs.chargeSpeed * dt * 0.04;
+    if (cs.chargeAmount >= 100) { cs.chargeAmount = 100; cs.chargeDir = -0.7; }
+    if (cs.chargeAmount < 0) cs.chargeAmount = 0;
+    if (cs.chargeTotalTimer >= cs.chargeDuration) { cs.chargeLocked = true; dealDamage(0, 'Za wolno!'); return; }
+  } else if (at === 'magic' && cs.attackReady) {
+    cs.magicTimer += dt;
+    if (cs.magicTimer >= cs.magicDuration || (cs.magicRune && cs.magicRuneProgress >= cs.magicRune.points.length)) { finishAttack(); return; }
+  }
+
+  if (cs.beamActive) {
+    cs.beamTimer -= dt;
+    cs.beamAngle += cs.beamSpeed * dt * 0.001;
+    if (cs.beamTimer <= 0) cs.beamActive = false;
+  }
+  cs.phaseTimer += dt;
+  if (cs.dmgLogTimer > 0) cs.dmgLogTimer -= dt;
+}
+
+function performAttack() {
+  if (!combatState || combatState.phase !== 'attack' || !combatState.attackReady) return;
+  const cs = combatState;
+  const at = cs.atkType;
+
+  if (at === 'timing') {
+    cs.attackReady = false;
+    const pos = cs.attackMarkerPos;
+    const dist = Math.abs(pos - 50);
+    let mult = dist < 8 ? 1.5 : dist < 18 ? 1.0 : dist < 30 ? 0.75 : dist < 42 ? 0.5 : 0.25;
+    dealDamage(mult, dist<8?'KRYTYCZNY!':mult>=1?'Dobry!':mult>=0.75?'OK':'Slaby...');
+  } else if (at === 'rapid') {
+    cs.rapidClicks++;
+  } else if (at === 'charge') {
+    if (!cs.chargeLocked) {
+      cs.chargeLocked = true;
+      const v = cs.chargeAmount;
+      let mult = v > 85 && v <= 100 ? 1.5 : v > 65 ? 1.0 : v > 40 ? 0.75 : v > 20 ? 0.5 : 0.25;
+      const quality = mult>=1.5?'POTEZNY!':mult>=1?'Mocny!':mult>=0.75?'OK':'Slaby...';
+      setTimeout(() => dealDamage(mult, quality), 200);
+    }
+  } else if (at === 'magic') {
+    // Handle in canvas click
+  }
+}
+
+function handleMagicClick(mx, my) {
+  const cs = combatState;
+  if (!cs || cs.phase !== 'attack' || cs.atkType !== 'magic' || !cs.attackReady || !cs.magicRune) return;
+  if (cs.magicRuneProgress >= cs.magicRune.points.length) return;
+  const target = cs.magicRune.points[cs.magicRuneProgress];
+  const dx = mx - target.x, dy = my - target.y;
+  if (Math.sqrt(dx*dx + dy*dy) < 35) {
+    cs.magicRuneProgress++;
+    playSfx('equip');
+  }
+}
+
+function finishAttack() {
+  const cs = combatState;
+  if (!cs) return;
+  cs.attackReady = false;
+  const at = cs.atkType;
+  if (at === 'rapid') {
+    const clicks = cs.rapidClicks;
+    const mult = clicks >= 20 ? 1.5 : clicks >= 14 ? 1.0 : clicks >= 8 ? 0.75 : clicks >= 4 ? 0.5 : 0.25;
+    dealDamage(mult, clicks>=20?'FURIA! ('+clicks+')':clicks>=14?'Szybki! ('+clicks+')':'('+clicks+' klikniec)');
+  } else if (at === 'magic') {
+    const progress = cs.magicRuneProgress;
+    const total = cs.magicRune ? cs.magicRune.points.length : 1;
+    const ratio = progress / total;
+    const mult = ratio >= 1 ? 1.5 : ratio >= 0.75 ? 1.0 : ratio >= 0.5 ? 0.6 : ratio > 0 ? 0.3 : 0;
+    dealDamage(mult, ratio>=1?'RUNA DOSKONALA!':ratio>=0.75?'Dobra runa!':ratio>=0.5?'Czesciowo':'Slaba runa...');
+  }
+}
+
+function dealDamage(multiplier, qualityText) {
+  const cs = combatState;
+  if (!cs) return;
+  if (multiplier <= 0) playSfx('miss');
+  else if (multiplier >= 1.5) playSfx('crit');
+  else playSfx('attack');
+  const stats = getPlayerStats();
+  let baseDmg = stats.str;
+  if (cs.playerDebuffs.weakness) baseDmg = Math.floor(baseDmg * (MONSTER_DEBUFFS.weakness?.strMult || 0.6));
+  if (cs.rageActive) baseDmg = Math.floor(baseDmg * 1.5);
+  const monDef = Math.max(0, cs.monster.def - cs.defReduction);
+  const rawDmg = Math.floor(baseDmg * multiplier);
+  let damage = Math.max(1, rawDmg - monDef);
+
+  // Life steal
+  if (stats.abilities.includes('lifeSteal')) {
+    const heal = Math.max(1, Math.floor(damage * 0.2));
+    game.player.hp = Math.min(stats.maxHp, game.player.hp + heal);
+  }
+
+  cs.monster.hp -= damage;
+  cs.phaseText = `${qualityText} -${damage} HP`;
+  cs.dmgLog = `Zadano ${damage} (sila:${baseDmg} x${Math.round(multiplier*100)}% = ${rawDmg} - obr:${monDef})`;
+  cs.dmgLogTimer = 3000;
+  cs.combatJournal.push({type:'dealt', text:`${qualityText} -${damage} (sila ${baseDmg} x${Math.round(multiplier*100)}% - obr ${monDef})`, color: multiplier >= 1.5 ? '#ffdd00' : '#44ff44'});
+  cs.floatingDmg.push({x: 250 + (Math.random()-0.5)*60, y: 50 + (Math.random()-0.5)*30, text: `-${damage}`, color: multiplier >= 1.5 ? '#ffdd00' : '#44ff44', age: 0});
+  cs.phaseTimer = 0;
+
+  // Apply weapon on-hit debuff
+  if (cs.weaponOnHit && !cs.monsterDebuffs[cs.weaponOnHit] && Math.random() < 0.4) {
+    const db = PLAYER_DEBUFFS[cs.weaponOnHit];
+    if (db) {
+      let dmgPerSec = 0;
+      if (cs.weaponOnHit === 'poison') dmgPerSec = Math.max(1, Math.floor(stats.str * 0.3));
+      if (cs.weaponOnHit === 'bleedM') dmgPerSec = Math.max(1, Math.floor(stats.str * 0.2));
+      cs.monsterDebuffs[cs.weaponOnHit] = {...db, remaining: db.duration, tickTimer:0, dmgPerSec};
+      cs.dmgLog += ` +${db.name}!`;
+    }
+  }
+
+  if (cs.monster.hp <= 0) {
+    cs.monster.hp = 0;
+    setTimeout(() => combatVictory(), 600);
+    return;
+  }
+
+  setTimeout(() => {
+    if (!combatState || game.screen !== 'combat') return;
+    cs.phase = 'dodge';
+    cs.phaseText = 'UNIKAJ!';
+    cs.phaseTimer = 0;
+    cs.dodgeElapsed = 0;
+    cs.projectiles = [];
+    cs.attackPatternIndex++;
+    cs.spawnTimer = 0;
+  }, 800);
+}
+
+function useAbility(abilityId) {
+  if (!combatState) return;
+  const cs = combatState;
+  const stats = getPlayerStats();
+
+  if (!stats.abilities.includes(abilityId)) return;
+  if (cs.abilityCooldowns[abilityId] > 0) return;
+
+  const info = ABILITY_INFO[abilityId];
+  cs.abilityCooldowns[abilityId] = info.cooldown;
+
+  switch (abilityId) {
+    case 'magicBolt': {
+      const dmg = Math.max(1, Math.floor(stats.str * 1.5) - cs.monster.def);
+      cs.monster.hp -= dmg;
+      cs.phaseText = `Mag. Pocisk! -${dmg}`;
+      cs.phaseTimer = 0;
+      break;
+    }
+    case 'freeze':
+      cs.frozen = true;
+      cs.frozenTimer = 2000;
+      cs.phaseText = 'Zamrozony!';
+      cs.phaseTimer = 0;
+      break;
+    case 'burn':
+      cs.burning = true;
+      cs.burnTimer = 1000;
+      cs.burnDamage = Math.max(1, Math.floor(stats.str * 0.3));
+      cs.phaseText = 'Podpalenie!';
+      cs.phaseTimer = 0;
+      break;
+    case 'holyStrike': {
+      const dmg = Math.max(1, Math.floor(stats.str * 2) - cs.monster.def);
+      cs.monster.hp -= dmg;
+      game.player.hp = Math.min(stats.maxHp, game.player.hp + Math.floor(dmg * 0.3));
+      cs.phaseText = `Sw. Cios! -${dmg}`;
+      cs.phaseTimer = 0;
+      break;
+    }
+    case 'meteor': {
+      const dmg = Math.max(1, Math.floor(stats.str * 3) - cs.monster.def);
+      cs.monster.hp -= dmg;
+      cs.phaseText = `METEOR! -${dmg}`;
+      cs.phaseTimer = 0;
+      break;
+    }
+    case 'magicShield':
+      cs.pInvincible = 2000;
+      cs.phaseText = 'Mag. Tarcza!';
+      cs.phaseTimer = 0;
+      break;
+    case 'shadowCloak':
+      cs.pVisible = false;
+      cs.phaseText = 'Plasz Cienia!';
+      cs.phaseTimer = 0;
+      setTimeout(() => { if (cs) cs.pVisible = true; }, 2000);
+      break;
+    case 'rage':
+      cs.rageActive = true;
+      cs.rageTimer = 3000;
+      cs.phaseText = 'SZAL!';
+      cs.phaseTimer = 0;
+      break;
+    case 'stealth':
+      cs.pVisible = false;
+      cs.phaseText = 'Ukrycie!';
+      cs.phaseTimer = 0;
+      setTimeout(() => { if (cs) cs.pVisible = true; }, 1500);
+      break;
+    case 'command':
+      cs.defReduction = Math.floor(cs.monster.def * 0.3);
+      cs.defReductionTimer = 4000;
+      cs.phaseText = 'Rozkaz! Obr. -30%';
+      cs.phaseTimer = 0;
+      break;
+    case 'dash': {
+      // Find optimal position: farthest from projectiles, away from their trajectories
+      let bestX = cs.px, bestY = cs.py, bestScore = -Infinity;
+      for (let i = 0; i < 30; i++) {
+        const cx = 30 + Math.random() * 440, cy = 30 + Math.random() * 290;
+        let score = 0;
+        for (const p of cs.projectiles) {
+          const dx = cx - p.x, dy = cy - p.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          score += Math.min(dist, 150); // distance from projectile
+          // bonus if projectile moves away from candidate
+          if (p.vx !== undefined && p.vy !== undefined) {
+            const dot = dx * p.vx + dy * p.vy;
+            if (dot < 0) score += 30; // projectile heading away
+            else score -= 20; // projectile heading toward
+          }
+        }
+        // Stay away from edges
+        score -= Math.max(0, 40 - cx) * 2;
+        score -= Math.max(0, 40 - cy) * 2;
+        score -= Math.max(0, cx - 470) * 2;
+        score -= Math.max(0, cy - 320) * 2;
+        if (score > bestScore) { bestScore = score; bestX = cx; bestY = cy; }
+      }
+      cs.px = bestX;
+      cs.py = bestY;
+      cs.pInvincible = 500;
+      cs.phaseText = 'Unik!';
+      cs.phaseTimer = 0;
+      break;
+    }
+    case 'regen': {
+      const heal = Math.floor(stats.maxHp * 0.1);
+      game.player.hp = Math.min(stats.maxHp, game.player.hp + heal);
+      cs.phaseText = `Regen +${heal} HP`;
+      cs.phaseTimer = 0;
+      break;
+    }
+    case 'fireShield':
+      cs.projectiles = cs.projectiles.filter(p => {
+        const dx = p.x - cs.px, dy = p.y - cs.py;
+        return Math.sqrt(dx*dx+dy*dy) > 80;
+      });
+      cs.phaseText = 'Ognista Tarcza!';
+      cs.phaseTimer = 0;
+      break;
+    case 'lifeSteal':
+      // Passive, no active use
+      break;
+    case 'fireResist':
+      // Passive
+      break;
+    case 'immortal':
+      // Passive
+      break;
+    case 'warCry':
+      cs.monsterAtkReduction = Math.floor(cs.monster.atk * 0.4);
+      cs.monsterAtkReductionTimer = 4000;
+      cs.phaseText = 'Okrzyk Wojenny!';
+      cs.phaseTimer = 0;
+      break;
+    case 'ironSkin':
+      cs.defBoost = Math.floor(stats.def * 0.5);
+      cs.defBoostTimer = 4000;
+      cs.phaseText = 'Zelazna Skora!';
+      cs.phaseTimer = 0;
+      break;
+    case 'haste':
+      cs.hasteActive = true;
+      cs.hasteTimer = 4000;
+      cs.pSpeed += 1;
+      cs.phaseText = 'Przyspieszenie!';
+      cs.phaseTimer = 0;
+      break;
+    case 'curse':
+      cs.defReduction = Math.floor(cs.monster.def * 0.5);
+      cs.defReductionTimer = 5000;
+      cs.phaseText = 'Klatwa!';
+      cs.phaseTimer = 0;
+      break;
+  }
+
+  if (cs.monster.hp <= 0) {
+    cs.monster.hp = 0;
+    setTimeout(() => combatVictory(), 600);
+    renderCombatUI();
+    return;
+  }
+
+  // Using ability during attack phase replaces normal attack - go to dodge
+  if (cs.phase === 'attack') {
+    cs.attackReady = false;
+    cs.combatJournal.push({type:'ability', text:`Uzyto: ${info.name}`, color:'#bb88ff'});
+    setTimeout(() => {
+      if (!combatState || game.screen !== 'combat') return;
+      cs.phase = 'dodge';
+      cs.phaseText = 'UNIKAJ!';
+      cs.phaseTimer = 0;
+      cs.dodgeElapsed = 0;
+      cs.projectiles = [];
+      cs.attackPatternIndex++;
+      cs.spawnTimer = 0;
+    }, 800);
+  }
+
+  renderCombatUI();
+}
+
+function combatVictory() {
+  if (!combatState) return;
+  cancelAnimationFrame(animFrame);
+  combatState.phase = 'victory';
+  playSfx('victory');
+  game.monstersKilled++;
+  const isBoss = combatState.monster.isBoss;
+  const goldDrop = isBoss ? combatState.monster.danger * rng(8, 15) + rng(10, 30) : combatState.monster.danger * rng(2, 5) + rng(1, 6);
+  game.gold += goldDrop;
+  game.goldCollected += goldDrop;
+  const cell = game.board[combatState.cellY][combatState.cellX];
+  cell.type = 'empty';
+  cell.monster = null;
+
+  // Recalculate danger numbers
+  recalcDangersFor(game.board, game.boardW, game.boardH);
+
+  // Quest progress
+  const killedName = combatState.monster.name;
+  game.quests.forEach(q => {
+    if(q.completed || q.readyForReward) return;
+    if(q.type==='killSpecific' && q.targetMonster === killedName) q.progress++;
+  });
+  checkQuestCompletion();
+
+  if (isBoss) {
+    addLog(`BOSS POKONANY: ${combatState.monster.icon} ${combatState.monster.name}! +${goldDrop} zlota`, 'epic');
+    // Boss kill counts as 2 quest kills for specific monster quests
+    game.quests.forEach(q => {
+      if(q.completed || q.readyForReward) return;
+      if(q.type==='killSpecific' && q.targetMonster === killedName) q.progress++;
+    });
+    // 30% chance to drop Zwoj Wizji
+    if(Math.random() < 0.3){
+      const mc = MAP_CONSUMABLES.find(c=>c.id==='vision');
+      game.consumables.push({id:mc.id,name:mc.name,icon:mc.icon,desc:mc.desc});
+      addLog(`${mc.icon} Boss upuscil ${mc.name}!`,'epic');
+    }
+  } else {
+    addLog(`Pokonano ${combatState.monster.icon} ${combatState.monster.name}! +${goldDrop} zlota`, 'good');
+  }
+  render();
+
+  setTimeout(() => {
+    combatState = null;
+    game.screen = 'board';
+    stopCombatMusic();
+    render();
+  }, 1500);
+}
+
+function combatDefeat() {
+  if (!combatState) return;
+  cancelAnimationFrame(animFrame);
+  combatState.phase = 'defeat';
+  playSfx('defeat');
+  addLog(`Zostales pokonany przez ${combatState.monster.name}...`, 'danger');
+
+  setTimeout(() => {
+    combatState = null;
+    stopCombatMusic();
+    gameOver();
+  }, 1500);
+}
+
+function recalcDangers() {
+  recalcDangersFor(game.board, game.boardW, game.boardH);
+}
+
+// ===================== GAME OVER / ROGUELITE =====================
+function gameOver() {
+  stopMusic();
+  const soulPoints = Math.floor(
+    (game.level - 1) * 50 +
+    game.monstersKilled * 10 +
+    game.equipmentFound * 5 +
+    game.cellsExplored * 1 +
+    game.questsCompleted * 25 +
+    game.goldCollected * 0.2
+  );
+  save.soulPoints += soulPoints;
+  save.totalRuns++;
+  if (game.level > save.bestLevel) save.bestLevel = game.level;
+  if (game.monstersKilled > save.bestKills) save.bestKills = game.monstersKilled;
+  localStorage.setItem('sweeperRPG_save', JSON.stringify(save));
+
+  game.screen = 'gameover';
+  game.earnedSoulPoints = soulPoints;
+  render();
+}
+
+function buyUpgrade(id) {
+  const upg = PERM_UPGRADES.find(u => u.id === id);
+  if (!upg) return;
+  const currentLevel = save.upgrades[id];
+  if (currentLevel >= upg.maxLevel) return;
+  const cost = (currentLevel + 1) * 15;
+  if (save.soulPoints < cost) return;
+  save.soulPoints -= cost;
+  save.upgrades[id]++;
+  localStorage.setItem('sweeperRPG_save', JSON.stringify(save));
+  render();
+}
+
+// ===================== INVENTORY / EQUIPMENT =====================
+function equipItem(item) {
+  const old = game.equipment[item.slot];
+  game.equipment[item.slot] = item;
+  const idx = game.inventory.indexOf(item);
+  if (idx >= 0) game.inventory.splice(idx, 1);
+  if (old) game.inventory.push(old);
+  const stats = getPlayerStats();
+  game.player.hp = Math.min(game.player.hp, stats.maxHp);
+  addLog(`Zalozono: ${item.name}`, 'info');
+  playSfx('equip');
+  render();
+}
+
+function unequipItem(slot) {
+  const item = game.equipment[slot];
+  if (!item) return;
+  game.equipment[slot] = null;
+  game.inventory.push(item);
+  const stats = getPlayerStats();
+  game.player.hp = Math.min(game.player.hp, stats.maxHp);
+  addLog(`Zdjeto: ${item.name}`, 'info');
+  render();
+}
+
+function itemTooltipHtml(item) {
+  if (!item) return '';
+  const col = RARITY_COLORS[item.rarity] || '#aaa';
+  const rarityNames = {common:'Zwykly',uncommon:'Niezwykly',rare:'Rzadki',epic:'Epicki',legendary:'Legendarny'};
+  let stats = '';
+  if (item.str) stats += `<div class="tt-stat">Sila: <span style="color:#ff8844">+${item.str}</span></div>`;
+  if (item.def) stats += `<div class="tt-stat">Obrona: <span style="color:#4488ff">+${item.def}</span></div>`;
+  if (item.spd) {
+    if (item.slot === 'weapon') stats += `<div class="tt-stat">Szb. Ataku: <span style="color:#44ff44">${item.spd>0?'+':''}${item.spd}</span></div>`;
+    else if (item.slot === 'boots') stats += `<div class="tt-stat">Szb. Uniku: <span style="color:#44ff44">${item.spd>0?'+':''}${item.spd}</span></div>`;
+    else stats += `<div class="tt-stat">Szb. At/Un: <span style="color:#44ff44">${item.spd>0?'+':''}${item.spd}</span></div>`;
+  }
+  if (item.hp) stats += `<div class="tt-stat">HP: <span style="color:#ff4444">+${item.hp}</span></div>`;
+  if (item.luck) stats += `<div class="tt-stat">Szczescie: <span style="color:#ffd700">+${item.luck}</span></div>`;
+  if (item.ability) { const ai=ABILITY_INFO[item.ability]; if(ai) stats+=`<div class="tt-stat" style="color:#bb88ff;">${ai.name}</div>`; }
+  return `<div class="eq-tooltip"><div class="tt-name" style="color:${col}">${item.name}</div><div style="color:${col};font-size:.85em;margin-bottom:3px;">${rarityNames[item.rarity]}</div>${stats}<div style="color:#666;font-size:.85em;margin-top:3px;">Kliknij by zdjac</div></div>`;
+}
+
+function pickupItem() {
+  if (!game.foundItem) return;
+  const item = game.foundItem;
+  game.foundItem = null;
+
+  if (!game.equipment[item.slot]) {
+    game.equipment[item.slot] = item;
+    addLog(`Zalozono: ${item.name}`, 'info');
+  } else {
+    game.inventory.push(item);
+    addLog(`Dodano do ekwipunku: ${item.name}`, 'info');
+  }
+
+  const stats = getPlayerStats();
+  game.player.maxHp = stats.maxHp;
+
+  game.screen = 'board';
+  render();
+}
+
+function discardItem() {
+  if (!game.foundItem) return;
+  addLog(`Porzucono: ${game.foundItem.name}`, 'info');
+  game.foundItem = null;
+  game.screen = 'board';
+  render();
+}
+
+// ===================== SHOP =====================
+function openShop(cell) {
+  game.shopState = {stock: cell.shopStock, tab: 'buy'};
+  game.screen = 'shop';
+  playSfx('shop');
+  addLog('Wchodzisz do sklepu.', 'info');
+  render();
+}
+
+function shopBuy(index) {
+  const s = game.shopState;
+  if(!s) return;
+  const item = s.stock[index];
+  if(!item || game.gold < item.price) return;
+  game.gold -= item.price;
+  if(item.isPotion) {
+    const stats = getPlayerStats();
+    game.player.hp = Math.min(stats.maxHp, game.player.hp + item.hp);
+    addLog(`Wypiles miksture! +${item.hp} HP`, 'good');
+  } else if(item.isMapConsumable) {
+    const mc = MAP_CONSUMABLES.find(c => c.id === item.consumableId);
+    if(mc) game.consumables.push({id:mc.id,name:mc.name,icon:mc.icon,desc:mc.desc});
+    addLog(`Kupiono: ${item.name} za ${item.price} zlota`,'info');
+  } else {
+    game.inventory.push({...item});
+    game.equipmentFound++;
+    addLog(`Kupiono: ${item.name} za ${item.price} zlota`, 'info');
+  }
+  s.stock.splice(index, 1);
+  render();
+}
+
+function shopSell(index) {
+  const item = game.inventory[index];
+  if(!item) return;
+  const price = Math.floor(getItemPrice(item) * 0.4);
+  game.gold += price;
+  game.inventory.splice(index, 1);
+  addLog(`Sprzedano: ${item.name} za ${price} zlota`, 'info');
+  render();
+}
+
+function shopSellConsumable(index) {
+  const c = game.consumables[index];
+  if(!c) return;
+  const mc = MAP_CONSUMABLES.find(m=>m.id===c.id);
+  const price = mc ? Math.floor((mc.basePrice + game.level * mc.pricePerLvl) * 0.4) : 5;
+  game.gold += price;
+  game.consumables.splice(index, 1);
+  addLog(`Sprzedano: ${c.name} za ${price} zlota`, 'info');
+  render();
+}
+
+function closeShop() {
+  game.shopState = null;
+  game.screen = 'board';
+  render();
+}
+
+// ===================== NPC DIALOGUE =====================
+function openDialogue(npc) {
+  game.dialogueState = {npc: npc, lineIndex: 0, questOffered: false, questAccepted: false, revealOffered: false};
+  game.screen = 'dialogue';
+  addLog(`Rozmawiasz z: ${npc.icon} ${npc.name}`, 'info');
+  render();
+}
+
+function advanceDialogue() {
+  const ds = game.dialogueState;
+  if(!ds) return;
+  if(ds.lineIndex < ds.npc.lines.length - 1) {
+    ds.lineIndex++;
+  } else if(!ds.questOffered && ds.npc.quest) {
+    ds.questOffered = true;
+  } else if(ds.questOffered && !ds.questAccepted) {
+    // already showing quest, do nothing on advance
+  } else if(ds.npc.canReveal && !ds.revealOffered) {
+    ds.revealOffered = true;
+  } else {
+    closeDialogue();
+    return;
+  }
+  render();
+}
+
+function getQuestMonster(level) {
+  // Pick a monster that can appear on this or the next level
+  const nextLvl = level + 1;
+  const maxTier = nextLvl <= 1 ? 1 : nextLvl <= 2 ? 2 : nextLvl <= 4 ? 3 : nextLvl <= 6 ? 4 : 5;
+  const candidates = MONSTER_TEMPLATES.filter(m => m.tier <= maxTier && !m.isBoss);
+  // Prefer monsters from mid-to-high available tiers (more interesting targets)
+  const preferred = candidates.filter(m => m.tier >= Math.max(0, maxTier - 1));
+  const pool = preferred.length > 0 ? preferred : candidates;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fillQuestText(text, monsterName, target) {
+  // $MONSTER_PL = monster name as-is (used in plural context)
+  // $MONSTER_D = monster name as-is (used in genitive-like context)
+  // $TARGET = number of targets
+  return text.replace(/\$MONSTER_PL/g, monsterName).replace(/\$MONSTER_D/g, monsterName).replace(/\$TARGET/g, target);
+}
+
+function acceptQuest() {
+  const ds = game.dialogueState;
+  if(!ds || !ds.npc.quest) return;
+  const q = ds.npc.quest;
+  const existing = game.quests.find(eq => eq.npcId === ds.npc.id);
+  if(existing) { addLog('Juz masz zadanie od tej osoby.','info'); closeDialogue(); return; }
+
+  let targetMonster = null;
+  let questDesc = ds.npc.questLine;
+  if (q.type === 'killSpecific') {
+    const mon = ds.previewMonster || getQuestMonster(game.level);
+    targetMonster = mon.name;
+    questDesc = fillQuestText(questDesc, targetMonster, q.target);
+  }
+
+  game.quests.push({
+    npcId: ds.npc.id,
+    npcName: ds.npc.name,
+    type: q.type,
+    target: q.target,
+    targetMonster: targetMonster,
+    progress: 0,
+    reward: q.reward,
+    rewardDesc: q.rewardDesc,
+    completed: false,
+    desc: questDesc,
+  });
+  ds.questAccepted = true;
+  addLog(`Nowe zadanie od ${ds.npc.name}!`, 'epic');
+  // If NPC can reveal map, do it now as bonus
+  if(ds.npc.canReveal) {
+    const px = game.playerPos.x, py = game.playerPos.y;
+    revealMapArea(px, py, 4);
+    addLog(`${ds.npc.name} odkrywa czesc mapy!`, 'epic');
+    if (game.treasurePos) {
+      revealMapArea(game.treasurePos.x, game.treasurePos.y, 2);
+      addLog('Wiem o ukrytym skarbie... oto jego lokalizacja!', 'epic');
+    }
+  }
+  render();
+}
+
+function npcRevealMap() {
+  const px = game.playerPos.x, py = game.playerPos.y;
+  revealMapArea(px, py, 5);
+  addLog('Mapa czesciowo odkryta!', 'epic');
+  // Also reveal treasure location if it exists
+  if (game.treasurePos) {
+    revealMapArea(game.treasurePos.x, game.treasurePos.y, 2);
+    addLog('Slyszalem o skrytce ze skarbem... Uważaj, jest strzezona!', 'epic');
+  }
+  closeDialogue();
+}
+
+function closeDialogue() {
+  game.dialogueState = null;
+  game.screen = 'board';
+  render();
+}
+
+function checkQuestCompletion() {
+  game.quests.forEach(q => {
+    if(!q.completed && !q.readyForReward && q.progress >= q.target) {
+      q.readyForReward = true;
+      addLog(`Zadanie wykonane! Wroc do ${q.npcName} po nagrode!`, 'epic');
+      playSfx('quest');
+      game.questCompletePopup = {npcName: q.npcName, rewardDesc: q.rewardDesc, needsReturn: true};
+    }
+  });
+}
+
+function claimQuestReward(npcId) {
+  const q = game.quests.find(qq => qq.npcId === npcId && qq.readyForReward && !qq.completed);
+  if (!q) return;
+  q.completed = true;
+  q.readyForReward = false;
+  game.questsCompleted++;
+  if(q.reward.gold) { game.gold += q.reward.gold; game.goldCollected += q.reward.gold; }
+  if(q.reward.revealMap) { revealMapArea(game.playerPos.x, game.playerPos.y, 5); }
+  addLog(`Nagroda od ${q.npcName}: +${q.reward.gold||0} zlota!`, 'epic');
+  playSfx('quest');
+}
+
+function renderQuestComplete(app) {
+  const q = game.questCompletePopup;
+  const overlay = document.createElement('div');
+  overlay.className = 'quest-complete-overlay';
+  overlay.innerHTML = `<div class="quest-complete-box">
+    <div style="font-size:3em;margin-bottom:10px;">⭐</div>
+    <h2>Zadanie Wykonane!</h2>
+    <div style="color:#aaa;font-size:.95em;margin-bottom:10px;">Zadanie od: <span style="color:#bb88ff;">${q.npcName}</span></div>
+    <div class="quest-reward">Nagroda: ${q.rewardDesc}</div>
+    <div style="color:#ffd700;font-size:1.1em;margin-top:10px;font-weight:bold;">Wroc do ${q.npcName} po nagrode!</div>
+    <button class="btn btn-success" onclick="dismissQuestComplete()" style="margin-top:15px;">Rozumiem!</button>
+  </div>`;
+  app.appendChild(overlay);
+}
+
+function dismissQuestComplete() {
+  game.questCompletePopup = null;
+  render();
+}
+
+// ===================== LOG =====================
+function addLog(text, type='info') {
+  if (!game) return;
+  game.log.unshift({text, type});
+  if (game.log.length > 50) game.log.pop();
+}
+
+// ===================== RENDERING =====================
+function render() {
+  const app = document.getElementById('app');
+  if (!game || game.screen === 'menu') {
+    renderMenu(app);
+  } else if (game.screen === 'board') {
+    renderBoard(app);
+  } else if (game.screen === 'combat') {
+    renderCombatScreen(app);
+  } else if (game.screen === 'gameover') {
+    renderGameOver(app);
+  } else if (game.screen === 'levelcomplete') {
+    renderLevelComplete(app);
+  } else if (game.screen === 'itemfound') {
+    renderBoard(app);
+    renderItemFound(app);
+  } else if (game.screen === 'shop') {
+    renderBoard(app);
+    renderShopOverlay(app);
+  } else if (game.screen === 'dialogue') {
+    renderBoard(app);
+    renderDialogueOverlay(app);
+  }
+  if (game && game.questCompletePopup) {
+    renderQuestComplete(app);
+  }
+}
+
+function renderMenu(app) {
+  let upgradesHtml = PERM_UPGRADES.map(u => {
+    const lvl = save.upgrades[u.id];
+    const cost = (lvl + 1) * 15;
+    const maxed = lvl >= u.maxLevel;
+    return `<div class="upgrade-row">
+      <div class="upgrade-info"><span class="upgrade-name">${u.icon} ${u.name}</span><br><span class="upgrade-desc">${u.desc}</span></div>
+      <div class="upgrade-level">Poz. ${lvl}/${u.maxLevel}</div>
+      <button class="btn btn-small ${maxed || save.soulPoints < cost ? '' : 'btn-success'}"
+        onclick="buyUpgrade('${u.id}')" ${maxed || save.soulPoints < cost ? 'disabled' : ''}>
+        ${maxed ? 'MAX' : `${cost} PD`}
+      </button>
+    </div>`;
+  }).join('');
+
+  app.innerHTML = `<div class="menu-screen">
+    <h1>SWEEPER RPG</h1>
+    <p class="subtitle">Odkrywaj lochy, walcz z potworami, zdobywaj ekwipunek</p>
+    <button class="btn" onclick="newGame()">NOWA GRA</button>
+    <div class="soul-points-display">Punkty Duszy: ${save.soulPoints} PD</div>
+    <div class="upgrades-panel">
+      <h3>Stale Ulepszenia</h3>
+      ${upgradesHtml}
+    </div>
+    <div style="margin-top:15px;color:#666;font-size:.8em;">
+      Najlepszy poziom: ${save.bestLevel} | Laczne podejscia: ${save.totalRuns} | Rekord zabojstw: ${save.bestKills}
+    </div>
+    <button class="btn btn-small" onclick="initAudio();toggleMusic();" style="margin-top:10px;font-size:.75em;">Muzyka ON/OFF</button>
+  </div>`;
+}
+
+function renderBoard(app) {
+  const stats = getPlayerStats();
+  const hpPercent = Math.max(0, (game.player.hp / stats.maxHp) * 100);
+
+  // LEFT PANEL - Stats
+  let statsHtml = `<div class="panel">
+    <h3>Bohater - Poziom ${game.level}</h3>
+    <div class="hp-bar"><div class="hp-fill" style="width:${hpPercent}%"></div></div>
+    <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val">${game.player.hp}/${stats.maxHp}</span></div>
+    <div class="stat-row"><span class="stat-name">Sila</span><span class="stat-val">${stats.str}</span></div>
+    <div class="stat-row"><span class="stat-name">Obrona</span><span class="stat-val">${stats.def}</span></div>
+    <div class="stat-row"><span class="stat-name">Szb. Ataku</span><span class="stat-val">${stats.atkSpd}</span></div>
+    <div class="stat-row"><span class="stat-name">Szb. Uniku</span><span class="stat-val">${stats.dodgeSpd}</span></div>
+    <div class="stat-row"><span class="stat-name">Szczescie</span><span class="stat-val">${stats.luck}</span></div>
+    <div class="stat-row"><span class="stat-name">Zabici</span><span class="stat-val">${game.monstersKilled}</span></div>
+  </div>`;
+  statsHtml += `<div class="panel"><div class="gold-display">Zloto: ${game.gold}</div>`;
+  if(game.quests.filter(q=>!q.completed).length > 0) {
+    statsHtml += `<h3 style="font-size:.8em;color:#ffd700;margin-top:5px;">Zadania</h3>`;
+    game.quests.filter(q=>!q.completed).forEach(q => {
+      const questDesc = q.type === 'killSpecific' ? `Pokonaj ${q.target}x ${q.targetMonster}` : q.type === 'killNext' ? `Pokonaj ${q.target} potworow` : q.type === 'reachNext' ? `Dotrzyj do nastepnego poziomu` : q.desc || 'Wypelnij zadanie';
+      if (q.readyForReward) {
+        statsHtml += `<div class="quest-tracker" title="Wroc do ${q.npcName} po nagrode!\nNagroda: ${q.rewardDesc}" style="cursor:help;color:#44ff44;animation:treasureGlow 2s ease-in-out infinite;">Wroc do ${q.npcName}!</div>`;
+      } else {
+        statsHtml += `<div class="quest-tracker" title="${questDesc}\nNagroda: ${q.rewardDesc}\nPostep: ${q.progress}/${q.target}" style="cursor:help;">${q.npcName}: ${q.progress}/${q.target}</div>`;
+      }
+    });
+  }
+  statsHtml += `</div>`;
+
+  // Abilities
+  if (stats.abilities.length > 0) {
+    statsHtml += `<div class="panel"><h3>Umiejetnosci</h3>`;
+    stats.abilities.forEach(a => {
+      const info = ABILITY_INFO[a];
+      if (info) statsHtml += `<div class="ability-tag">${info.name}</div>`;
+    });
+    statsHtml += `</div>`;
+  }
+
+  // Consumables
+  if (game.consumables.length > 0) {
+    statsHtml += `<div class="panel"><h3>Przedmioty (${game.consumables.length})</h3>`;
+    game.consumables.forEach((c, i) => {
+      statsHtml += `<div class="consumable-item" title="${c.desc}">
+        <span>${c.icon}</span><span style="flex:1">${c.name}</span>
+        <button class="consumable-use-btn" onclick="useConsumable(${i})">${i<5?(i+1)+' ':''} Uzyj</button>
+      </div>`;
+    });
+    statsHtml += `</div>`;
+  }
+
+  // Log
+  statsHtml += `<div class="panel log-panel"><h3>Dziennik</h3>`;
+  game.log.slice(0, 15).forEach(l => {
+    statsHtml += `<div class="log-entry log-${l.type}">${l.text}</div>`;
+  });
+  statsHtml += `</div>`;
+
+  // BOARD
+  const cellSz = calcCellSize();
+  const fontSize = cellSz >= 50 ? '1.05em' : cellSz >= 38 ? '.85em' : '.7em';
+  let boardHtml = '';
+  if(game.spyglassMode) boardHtml += `<div class="spyglass-banner">🔭 Luneta: kliknij ${game.spyglassMode.remaining} pol (Esc = anuluj)</div>`;
+  boardHtml += `<div class="board" style="grid-template-columns:repeat(${game.boardW},${cellSz}px);position:relative;">`;
+  for (let y = 0; y < game.boardH; y++) {
+    for (let x = 0; x < game.boardW; x++) {
+      const cell = game.board[y][x];
+      const isPlayer = (x === game.playerPos.x && y === game.playerPos.y);
+      const adj = isAdjacent(x, y);
+      let cls = 'cell';
+      let content = '';
+
+      if (cell.type === 'wall') {
+        cls += ' cell-hidden';
+        content = '';
+        // Make wall cells non-interactive and darker
+        const clickHandler = '';
+        const rightClick = '';
+        boardHtml += `<div class="${cls}" style="width:${cellSz}px;height:${cellSz}px;font-size:${fontSize};background:#1a1210;border:1px solid #2a1f18;cursor:default;opacity:.5;"></div>`;
+        continue;
+      }
+
+      if (isPlayer) {
+        cls += ' cell-revealed cell-player';
+        let underInfo = '';
+        if (cell.type === 'exit') {
+          underInfo = '🚪';
+        } else if (cell.type === 'entrance') {
+          underInfo = '🔙';
+        } else if (cell.type === 'shop') {
+          underInfo = '🏪';
+        } else if (cell.type === 'npc' && cell.npc) {
+          underInfo = cell.npc.icon;
+        } else if (cell.dangerCount > 0) {
+          const dc = cell.dangerCount;
+          cls += ` d${Math.min(dc, 5)}`;
+          underInfo = `<span class="danger-count">${dc}</span>`;
+        }
+        content = `<span class="player-icon">🧙</span>${underInfo ? `<span class="under-info">${underInfo}</span>` : ''}`;
+      } else if (cell.revealed) {
+        cls += ' cell-revealed';
+        if (cell.type === 'exit') {
+          cls += ' cell-exit';
+          content = '🚪';
+        } else if (cell.type === 'entrance') {
+          cls += ' cell-exit';
+          content = '🔙';
+        } else if (cell.type === 'equipment') {
+          const isTreasure = game.treasurePos && game.treasurePos.x === x && game.treasurePos.y === y;
+          content = isTreasure ? '💎' : '✨';
+          if (isTreasure) cls += ' cell-treasure';
+        } else if (cell.type === 'monster') {
+          if(cell.dangerRevealed) {
+            cls += ' cell-danger-hint';
+            content = '❓';
+          } else {
+            cls += cell.monster.isBoss ? ' cell-boss' : ' cell-monster';
+            content = cell.monster.icon;
+          }
+        } else if (cell.type === 'gold') {
+          cls += ' cell-gold';
+          content = '💰';
+        } else if (cell.type === 'shop') {
+          cls += ' cell-shop';
+          content = '🏪';
+        } else if (cell.type === 'npc') {
+          cls += ' cell-npc';
+          content = cell.npc ? cell.npc.icon : '👤';
+        } else {
+          const dc = cell.dangerCount;
+          cls += ` d${Math.min(dc, 5)}`;
+          if (dc > 0) {
+            content = `<span class="danger-count">${dc}</span>`;
+          }
+        }
+      } else {
+        cls += ' cell-hidden';
+        if (adj) cls += ' adjacent';
+        if (cell.bossHighlight) cls += ' boss-ping';
+        if (cell.flagged) {
+          cls += ' cell-flag';
+          content = '🚩';
+        }
+      }
+
+      // Build tooltip for revealed cells
+      let tooltip = '';
+      if (cell.revealed || isPlayer) {
+        if (cell.type === 'monster' && cell.monster) {
+          if(cell.dangerRevealed){
+            tooltip = 'Cos tu czyha... Uwazaj!';
+          } else {
+            const m = cell.monster;
+            tooltip = `${m.name}${m.isBoss?' (BOSS)':''}\nHP: ${m.hp}  ATK: ${m.atk}  DEF: ${m.def}  SPD: ${m.spd}\n${m.desc||''}`;
+          }
+        } else if (cell.type === 'equipment' && cell.equipment) {
+          const eq = cell.equipment;
+          const rarityNames = {common:'Zwykly',uncommon:'Niezwykly',rare:'Rzadki',epic:'Epicki',legendary:'Legendarny'};
+          tooltip = `${eq.name} (${rarityNames[eq.rarity]||eq.rarity})\n${eq.desc||''}`;
+        } else if (cell.type === 'gold' && cell.goldAmount) {
+          tooltip = `Zloto: ${cell.goldAmount} szt.`;
+        } else if (cell.type === 'exit') {
+          tooltip = 'Wyjscie na nastepny poziom';
+        } else if (cell.type === 'entrance') {
+          tooltip = 'Powrot na poprzedni poziom';
+        } else if (cell.type === 'npc' && cell.npc) {
+          tooltip = `${cell.npc.name} - ${cell.npc.role}`;
+        } else if (cell.type === 'shop') {
+          tooltip = 'Sklep';
+        }
+      }
+      const titleAttr = tooltip ? `title="${tooltip.replace(/"/g,'&quot;')}"` : '';
+      let clickHandler;
+      if(game.spyglassMode && !cell.revealed && cell.type!=='wall'){
+        clickHandler = `onclick="spyglassClick(${x},${y})"`;
+      } else {
+        clickHandler = adj && !cell.flagged ? `onclick="movePlayer(${x},${y})"` : '';
+      }
+      const rightClick = !cell.revealed ? `oncontextmenu="event.preventDefault();toggleFlag(${x},${y})"` : '';
+      boardHtml += `<div class="${cls}" style="width:${cellSz}px;height:${cellSz}px;font-size:${fontSize};" ${titleAttr} ${clickHandler} ${rightClick}>${content}</div>`;
+    }
+  }
+  boardHtml += `</div>`;
+
+  // RIGHT PANEL - Equipment (paper doll)
+  const slotDefs = [
+    {key:'helmet',label:'Helm',icon:'🪖',emptyIcon:'○',cls:'eq-slot-helmet'},
+    {key:'armor',label:'Zbroja',icon:'🛡️',emptyIcon:'○',cls:'eq-slot-armor'},
+    {key:'weapon',label:'Bron',icon:'⚔️',emptyIcon:'○',cls:'eq-slot-weapon'},
+    {key:'shield',label:'Tarcza',icon:'🛡️',emptyIcon:'○',cls:'eq-slot-shield'},
+    {key:'bracers',label:'Karwasze',icon:'🥊',emptyIcon:'○',cls:'eq-slot-bracers'},
+    {key:'accessory',label:'Akces.',icon:'💍',emptyIcon:'○',cls:'eq-slot-accessory'},
+    {key:'boots',label:'Buty',icon:'👢',emptyIcon:'○',cls:'eq-slot-boots'},
+    {key:'special',label:'Spec.',icon:'🔮',emptyIcon:'○',cls:'eq-slot-special'},
+  ];
+  let equipHtml = `<div class="panel"><h3>Ekwipunek</h3><div class="paperdoll"><div class="paperdoll-body">🧍</div>`;
+  slotDefs.forEach(sd => {
+    const item = game.equipment[sd.key];
+    const hasItem = !!item;
+    const col = hasItem ? RARITY_COLORS[item.rarity] : '#555';
+    const icon = hasItem ? sd.icon : sd.emptyIcon;
+    const nameText = hasItem ? item.name : sd.label;
+    const click = hasItem ? `onclick="unequipItem('${sd.key}')"` : '';
+    const tooltip = hasItem ? itemTooltipHtml(item) : '';
+    equipHtml += `<div class="eq-slot ${sd.cls} ${hasItem?'has-item':''}" ${click} style="${hasItem?'border-color:'+col:''}">
+      <div class="eq-icon">${icon}</div>
+      <div class="eq-item-name" style="color:${col}" title="${hasItem?item.desc:sd.label}">${nameText}</div>
+      ${tooltip}
+    </div>`;
+  });
+  equipHtml += `</div></div>`;
+
+  // Inventory
+  const slotNames = {weapon:'Bron',armor:'Zbroja',helmet:'Helm',accessory:'Akces.',shield:'Tarcza',boots:'Buty',bracers:'Karwasze',special:'Spec.'};
+  equipHtml += `<div class="panel" style="flex:1;overflow-y:auto;"><h3>Plecak (${game.inventory.length})</h3>`;
+  if (game.inventory.length === 0) {
+    equipHtml += `<div style="color:#555;font-size:.8em;text-align:center;padding:10px;">Pusty</div>`;
+  }
+  game.inventory.forEach((item, i) => {
+    const col = RARITY_COLORS[item.rarity];
+    let tt='';
+    if(item.str) tt+=`Sil:+${item.str} `;
+    if(item.def) tt+=`Obr:+${item.def} `;
+    if(item.spd) { if(item.slot==='weapon') tt+=`SzA:${item.spd>0?'+':''}${item.spd} `; else if(item.slot==='boots') tt+=`SzU:${item.spd>0?'+':''}${item.spd} `; else tt+=`Szb:${item.spd>0?'+':''}${item.spd} `; }
+    if(item.hp) tt+=`HP:+${item.hp} `;
+    if(item.luck) tt+=`Szcz:+${item.luck} `;
+    if(item.ability){const ai=ABILITY_INFO[item.ability];if(ai)tt+=ai.name;}
+    equipHtml += `<div class="inventory-item" onclick="equipItem(game.inventory[${i}])" title="${item.desc}\n${tt}">
+      <span style="color:${col}">${item.name}</span>
+      <span style="color:#888;font-size:.75em">${slotNames[item.slot] || item.slot}</span>
+    </div>`;
+  });
+  equipHtml += `</div>`;
+
+  // Controls help
+  equipHtml += `<div class="panel" style="font-size:.7em;color:#666;">
+    <b>Sterowanie:</b><br>
+    Strzalki/WASD = ruch<br>
+    Klik = idz na pole<br>
+    PPM = postaw flage<br>
+    Liczby = potwory obok<br>
+    1-5 = uzyj przedmiotu<br>
+    Klik ekwip. = zdejmij<br>
+    <button class="btn btn-small" onclick="toggleMusic()" style="margin-top:5px;font-size:.85em;padding:3px 8px;">Muzyka ON/OFF</button>
+  </div>`;
+
+  app.innerHTML = `<div class="game-screen">
+    <div class="left-panel">${statsHtml}</div>
+    <div class="center-panel">${boardHtml}</div>
+    <div class="right-panel">${equipHtml}</div>
+  </div>`;
+}
+
+function renderItemFound(app) {
+  const item = game.foundItem;
+  if (!item) return;
+  const col = RARITY_COLORS[item.rarity];
+  const rarityNames = {common:'Zwykly',uncommon:'Niezwykly',rare:'Rzadki',epic:'Epicki',legendary:'Legendarny'};
+
+  let statsText = '';
+  if (item.str) statsText += `<div>Sila: <span style="color:#ff8844">+${item.str}</span></div>`;
+  if (item.def) statsText += `<div>Obrona: <span style="color:#4488ff">+${item.def}</span></div>`;
+  if (item.spd) {
+    if (item.slot === 'weapon') statsText += `<div>Szb. Ataku: <span style="color:#44ff44">${item.spd > 0 ? '+' : ''}${item.spd}</span></div>`;
+    else if (item.slot === 'boots') statsText += `<div>Szb. Uniku: <span style="color:#44ff44">${item.spd > 0 ? '+' : ''}${item.spd}</span></div>`;
+    else statsText += `<div>Szb. At/Un: <span style="color:#44ff44">${item.spd > 0 ? '+' : ''}${item.spd}</span></div>`;
+  }
+  if (item.hp) statsText += `<div>HP: <span style="color:#ff4444">+${item.hp}</span></div>`;
+  if (item.luck) statsText += `<div>Szczescie: <span style="color:#ffd700">+${item.luck}</span></div>`;
+  if (item.ability) {
+    const ai = ABILITY_INFO[item.ability];
+    statsText += `<div style="margin-top:5px;color:#bb88ff;">Umiejetnosc: ${ai ? ai.name : item.ability}</div>`;
+    if (ai) statsText += `<div style="color:#886;font-size:.85em;">${ai.combat}</div>`;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'item-overlay';
+  overlay.innerHTML = `<div class="item-card">
+    <h2 style="color:${col}">${item.name}</h2>
+    <div style="color:${col};font-size:.85em;">${rarityNames[item.rarity]}</div>
+    <div class="item-stats">${statsText}</div>
+    <div style="color:#888;font-size:.85em;margin-bottom:15px;">${item.desc}</div>
+    <button class="btn btn-success" onclick="pickupItem()">Zabierz</button>
+    <button class="btn btn-danger btn-small" onclick="discardItem()">Porzuc</button>
+  </div>`;
+  app.appendChild(overlay);
+}
+
+function renderShopOverlay(app) {
+  const s = game.shopState;
+  if(!s) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'shop-overlay';
+  let itemsHtml = '';
+  if(s.tab === 'buy') {
+    s.stock.forEach((item, i) => {
+      const col = RARITY_COLORS[item.rarity] || '#aaa';
+      const canBuy = game.gold >= item.price;
+      const namePrefix = item.icon ? item.icon + ' ' : '';
+      itemsHtml += `<div class="shop-item">
+        <div class="shop-item-info">
+          <div class="shop-item-name" style="color:${col}">${namePrefix}${item.name}</div>
+          <div class="shop-item-desc">${item.desc}</div>
+        </div>
+        <div class="shop-item-price">${item.price} zl</div>
+        <button class="shop-btn shop-btn-buy" onclick="shopBuy(${i})" ${canBuy?'':'disabled'}>Kup</button>
+      </div>`;
+    });
+    if(s.stock.length === 0) itemsHtml = '<div style="color:#666;text-align:center;padding:20px;">Sklep pusty!</div>';
+  } else {
+    game.inventory.forEach((item, i) => {
+      const col = RARITY_COLORS[item.rarity] || '#aaa';
+      const price = Math.floor(getItemPrice(item) * 0.4);
+      itemsHtml += `<div class="shop-item">
+        <div class="shop-item-info">
+          <div class="shop-item-name" style="color:${col}">${item.name}</div>
+          <div class="shop-item-desc">${item.desc}</div>
+        </div>
+        <div class="shop-item-price">${price} zl</div>
+        <button class="shop-btn shop-btn-sell" onclick="shopSell(${i})">Sprzedaj</button>
+      </div>`;
+    });
+    // Consumables in sell tab
+    game.consumables.forEach((c, i) => {
+      const mc = MAP_CONSUMABLES.find(m=>m.id===c.id);
+      const price = mc ? Math.floor((mc.basePrice + game.level * mc.pricePerLvl) * 0.4) : 5;
+      itemsHtml += `<div class="shop-item">
+        <div class="shop-item-info">
+          <div class="shop-item-name" style="color:#44aaff">${c.icon} ${c.name}</div>
+          <div class="shop-item-desc">${c.desc}</div>
+        </div>
+        <div class="shop-item-price">${price} zl</div>
+        <button class="shop-btn shop-btn-sell" onclick="shopSellConsumable(${i})">Sprzedaj</button>
+      </div>`;
+    });
+    if(game.inventory.length === 0 && game.consumables.length === 0) itemsHtml = '<div style="color:#666;text-align:center;padding:20px;">Plecak pusty!</div>';
+  }
+  overlay.innerHTML = `<div class="shop-box">
+    <h2>Sklep</h2>
+    <div style="color:#ffd700;text-align:center;margin-bottom:10px;">Twoje zloto: ${game.gold}</div>
+    <div class="shop-tabs">
+      <div class="shop-tab ${s.tab==='buy'?'active':''}" onclick="game.shopState.tab='buy';render();">Kup</div>
+      <div class="shop-tab ${s.tab==='sell'?'active':''}" onclick="game.shopState.tab='sell';render();">Sprzedaj</div>
+    </div>
+    ${itemsHtml}
+    <div style="text-align:center;margin-top:15px;">
+      <button class="btn" onclick="closeShop()">Wyjdz ze sklepu</button>
+    </div>
+  </div>`;
+  app.appendChild(overlay);
+}
+
+function renderDialogueOverlay(app) {
+  const ds = game.dialogueState;
+  if(!ds) return;
+  const npc = ds.npc;
+  const overlay = document.createElement('div');
+  overlay.className = 'dialogue-overlay';
+
+  let dialogueContent = '';
+  let buttonsHtml = '';
+
+  // Check if NPC has a quest ready for reward
+  const rewardQuest = game.quests.find(q => q.npcId === npc.id && q.readyForReward && !q.completed);
+  const completedQuest = game.quests.find(q => q.npcId === npc.id && q.completed);
+
+  if(rewardQuest && !ds.rewardClaimed) {
+    dialogueContent = npc.rewardLine || 'Zrobiles to! Oto twoja nagroda!';
+    buttonsHtml = `<button class="btn btn-success" onclick="claimQuestReward('${npc.id}');game.dialogueState.rewardClaimed=true;render();">Odbierz nagrode (${rewardQuest.rewardDesc})</button>`;
+  } else if(ds.rewardClaimed || completedQuest) {
+    dialogueContent = npc.postQuestLine || 'Dziekuje za pomoc, wedrowcze.';
+    buttonsHtml = `<button class="btn" onclick="closeDialogue()">Pozegnaj sie</button>`;
+  } else if(ds.questOffered && !ds.questAccepted) {
+    const alreadyHas = game.quests.find(q => q.npcId === npc.id);
+    if(alreadyHas) {
+      if(alreadyHas.type === 'killSpecific') {
+        dialogueContent = `Wciaz czekam... Pokonaj ${alreadyHas.targetMonster}: ${alreadyHas.progress}/${alreadyHas.target}`;
+      } else {
+        dialogueContent = `Wciaz czekam na wypelnienie zadania... (${alreadyHas.progress}/${alreadyHas.target})`;
+      }
+      buttonsHtml = `<button class="btn" onclick="closeDialogue()">Pozegnaj sie</button>`;
+    } else {
+      // Preview quest with monster name filled in
+      if(!ds.previewMonster && npc.quest && npc.quest.type === 'killSpecific') {
+        ds.previewMonster = getQuestMonster(game.level);
+      }
+      dialogueContent = npc.questLine;
+      if(ds.previewMonster && npc.quest && npc.quest.type === 'killSpecific') {
+        dialogueContent = fillQuestText(dialogueContent, ds.previewMonster.name, npc.quest.target);
+      }
+      buttonsHtml = `<button class="btn btn-success" onclick="acceptQuest()">Przyjmij zadanie</button>
+        <button class="btn" onclick="closeDialogue()">Odrzuc</button>`;
+    }
+  } else if(ds.questAccepted) {
+    dialogueContent = 'Dziekuje! Wroce tu kiedy wypelnisz zadanie. Powodzenia, wedrowcze.';
+    buttonsHtml = `<button class="btn" onclick="closeDialogue()">Pozegnaj sie</button>`;
+  } else {
+    dialogueContent = npc.lines[ds.lineIndex];
+    const hasMore = ds.lineIndex < npc.lines.length - 1;
+    const hasQuest = npc.quest && !ds.questOffered;
+    buttonsHtml = `<button class="btn" onclick="advanceDialogue()">${hasMore ? 'Dalej...' : (hasQuest ? 'Slucham...' : 'Pozegnaj sie')}</button>`;
+    if(!hasMore && npc.canReveal) {
+      const treasureHint = game.treasurePos ? ' (+ lokalizacja skarbu!)' : '';
+      buttonsHtml += `<button class="btn btn-success" onclick="npcRevealMap()">Pokaz mi mape${treasureHint}</button>`;
+    }
+  }
+
+  overlay.innerHTML = `<div class="dialogue-box">
+    <div class="npc-header">
+      <div class="npc-icon">${npc.icon}</div>
+      <div>
+        <div class="npc-name">${npc.name}</div>
+        <div class="npc-role">${npc.role}</div>
+      </div>
+    </div>
+    <div class="dialogue-text">${dialogueContent}</div>
+    <div class="dialogue-buttons">${buttonsHtml}</div>
+  </div>`;
+  app.appendChild(overlay);
+}
+
+function renderCombatScreen(app) {
+  const cs = combatState;
+  if (!cs) return;
+  const stats = getPlayerStats();
+  const playerHpPct = Math.max(0, (game.player.hp / stats.maxHp) * 100);
+  const monsterHpPct = Math.max(0, (cs.monster.hp / cs.monsterMaxHp) * 100);
+
+  let abilitiesHtml = '';
+  if (stats.abilities.length > 0) {
+    abilitiesHtml = '<div class="combat-abilities">';
+    stats.abilities.forEach(a => {
+      const info = ABILITY_INFO[a];
+      if (!info || info.cooldown === 0) return; // skip passive abilities
+      const cd = cs.abilityCooldowns[a] || 0;
+      const disabled = cd > 0 || (cs.phase !== 'dodge' && cs.phase !== 'attack') ? 'disabled' : '';
+      abilitiesHtml += `<button class="ability-btn" onclick="useAbility('${a}')" ${disabled}>
+        ${info.name}${cd > 0 ? ` (${cd})` : ''}
+      </button>`;
+    });
+    abilitiesHtml += '</div>';
+  }
+
+  const isDodge = cs.phase === 'dodge';
+  const isAttack = cs.phase === 'attack';
+  const hlOn = 'color:#ffd700;text-shadow:0 0 6px #ffd70088;font-weight:bold;';
+  const hlOff = 'color:#888;';
+  const pWin = 'color:#44ff44;';
+  const pLose = 'color:#ff4444;';
+  const pEq = 'color:#ccc;';
+  function cmpCol(pv,mv){return pv>mv?pWin:pv<mv?pLose:pEq;}
+  const effDef = stats.def + (cs.defBoost||0);
+  const effMAtk = Math.max(1, cs.monster.atk - (cs.monsterAtkReduction||0));
+  const effMDef = Math.max(0, cs.monster.def - (cs.defReduction||0));
+
+  const cSz = calcCombatSize();
+  app.innerHTML = `<div class="combat-overlay">
+    <div class="combat-header" style="display:flex;justify-content:center;align-items:stretch;gap:0;margin-bottom:4px;width:${cSz.w}px;">
+      <div style="flex:1;text-align:center;">
+        <div style="color:#44ff44;font-weight:bold;font-size:1.1em;">🧙 Bohater</div>
+        <div class="combat-hp-bar" style="margin:3px 0;"><div class="combat-hp-fill player-hp-fill" style="width:${playerHpPct}%"></div></div>
+        <div class="hp-text" style="font-size:.85em;">${game.player.hp}/${stats.maxHp} HP</div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 8px;font-size:1.3em;color:#555;">⚔️</div>
+      <div style="flex:1;text-align:center;">
+        <div style="color:${cs.monster.isBoss?'#ff4488':'#ff6644'};font-weight:bold;font-size:1.1em;">${cs.monster.icon} ${cs.monster.isBoss?'BOSS: ':''}${cs.monster.name}</div>
+        <div class="combat-hp-bar" style="margin:3px 0;"><div class="combat-hp-fill monster-hp-fill" style="width:${monsterHpPct}%"></div></div>
+        <div class="hp-text" style="font-size:.85em;">${cs.monster.hp}/${cs.monsterMaxHp} HP</div>
+      </div>
+    </div>
+    <div id="statCompare" style="display:flex;justify-content:center;gap:0;font-size:.78em;margin-bottom:4px;padding:3px 6px;background:rgba(0,0,0,.3);border-radius:6px;width:${cSz.w}px;">
+      <div style="flex:1;text-align:right;padding-right:6px;line-height:1.5;">
+        <div style="${isAttack?hlOn+cmpCol(stats.str,effMDef):hlOff}">${stats.str}</div>
+        <div style="${isDodge?hlOn+cmpCol(effDef,effMAtk):hlOff}">${effDef}${cs.defBoost>0?' <span style="color:#88ccff;">(+'+cs.defBoost+')</span>':''}</div>
+        <div style="${isAttack?hlOn:hlOff}">${stats.atkSpd}</div>
+        <div style="${isDodge?hlOn+cmpCol(stats.dodgeSpd,cs.monster.spd):hlOff}">${stats.dodgeSpd}</div>
+        <div style="${hlOff}">${stats.luck}</div>
+      </div>
+      <div style="text-align:center;color:#666;min-width:90px;line-height:1.5;">
+        <div style="${isAttack?hlOn:'color:#aaa;'}">⚔️ Sila/ATK</div>
+        <div style="${isDodge?hlOn:'color:#aaa;'}">🛡️ Obrona</div>
+        <div style="${isAttack?hlOn:'color:#aaa;'}">⚡ Szb. Ataku</div>
+        <div style="${isDodge?hlOn:'color:#aaa;'}">💨 Szb. Uniku</div>
+        <div style="color:#aaa;">🍀 Szczescie</div>
+      </div>
+      <div style="flex:1;text-align:left;padding-left:6px;line-height:1.5;">
+        <div style="${isDodge?hlOn+cmpCol(effMAtk,effDef):hlOff}">${effMAtk}${cs.monsterAtkReduction>0?' <span style="color:#ff8888;">(-'+cs.monsterAtkReduction+')</span>':''}</div>
+        <div style="${isAttack?hlOn+cmpCol(effMDef,stats.str):hlOff}">${effMDef}${cs.defReduction>0?' <span style="color:#ff8888;">(-'+cs.defReduction+')</span>':''}</div>
+        <div style="${isAttack?hlOn:hlOff}">${cs.monster.spd}</div>
+        <div style="${isDodge?hlOn+cmpCol(cs.monster.spd,stats.dodgeSpd):hlOff}">${cs.monster.spd}</div>
+        <div style="${hlOff}">-</div>
+      </div>
+    </div>
+    <div id="speedBanner" style="text-align:center;padding:3px 8px;border-radius:4px;margin-bottom:3px;min-height:20px;transition:background .3s;width:${cSz.w}px;"></div>
+    <div class="combat-arena" style="width:${cSz.w}px;height:${cSz.h}px;">
+      <canvas id="combatCanvas" width="500" height="350" style="width:${cSz.w}px;height:${cSz.h}px;"></canvas>
+      <div class="combat-phase-text ${cs.phaseTimer < 1000 ? 'visible' : ''}" id="phaseText">${cs.phaseText}</div>
+    </div>
+    <div class="attack-bar-container" id="attackBarContainer" style="display:${cs.phase==='attack'?'block':'none'};width:${cSz.w}px;">
+      ${cs.atkType==='timing'?`<div class="attack-bar">
+        <div class="attack-zone attack-zone-miss"></div>
+        <div class="attack-zone attack-zone-weak" style="left:8%;width:84%"></div>
+        <div class="attack-zone attack-zone-good" style="left:20%;width:60%"></div>
+        <div class="attack-zone attack-zone-crit" style="left:42%;width:16%"></div>
+        <div class="attack-marker" id="attackMarker" style="left:${cs.attackMarkerPos}%"></div>
+      </div>
+      <div style="height:4px;background:#222;border-radius:2px;margin-top:4px;"><div id="timingTimerBar" style="height:100%;width:0%;background:linear-gradient(90deg,#44ff44,#ff4444);border-radius:2px;"></div></div>
+      <div class="attack-label">MIECZ - Nacisnij SPACJE! (<span id="timingTimerText">${Math.max(0,Math.ceil(cs.timingDuration/1000))}</span>s)</div>`:''}
+      ${cs.atkType==='rapid'?`<div style="text-align:center;">
+        <div style="font-size:2em;color:#ffd700;" id="rapidClickCount">${cs.rapidClicks}</div>
+        <div class="attack-bar"><div id="rapidTimerBar" style="height:100%;width:0%;background:linear-gradient(90deg,#44ff44,#ff4444);border-radius:12px;"></div></div>
+        <div class="attack-label">SZTYLET - Klikaj SPACJE jak najszybciej! (<span id="rapidTimerText">${Math.max(0,Math.ceil(cs.rapidDuration/1000))}</span>s)</div>
+      </div>`:''}
+      ${cs.atkType==='charge'?`<div style="text-align:center;">
+        <div class="attack-bar" style="position:relative;">
+          <div id="chargeBar" style="height:100%;width:${cs.chargeAmount}%;background:linear-gradient(90deg,#4444ff,#4488ff);border-radius:12px;"></div>
+          <div style="position:absolute;left:85%;top:0;width:15%;height:100%;border-left:2px solid #ffd700;background:rgba(255,215,0,.1);border-radius:0 12px 12px 0;"></div>
+        </div>
+        <div style="height:4px;background:#222;border-radius:2px;margin-top:4px;"><div id="chargeTimerBar" style="height:100%;width:0%;background:linear-gradient(90deg,#44ff44,#ff4444);border-radius:2px;"></div></div>
+        <div class="attack-label">TOPOR - Nacisnij SPACJE w zlotej strefie! <span id="chargeTimerText">(${Math.max(0,Math.ceil(cs.chargeDuration/1000))}s)</span></div>
+      </div>`:''}
+      ${cs.atkType==='magic'?`<div style="text-align:center;">
+        <div style="color:#bb88ff;font-size:1.1em;" id="magicHitCount">Runa: ${cs.magicRune?cs.magicRune.name:'?'} (${cs.magicRuneProgress}/${cs.magicRune?cs.magicRune.points.length:0})</div>
+        <div class="attack-bar"><div id="magicTimerBar" style="height:100%;width:0%;background:linear-gradient(90deg,#bb88ff,#ff4444);border-radius:12px;"></div></div>
+        <div class="attack-label">MAGIA - Klikaj w punkty runy po kolei! (<span id="magicTimerText">${Math.max(0,Math.ceil(cs.magicDuration/1000))}</span>s)</div>
+      </div>`:''}
+    </div>
+    ${abilitiesHtml}
+    <div class="combat-info" style="min-height:40px;width:${cSz.w}px;">
+      ${cs.phase === 'dodge' ? 'Unikaj pociskow! WASD/Strzalki' : ''}
+      ${cs.phase === 'intro' ? 'Przygotuj sie...' : ''}
+      ${cs.phase === 'victory' ? `Zwyciestwo! Pokonano ${cs.monster.name}!` : ''}
+      ${cs.phase === 'defeat' ? 'Porazka...' : ''}
+      ${cs.frozen ? ' ❄️ Zamrozony' : ''}${cs.burning ? ' 🔥 Podpalenie' : ''}${cs.rageActive ? ' 💢 Szal' : ''}${cs.hasteActive ? ' ⚡ Przyspieszenie' : ''}${cs.defBoost > 0 ? ' 🛡️ Zel. Skora' : ''}${cs.monsterAtkReduction > 0 ? ' 📯 Okrzyk' : ''}${cs.defReduction > 0 ? ' ☠️ Klatwa' : ''}
+      ${Object.keys(cs.monsterDebuffs).map(k=>{const d=PLAYER_DEBUFFS[k];return d?' <span style="color:#44ff44;">'+d.icon+d.name+'</span>':'';}).join('')}
+      ${Object.keys(cs.playerDebuffs).map(k=>{const d=MONSTER_DEBUFFS[k];return d?' <span style="color:#ff4444;">'+d.icon+d.name+'</span>':'';}).join('')}
+      <div id="dmgLogText" style="color:#ddd;font-size:.85em;min-height:18px;margin-top:3px;font-weight:bold;text-shadow:0 0 4px rgba(0,0,0,.5);">${cs.dmgLogTimer>0?cs.dmgLog:''}</div>
+    </div>
+    <div id="combatJournal" style="max-height:80px;overflow-y:auto;font-size:.75em;border-top:1px solid #333;margin-top:4px;padding-top:4px;width:${cSz.w}px;">
+      ${cs.combatJournal.map(e => `<div style="color:${e.color};margin:1px 0;">${e.text}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderCombat() {
+  if (!ctx || !combatState) return;
+  const cs = combatState;
+  const w = 500, h = 350;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Background
+  ctx.fillStyle = '#0a0a1a';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid lines (subtle)
+  ctx.strokeStyle = '#151530';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < w; i += 25) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+  }
+  for (let i = 0; i < h; i += 25) {
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
+  }
+
+  // Beam
+  if (cs.beamActive) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 100, 100, 0.8)';
+    ctx.lineWidth = 20;
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = '#ff4444';
+    ctx.beginPath();
+    const bx = w/2, by = h/3;
+    ctx.moveTo(bx, by);
+    ctx.lineTo(bx + Math.cos(cs.beamAngle) * 600, by + Math.sin(cs.beamAngle) * 600);
+    ctx.stroke();
+    ctx.restore();
+
+    // Beam collision
+    if (cs.pInvincible <= 0 && cs.pVisible) {
+      const dx = cs.px - w/2, dy = cs.py - h/3;
+      const beamDirX = Math.cos(cs.beamAngle), beamDirY = Math.sin(cs.beamAngle);
+      const cross = Math.abs(dx * beamDirY - dy * beamDirX);
+      const dot = dx * beamDirX + dy * beamDirY;
+      if (cross < 22 && dot > 0) {
+        let dmg = Math.max(1, cs.monster.atk - getPlayerStats().def);
+        game.player.hp -= dmg;
+        cs.pInvincible = 800;
+        if (game.player.hp <= 0) {
+          game.player.hp = 0;
+          combatDefeat();
+          return;
+        }
+      }
+    }
+  }
+
+  // Projectiles
+  cs.projectiles.forEach(p => {
+    // Phase projectiles blink
+    if (p.movement === 'phase') {
+      p.phaseTimer = (p.phaseTimer || 0) + 1;
+      if (Math.floor(p.phaseTimer / 30) % 2 === 0) {
+        ctx.globalAlpha = 0.3;
+      }
+    }
+
+    // Expanding projectiles
+    if (p.movement === 'expand') {
+      p.size = Math.min(p.maxRadius, p.size + p.expandSpeed * 1.5);
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255, 100, 50, 0.6)';
+      ctx.lineWidth = 3;
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Check collision with ring
+      if (cs.pInvincible <= 0 && cs.pVisible) {
+        const dx = p.x - cs.px, dy = p.y - cs.py;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (Math.abs(dist - p.size) < cs.pSize + 3) {
+          let dmg = Math.max(1, cs.monster.atk - getPlayerStats().def);
+          game.player.hp -= dmg;
+          cs.pInvincible = 500;
+        }
+      }
+    } else {
+      ctx.fillStyle = cs.frozen ? '#88ccff' : '#ff4444';
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = cs.frozen ? '#88ccff' : '#ff4444';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  });
+
+  // Player
+  if (cs.pVisible || cs.pInvincible > 0) {
+    ctx.save();
+    if (cs.pInvincible > 0) {
+      ctx.globalAlpha = 0.5 + Math.sin(Date.now() * 0.02) * 0.3;
+    }
+    if (!cs.pVisible) {
+      ctx.globalAlpha = 0.2;
+    }
+    // Player glow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = cs.rageActive ? '#ff4444' : '#44ff44';
+    ctx.fillStyle = cs.rageActive ? '#ff6644' : '#44ff44';
+    ctx.beginPath();
+    ctx.arc(cs.px, cs.py, cs.pSize, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner
+    ctx.fillStyle = cs.rageActive ? '#ffaa44' : '#88ff88';
+    ctx.beginPath();
+    ctx.arc(cs.px, cs.py, cs.pSize * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.shadowBlur = 0;
+  }
+
+  // Magic rune drawing
+  if (cs.phase === 'attack' && cs.atkType === 'magic' && cs.magicRune) {
+    const rune = cs.magicRune;
+    const prog = cs.magicRuneProgress;
+    ctx.save();
+    // Draw upcoming path (dim dashed)
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = 'rgba(187, 136, 255, 0.2)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < rune.points.length - 1; i++) {
+      if (i < prog) continue;
+      ctx.beginPath();
+      ctx.moveTo(rune.points[i].x, rune.points[i].y);
+      ctx.lineTo(rune.points[i+1].x, rune.points[i+1].y);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // Draw completed path (bright glowing)
+    if (prog > 0) {
+      ctx.strokeStyle = '#bb88ff';
+      ctx.lineWidth = 4;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = '#bb88ff';
+      ctx.beginPath();
+      ctx.moveTo(rune.points[0].x, rune.points[0].y);
+      for (let i = 1; i < prog && i < rune.points.length; i++) {
+        ctx.lineTo(rune.points[i].x, rune.points[i].y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    // Draw waypoints
+    rune.points.forEach((p, i) => {
+      ctx.beginPath();
+      if (i < prog) {
+        ctx.fillStyle = '#44ff44';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#44ff44';
+        ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else if (i === prog) {
+        const pulse = 1 + Math.sin(Date.now() * 0.008) * 0.3;
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ffd700';
+        ctx.arc(p.x, p.y, 16 * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(i + 1, p.x, p.y);
+      } else {
+        ctx.strokeStyle = 'rgba(187, 136, 255, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(187, 136, 255, 0.5)';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(i + 1, p.x, p.y);
+      }
+    });
+    ctx.restore();
+  }
+
+  // Floating damage numbers
+  cs.floatingDmg.forEach(fd => {
+    const alpha = Math.max(0, 1 - fd.age / 1200);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = `bold ${fd.color === '#ffdd00' ? 22 : 18}px sans-serif`;
+    ctx.fillStyle = fd.color;
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = fd.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(fd.text, fd.x, fd.y);
+    ctx.restore();
+  });
+
+  // Phase text
+  const phaseTextEl = document.getElementById('phaseText');
+  if (phaseTextEl) {
+    phaseTextEl.textContent = cs.phaseText;
+    phaseTextEl.className = 'combat-phase-text' + (cs.phaseTimer < 1200 ? ' visible' : '');
+  }
+
+  // Update attack bar position
+  if (cs.phase === 'attack') {
+    const container = document.getElementById('attackBarContainer');
+    if (container) container.style.display = 'block';
+    if (cs.atkType === 'timing') {
+      const marker = document.getElementById('attackMarker');
+      if (marker) marker.style.left = cs.attackMarkerPos + '%';
+      const tb = document.getElementById('timingTimerBar');
+      if (tb) tb.style.width = Math.min(100, cs.timingTimer/cs.timingDuration*100) + '%';
+      const tt = document.getElementById('timingTimerText');
+      if (tt) tt.textContent = Math.max(0, Math.ceil((cs.timingDuration-cs.timingTimer)/1000));
+    } else if (cs.atkType === 'rapid') {
+      const cc = document.getElementById('rapidClickCount');
+      if (cc) cc.textContent = cs.rapidClicks;
+      const tb = document.getElementById('rapidTimerBar');
+      if (tb) tb.style.width = Math.min(100, cs.rapidTimer/cs.rapidDuration*100) + '%';
+      const tt = document.getElementById('rapidTimerText');
+      if (tt) tt.textContent = Math.max(0, Math.ceil((cs.rapidDuration-cs.rapidTimer)/1000));
+    } else if (cs.atkType === 'charge') {
+      const cb = document.getElementById('chargeBar');
+      if (cb) { cb.style.width = cs.chargeAmount + '%'; cb.style.background = `linear-gradient(90deg,#4444ff,${cs.chargeAmount>85?'#ffd700':cs.chargeAmount>65?'#44ff44':'#4488ff'})`; }
+      const tb = document.getElementById('chargeTimerBar');
+      if (tb) tb.style.width = Math.min(100, (cs.chargeTotalTimer||0)/cs.chargeDuration*100) + '%';
+      const tt = document.getElementById('chargeTimerText');
+      if (tt) tt.textContent = cs.chargeLocked ? 'Zablokowano!' : `(${Math.max(0, Math.ceil((cs.chargeDuration-(cs.chargeTotalTimer||0))/1000))}s)`;
+    } else if (cs.atkType === 'magic') {
+      const hc = document.getElementById('magicHitCount');
+      if (hc) hc.textContent = `Runa: ${cs.magicRune?cs.magicRune.name:'?'} (${cs.magicRuneProgress}/${cs.magicRune?cs.magicRune.points.length:0})`;
+      const tb = document.getElementById('magicTimerBar');
+      if (tb) tb.style.width = Math.min(100, cs.magicTimer/cs.magicDuration*100) + '%';
+      const tt = document.getElementById('magicTimerText');
+      if (tt) tt.textContent = Math.max(0, Math.ceil((cs.magicDuration-cs.magicTimer)/1000));
+    }
+  }
+
+  // Update HP display
+  const playerHpBars = document.querySelectorAll('.player-hp-fill');
+  const monsterHpBars = document.querySelectorAll('.monster-hp-fill');
+  const stats = getPlayerStats();
+  playerHpBars.forEach(b => b.style.width = Math.max(0, (game.player.hp / stats.maxHp) * 100) + '%');
+  monsterHpBars.forEach(b => b.style.width = Math.max(0, (cs.monster.hp / cs.monsterMaxHp) * 100) + '%');
+
+  // Update HP text
+  const hpTexts = document.querySelectorAll('.hp-text');
+  if (hpTexts[0]) hpTexts[0].textContent = `${game.player.hp}/${stats.maxHp} HP`;
+  if (hpTexts[1]) hpTexts[1].textContent = `${cs.monster.hp}/${cs.monsterMaxHp} HP`;
+
+  // Update stat compare panel highlighting
+  const scEl = document.getElementById('statCompare');
+  if (scEl) {
+    const isDg = cs.phase === 'dodge';
+    const isAt = cs.phase === 'attack';
+    const hlO = 'color:#ffd700;text-shadow:0 0 6px #ffd70088;font-weight:bold;';
+    const hlF = 'color:#888;';
+    const effDf = stats.def + (cs.defBoost||0);
+    const effMA = Math.max(1, cs.monster.atk - (cs.monsterAtkReduction||0));
+    const effMD = Math.max(0, cs.monster.def - (cs.defReduction||0));
+    function cc(a,b){return a>b?'color:#44ff44;':a<b?'color:#ff4444;':'color:#ccc;';}
+    const rows = scEl.children;
+    if (rows[0]) rows[0].innerHTML = `
+      <div style="${isAt?hlO+cc(stats.str,effMD):hlF}">${stats.str}</div>
+      <div style="${isDg?hlO+cc(effDf,effMA):hlF}">${effDf}${cs.defBoost>0?' <span style="color:#88ccff;">(+'+ cs.defBoost+')</span>':''}</div>
+      <div style="${isAt?hlO:hlF}">${stats.atkSpd}</div>
+      <div style="${isDg?hlO+cc(stats.dodgeSpd,cs.monster.spd):hlF}">${stats.dodgeSpd}</div>
+      <div style="${hlF}">${stats.luck}</div>`;
+    if (rows[2]) rows[2].innerHTML = `
+      <div style="${isDg?hlO+cc(effMA,effDf):hlF}">${effMA}${cs.monsterAtkReduction>0?' <span style="color:#ff8888;">(-'+cs.monsterAtkReduction+')</span>':''}</div>
+      <div style="${isAt?hlO+cc(effMD,stats.str):hlF}">${effMD}${cs.defReduction>0?' <span style="color:#ff8888;">(-'+cs.defReduction+')</span>':''}</div>
+      <div style="${isAt?hlO:hlF}">${cs.monster.spd}</div>
+      <div style="${isDg?hlO+cc(cs.monster.spd,stats.dodgeSpd):hlF}">${cs.monster.spd}</div>
+      <div style="${hlF}">-</div>`;
+  }
+
+  // Update prominent speed banner
+  const banEl = document.getElementById('speedBanner');
+  if (banEl) {
+    if (cs.phase === 'dodge') {
+      const diff = stats.dodgeSpd - cs.monster.spd;
+      const col = diff > 0 ? '#44ff44' : diff < 0 ? '#ff4444' : '#ffdd00';
+      const txt = diff > 0 ? 'SZYBSZY' : diff < 0 ? 'WOLNIEJSZY' : 'ROWNI';
+      banEl.innerHTML = `<span style="color:${col};font-size:1.1em;font-weight:bold;">UNIKI: ${txt} (${diff>0?'+':''}${diff})</span> <span style="color:#aaa;font-size:.75em;">Twoj ruch: ${(2 + stats.dodgeSpd*0.3).toFixed(1)}, pociski: x${(1 + cs.monster.spd*0.1).toFixed(1)}</span>`;
+      banEl.style.background = diff > 0 ? 'rgba(0,80,0,.3)' : diff < 0 ? 'rgba(80,0,0,.3)' : 'rgba(80,80,0,.3)';
+    } else if (cs.phase === 'attack') {
+      const spdBonus = stats.atkSpd > 5 ? 'SZYBKI' : stats.atkSpd < 3 ? 'WOLNY' : 'NORMALNY';
+      const col = stats.atkSpd > 5 ? '#44ff44' : stats.atkSpd < 3 ? '#ff4444' : '#ffdd00';
+      banEl.innerHTML = `<span style="color:${col};font-size:1.1em;font-weight:bold;">ATAK: ${spdBonus} (Szb.${stats.atkSpd})</span> <span style="color:#aaa;font-size:.75em;">Wiecej = dluzszy czas + wolniejszy pasek</span>`;
+      banEl.style.background = stats.atkSpd > 5 ? 'rgba(0,80,0,.3)' : stats.atkSpd < 3 ? 'rgba(80,0,0,.3)' : 'rgba(80,80,0,.3)';
+    } else {
+      banEl.innerHTML = '';
+      banEl.style.background = 'transparent';
+    }
+  }
+
+  // Update damage log text
+  const dmgEl = document.getElementById('dmgLogText');
+  if (dmgEl) dmgEl.textContent = cs.dmgLogTimer > 0 ? cs.dmgLog : '';
+
+  // Update combat journal (scroll to bottom on new entries)
+  const jEl = document.getElementById('combatJournal');
+  if (jEl && jEl.childElementCount !== cs.combatJournal.length) {
+    jEl.innerHTML = cs.combatJournal.map(e => `<div style="color:${e.color};margin:1px 0;">${e.text}</div>`).join('');
+    jEl.scrollTop = jEl.scrollHeight;
+  }
+}
+
+function renderCombatUI() {
+  // Quick update of ability buttons without full re-render
+  const stats = getPlayerStats();
+  const btns = document.querySelectorAll('.ability-btn');
+  let idx = 0;
+  stats.abilities.forEach(a => {
+    const info = ABILITY_INFO[a];
+    if (!info || info.cooldown === 0) return;
+    if (btns[idx]) {
+      const cd = combatState.abilityCooldowns[a] || 0;
+      const phaseOk = combatState.phase === 'dodge' || combatState.phase === 'attack';
+      btns[idx].disabled = cd > 0 || !phaseOk;
+      btns[idx].textContent = `${info.name}${cd > 0 ? ` (${cd})` : ''}`;
+    }
+    idx++;
+  });
+}
+
+function renderGameOver(app) {
+  app.innerHTML = `<div class="gameover-screen">
+    <h1>KONIEC GRY</h1>
+    <p style="color:#888;margin-bottom:20px;">Twoja podroz dobiegla konca...</p>
+    <div class="stats-summary">
+      <div class="stat-row"><span class="stat-name">Osiagniety poziom</span><span class="stat-val">${game.level}</span></div>
+      <div class="stat-row"><span class="stat-name">Potwory pokonane</span><span class="stat-val">${game.monstersKilled}</span></div>
+      <div class="stat-row"><span class="stat-name">Pola odkryte</span><span class="stat-val">${game.cellsExplored}</span></div>
+      <div class="stat-row"><span class="stat-name">Ekwipunek znaleziony</span><span class="stat-val">${game.equipmentFound}</span></div>
+      <div class="stat-row"><span class="stat-name">Zloto zebrane</span><span class="stat-val">${game.goldCollected}</span></div>
+      <div class="stat-row"><span class="stat-name">Zadania ukonczone</span><span class="stat-val">${game.questsCompleted}</span></div>
+    </div>
+    <div class="reward-display">+${game.earnedSoulPoints} Punktow Duszy</div>
+    <p style="color:#888;font-size:.85em;margin-bottom:20px;">Laczne PD: ${save.soulPoints}</p>
+    <button class="btn" onclick="game={screen:'menu'};render();">Ulepszenia i Nowa Gra</button>
+  </div>`;
+}
+
+function renderLevelComplete(app) {
+  const stats = getPlayerStats();
+  const hpPct = Math.max(0, (game.player.hp / stats.maxHp) * 100);
+  const node = game.levelNodes[game.currentNodeId];
+  const isRevisit = node && node.board;
+  app.innerHTML = `<div class="combat-overlay">
+    <div class="level-complete">
+      <h2>${isRevisit ? 'Powrot na' : ''} Poziom ${game.level}${isRevisit ? '' : ' Ukonczony!'}</h2>
+      <p style="color:#aaa;margin-bottom:20px;">${isRevisit ? 'Wracasz na odwiedzony wczesniej poziom.' : 'Znaleziono wyjscie do nastepnego poziomu.'}</p>
+      <div style="margin-bottom:15px;">
+        <div class="hp-bar" style="width:300px;margin:0 auto;"><div class="hp-fill" style="width:${hpPct}%"></div></div>
+        <div style="color:#aaa;font-size:.85em;margin-top:5px;">HP: ${game.player.hp}/${stats.maxHp} (leczenie 40% max HP + 10)</div>
+      </div>
+      <div style="margin-bottom:20px;color:#888;">
+        Potwory pokonane: ${game.monstersKilled}<br>
+        Ekwipunek: ${game.equipmentFound}
+      </div>
+      <button class="btn btn-success" onclick="nextLevel()">${isRevisit ? 'Wejdz' : 'Nastepny Poziom'} →</button>
+    </div>
+  </div>`;
+}
+
+// ===================== INPUT HANDLING =====================
+document.addEventListener('keydown', e => {
+  if (combatState) {
+    combatState.keys[e.code] = true;
+    if ((e.code === 'Space' || e.code === 'Enter') && combatState.phase === 'attack') {
+      e.preventDefault();
+      performAttack();
+    }
+    const stats = getPlayerStats();
+    const activeAbilities = stats.abilities.filter(a => ABILITY_INFO[a] && ABILITY_INFO[a].cooldown > 0);
+    if (e.code >= 'Digit1' && e.code <= 'Digit9') {
+      const idx = parseInt(e.code.replace('Digit', '')) - 1;
+      if (activeAbilities[idx]) useAbility(activeAbilities[idx]);
+    }
+    return;
+  }
+
+  // Board movement with arrow keys / WASD
+  if (game && game.screen === 'board') {
+    // Escape cancels spyglass mode
+    if (e.code === 'Escape' && game.spyglassMode) {
+      cancelSpyglass();
+      return;
+    }
+    // 1-5 use consumables (only when not in spyglass mode)
+    if (!game.spyglassMode && e.code >= 'Digit1' && e.code <= 'Digit5') {
+      const idx = parseInt(e.code.replace('Digit', '')) - 1;
+      if (game.consumables[idx]) { useConsumable(idx); return; }
+    }
+    const dirs = {
+      ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],
+      KeyW:[0,-1],KeyS:[0,1],KeyA:[-1,0],KeyD:[1,0],
+    };
+    const d = dirs[e.code];
+    if (d) {
+      e.preventDefault();
+      const nx = game.playerPos.x + d[0], ny = game.playerPos.y + d[1];
+      if (isAdjacent(nx, ny)) movePlayer(nx, ny);
+    }
+  }
+});
+
+document.addEventListener('keyup', e => {
+  if (combatState) {
+    combatState.keys[e.code] = false;
+  }
+});
+
+document.addEventListener('click', e => {
+  if (combatState && combatState.phase === 'attack' && combatState.attackReady) {
+    const cvs = document.getElementById('combatCanvas');
+    if (combatState.atkType === 'magic' && e.target === cvs) {
+      const rect = cvs.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (500 / rect.width);
+      const my = (e.clientY - rect.top) * (350 / rect.height);
+      handleMagicClick(mx, my);
+      return;
+    }
+    const attackBar = document.querySelector('.attack-bar');
+    if (e.target === cvs || (attackBar && attackBar.contains(e.target))) {
+      performAttack();
+    }
+  }
+});
+
+// Prevent context menu on board
+document.addEventListener('contextmenu', e => {
+  if (e.target.classList.contains('cell')) {
+    e.preventDefault();
+  }
+});
+
+// ===================== INIT =====================
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (game) render(); }, 150);
+});
+
+function init() {
+  game = {screen: 'menu'};
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
