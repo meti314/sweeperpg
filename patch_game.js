@@ -53,15 +53,15 @@ console.log(`Zaladowano: ${loaded}, brak: ${missing}`);
 // ===================== MONSTER NAME → SPRITE KEY MAPPING =====================
 const MONSTER_SPRITE_MAP = {
   'Zmutowany Karaluch': 'monster_karaluch',
-  'Maly Szczur': 'monster_szczur_maly',
-  'Grzyb Trujacy': 'monster_grzyb',
+  'Mały Szczur': 'monster_szczur_maly',
+  'Grzyb Trujący': 'monster_grzyb',
   'Robak': 'monster_robak',
-  'Stonozka': 'monster_stonozka',
-  'Sluz': 'monster_sluz',
+  'Stonożka': 'monster_stonozka',
+  'Śluz': 'monster_sluz',
   'Szczur': 'monster_szczur',
   'Nietoperz': 'monster_nietoperz',
-  'Pajak': 'monster_pajak',
-  'Mala Sluz': 'monster_mala_sluz',
+  'Pająk': 'monster_pajak',
+  'Mała Śluz': 'monster_mala_sluz',
   'Szkielet': 'monster_szkielet',
   'Goblin': 'monster_goblin',
   'Zombie': 'monster_zombie',
@@ -71,22 +71,55 @@ const MONSTER_SPRITE_MAP = {
   'Mroczny Mag': 'monster_mroczny_mag',
   'Troll': 'monster_troll',
   'Bandyta': 'monster_bandyta',
-  'Ognisty Zywiolak': 'monster_ognisty_zywiolak',
-  'Lodowy Zywiolak': 'monster_lodowy_zywiolak',
+  'Ognisty Żywiołak': 'monster_ognisty_zywiolak',
+  'Lodowy Żywiołak': 'monster_lodowy_zywiolak',
   'Golem': 'monster_golem',
   'Wampir': 'monster_wampir',
   'Bazyliszek': 'monster_bazyliszek',
-  'Upior': 'monster_upior',
-  'Smocze Piskle': 'monster_smocze_piskle',
+  'Upiór': 'monster_upior',
+  'Smocze Pisklę': 'monster_smocze_piskle',
   'Demon': 'monster_demon',
   'Lich': 'monster_lich',
   'Smok': 'monster_smok',
+  // Tier 6-10 monsters
+  'Mroczny Rycerz': 'monster_mroczny_rycerz',
+  'Chimera': 'monster_chimera',
+  'Banszi': 'monster_banszi',
+  'Tropiciel Cieni': 'monster_tropiciel_cieni',
+  'Lawowy Golem': 'monster_lawowy_golem',
+  'Rycerz Śmierci': 'monster_rycerz_smierci',
+  'Pradawny Smok': 'monster_pradawny_smok',
+  'Plugawiec': 'monster_plugawiec',
+  'Demon Otchłani': 'monster_demon_otchlani',
+  'Mroźny Wyrm': 'monster_mrozny_wyrm',
+  'Pustkowiec': 'monster_pustkowiec',
+  'Arcydemon': 'monster_arcydemon',
+  'Żniwiarz Dusz': 'monster_zniwiarz_dusz',
+  'Kryształowy Kolos': 'monster_krysztalowy_kolos',
+  'Starszy Lich': 'monster_starszy_lich',
+  'Tytan': 'monster_tytan',
+  'Żywiołak Chaosu': 'monster_zywiolak_chaosu',
+  'Koszmar': 'monster_koszmar',
+  'Król Otchłani': 'monster_krol_otchlani',
+  'Smok Cienia': 'monster_smok_cienia',
+  'Władca Pustki': 'monster_wladca_pustki',
+  // Pack monsters
+  'Stado Szczurów': 'monster_stado_szczurow',
+  'Chmara Nietoperzy': 'monster_chmara_nietoperzy',
+  'Sfora Wilków': 'monster_sfora_wilkow',
+  'Rój Duchów': 'monster_roj_duchow',
   // Bosses
-  'Krol Goblinow': 'boss_krol_goblinow',
+  'Król Goblinów': 'boss_krol_goblinow',
   'Nekromanta': 'boss_nekromanta',
-  'Ognisty Wladca': 'boss_ognisty_wladca',
-  'Straznik Otchlani': 'boss_straznik_otchlani',
-  "Cien Zar'Kotha": 'boss_cien',
+  'Ognisty Władca': 'boss_ognisty_wladca',
+  'Strażnik Otchłani': 'boss_straznik_otchlani',
+  "Cień Zar'Kotha": 'boss_cien',
+  // New bosses (tiers 6-10)
+  'Królowa Chimer': 'boss_krolowa_chimer',
+  'Pradawny Nekromanta': 'boss_pradawny_nekromanta',
+  'Żelazny Władca': 'boss_zelazny_wladca',
+  "Avatar Zar'Kotha": 'boss_avatar_zarkotha',
+  'Serce Otchłani': 'boss_serce_otchlani',
 };
 
 const NPC_SPRITE_MAP = {
@@ -371,90 +404,95 @@ if (spritesEndIdx !== -1) {
   html = html.slice(0, spritesEndIdx) + spritesJS_combat + html.slice(spritesEndIdx);
 }
 
-// 17. Patch renderCombat() canvas to draw monster sprite
-// Replace the monster circle drawing with sprite
-// The monster is drawn as a circle at (w/2, h/3) in the canvas
-// Find monster drawing code and add sprite rendering
-const monsterDrawSearch = "// Player glow";
+// 17. Patch renderCombat() canvas - draw monster sprites at dynamic position
+// The monster is drawn at (cs.mx, cs.my) with emoji or as pack units
+// Find the "Draw monster(s)" section and replace with sprite-based rendering
+const monsterDrawSearch = "// Draw monster(s)";
 const monsterDrawIdx = html.indexOf(monsterDrawSearch);
 if (monsterDrawIdx !== -1) {
-  // Insert monster sprite drawing before player drawing
-  const monsterSpriteCode = `
-  // Draw monster sprite on canvas
-  {
+  // Find end of the monster drawing block (ends before "// Melee range indicator")
+  const monsterEndSearch = "// Melee range indicator";
+  const monsterEndIdx = html.indexOf(monsterEndSearch, monsterDrawIdx);
+  if (monsterEndIdx !== -1) {
+    const monsterSpriteCode = `// Draw monster(s) with sprites
+  if (cs.isPack) {
+    cs.packUnits.forEach(u => {
+      if (!u.alive) return;
+      ctx.save();
+      const mKey = MONSTER_SPRITE_MAP[cs.monster.name];
+      const mImg = mKey ? getSpriteImage(mKey) : null;
+      if (mImg && mImg.complete && mImg.naturalWidth > 0) {
+        const mSize = 36;
+        ctx.drawImage(mImg, u.x-mSize/2, u.y-mSize/2, mSize, mSize);
+      } else {
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ff6644';
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(u.icon, u.x, u.y);
+      }
+      // Unit HP bar
+      const bw = 30, bh = 4;
+      ctx.fillStyle = '#333';
+      ctx.fillRect(u.x-bw/2, u.y+16, bw, bh);
+      ctx.fillStyle = u.hp > u.maxHp*0.5 ? '#44ff44' : u.hp > u.maxHp*0.25 ? '#ffaa00' : '#ff4444';
+      ctx.fillRect(u.x-bw/2, u.y+16, bw * (u.hp/u.maxHp), bh);
+      ctx.restore();
+      ctx.shadowBlur = 0;
+    });
+  } else {
+    ctx.save();
     const mKey = MONSTER_SPRITE_MAP[cs.monster.name];
     const mImg = mKey ? getSpriteImage(mKey) : null;
     if (mImg && mImg.complete && mImg.naturalWidth > 0) {
       const mSize = cs.monster.isBoss ? 80 : 56;
-      ctx.save();
       if (cs.frozen) { ctx.globalAlpha = 0.6; ctx.filter = 'hue-rotate(180deg)'; }
-      ctx.drawImage(mImg, w/2 - mSize/2, h/3 - mSize/2, mSize, mSize);
-      ctx.restore();
+      ctx.drawImage(mImg, cs.mx-mSize/2, cs.my-mSize/2, mSize, mSize);
     } else {
-      // Fallback: draw circle
-      ctx.fillStyle = cs.monster.isBoss ? '#ff4488' : '#ff6644';
-      ctx.shadowBlur = cs.monster.isBoss ? 20 : 10;
-      ctx.shadowColor = cs.monster.isBoss ? '#ff4488' : '#ff6644';
-      ctx.beginPath();
-      ctx.arc(w/2, h/3, cs.monster.isBoss ? 24 : 16, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.font = cs.monster.isBoss ? '28px serif' : '20px serif';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = cs.monster.isBoss ? '#ff4444' : '#ff8844';
+      ctx.font = cs.monster.isBoss ? '36px sans-serif' : '28px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(cs.monster.icon, w/2, h/3);
+      ctx.fillText(cs.monster.icon, cs.mx, cs.my);
     }
+    ctx.restore();
+    ctx.shadowBlur = 0;
   }
 
   `;
-  html = html.slice(0, monsterDrawIdx) + monsterSpriteCode + html.slice(monsterDrawIdx);
-}
-
-// Remove existing monster drawing (circle + emoji) - find it after the injected code
-// The original monster drawing is around "Monster" comment
-// Actually, looking at the code, the monster is drawn as part of the "Monster" section
-// Let me find and replace the original monster drawing
-const origMonsterDraw = html.indexOf("// Monster\n", monsterDrawIdx + 100);
-// The original code draws monster with fillStyle and arc - we'll look for the specific pattern
-// Actually we need to look at what's drawn. Let me search for it
-const monsterSectionSearch = "  // Monster\n";
-let monsterSectionIdx = html.indexOf(monsterSectionSearch);
-// There might be multiple, we want the one in renderCombat
-// Since we already injected our code, let's not remove the original to avoid breaking things
-// The canvas draws both - our sprite will just overlay on top, which is fine
-// Actually no, we want to prevent double-drawing. Let's wrap the original in a condition.
-
-// Find the monster drawing section in renderCombat
-// It should be before "// Player" and after the grid drawing
-const gridEndSearch = "  // Beam\n";
-if (monsterSectionIdx !== -1 && monsterSectionIdx > html.indexOf(gridEndSearch)) {
-  // Don't modify original monster drawing - our code draws first,
-  // and if sprite loaded, it will cover it. For cleanliness, let's just
-  // let both draw - the sprite will be on top.
+    html = html.slice(0, monsterDrawIdx) + monsterSpriteCode + html.slice(monsterEndIdx);
+  }
 }
 
 // 18. Patch player drawing on canvas with sprite
-// Replace entire player drawing block (outer glow circle + inner circle) with sprite
-const playerBlockSearch = "// Player glow\n    ctx.shadowBlur = 15;";
-const playerBlockIdx = html.indexOf(playerBlockSearch, html.indexOf("// Player\n"));
-if (playerBlockIdx !== -1) {
-  // Find the end of the inner circle fill
-  const innerSearch = "ctx.arc(cs.px, cs.py, cs.pSize * 0.5, 0, Math.PI * 2);\n    ctx.fill();";
-  const innerIdx = html.indexOf(innerSearch, playerBlockIdx);
-  if (innerIdx !== -1) {
-    const endOfInner = innerIdx + innerSearch.length;
-    const origPlayerDraw = html.slice(playerBlockIdx, endOfInner);
-    const replacement = `// Player sprite or circle fallback
+// The player is now drawn as an emoji at (cs.px, cs.py)
+// Find the player drawing section and replace with sprite-based rendering
+const playerGlowSearch = "// Player glow\n    ctx.shadowBlur = 12;";
+const playerGlowIdx = html.indexOf(playerGlowSearch);
+if (playerGlowIdx !== -1) {
+  // Find end of emoji draw
+  const emojiEnd = "ctx.fillText('🧙', cs.px, cs.py);";
+  const emojiEndIdx = html.indexOf(emojiEnd, playerGlowIdx);
+  if (emojiEndIdx !== -1) {
+    const endOfBlock = emojiEndIdx + emojiEnd.length;
+    const replacement = `// Player sprite or emoji fallback
     {
       const pImg = getSpriteImage('cell_player');
       if (pImg && pImg.complete && pImg.naturalWidth > 0) {
         const pDrawSize = cs.pSize * 3.5;
         ctx.drawImage(pImg, cs.px - pDrawSize/2, cs.py - pDrawSize/2, pDrawSize, pDrawSize);
       } else {
-        ${origPlayerDraw}
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = cs.rageActive ? '#ff4444' : '#44ff44';
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🧙', cs.px, cs.py);
       }
     }`;
-    html = html.slice(0, playerBlockIdx) + replacement + html.slice(endOfInner);
+    html = html.slice(0, playerGlowIdx) + replacement + html.slice(endOfBlock);
   }
 }
 

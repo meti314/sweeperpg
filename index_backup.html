@@ -64,7 +64,7 @@ body{background:#0a0a1a;color:#e0e0e0;font-family:'Segoe UI',Tahoma,sans-serif;o
 .cell .danger-count{color:#ff8844;font-size:1.2em;}
 .cell .danger-sum{color:#ff4444;font-size:.65em;}
 .cell .player-icon{font-size:1.3em;line-height:1;}
-.cell .under-info{font-size:.7em;line-height:1;margin-top:1px;font-weight:bold;}
+.cell .under-info{font-size:.7em;line-height:1;margin-top:-2px;font-weight:bold;text-shadow:0 0 3px #000,0 0 6px #000;}
 .cell-gold{background:linear-gradient(135deg,#3a3a1a,#2a2a0a)!important;border-color:#ffd700!important;}
 .cell-shop{background:linear-gradient(135deg,#1a2a4a,#0a1a3a)!important;border-color:#44aaff!important;}
 .cell-npc{background:linear-gradient(135deg,#2a1a3a,#1a0a2a)!important;border-color:#bb88ff!important;}
@@ -431,88 +431,144 @@ function stopCombatMusic() {
 // ===================== MONSTER DATA =====================
 const MONSTER_TEMPLATES = [
   // tier 0 (danger 0-1) - very weak, tutorial enemies
-  {name:'Zmutowany Karaluch',icon:'🪳',danger:0,hp:6,atk:1,def:0,spd:1,desc:'Przetrwal apokalipse i dwie deratyzacje. Dalej brzydki.',tier:0,
+  {name:'Zmutowany Karaluch',icon:'🪳',danger:0,hp:6,atk:1,def:0,spd:1,desc:'Przetrwał apokalipsę i dwie deratyzacje. Dalej brzydki.',tier:0,
     patterns:[{type:'scatter',count:3,speed:50,interval:2000,projSize:6}]},
-  {name:'Maly Szczur',icon:'🐁',danger:0,hp:5,atk:2,def:0,spd:2,desc:'Kiedys byl czyjms zwierzatkiem. Teraz grize.',tier:0,
+  {name:'Mały Szczur',icon:'🐁',danger:0,hp:5,atk:2,def:0,spd:2,desc:'Kiedyś był czyimś zwierzątkiem. Teraz gryzie.',tier:0,
     patterns:[{type:'burst',count:3,speed:70,interval:1800,projSize:5}]},
-  {name:'Grzyb Trujacy',icon:'🍄',danger:0,hp:8,atk:1,def:1,spd:0,desc:'Nie, to NIE jest ten rodzaj grzyba. Nawet o tym nie mysl.',tier:0,
+  {name:'Grzyb Trujący',icon:'🍄',danger:0,hp:8,atk:1,def:1,spd:0,desc:'Nie, to NIE jest ten rodzaj grzyba. Nawet o tym nie myśl.',tier:0,
     patterns:[{type:'expand',count:1,speed:25,interval:2500,projSize:5,maxRadius:60}]},
-  {name:'Robak',icon:'🪱',danger:1,hp:8,atk:2,def:0,spd:1,desc:'1 metr obrzydliwosci. Przynajmniej jest na diecie.',tier:0,
+  {name:'Robak',icon:'🪱',danger:1,hp:8,atk:2,def:0,spd:1,desc:'1 metr obrzydliwości. Przynajmniej jest na diecie.',tier:0,
     patterns:[{type:'scatter',count:4,speed:55,interval:1800,projSize:6}]},
-  {name:'Stonozka',icon:'🐛',danger:1,hp:10,atk:3,def:0,spd:2,desc:'100 nog i ani jednej pary porzadnych butow.',tier:0,
+  {name:'Stonożka',icon:'🐛',danger:1,hp:10,atk:3,def:0,spd:2,desc:'100 nóg i ani jednej pary porządnych butów.',tier:0,
     patterns:[{type:'fan',count:3,speed:65,interval:1600,projSize:5,arc:40}]},
   // tier 1 (danger 1-2)
-  {name:'Sluz',icon:'🟢',danger:1,hp:15,atk:3,def:1,spd:1,desc:'Galaretka, ktora chce cie zjesc. I to nawet bez cukru.',tier:1,
+  {name:'Śluz',icon:'🟢',danger:1,hp:15,atk:3,def:1,spd:1,desc:'Galaretka, która chce cię zjeść. I to nawet bez cukru.',tier:1,
     patterns:[{type:'scatter',count:6,speed:90,interval:1200,projSize:8},{type:'rain',count:4,speed:70,interval:1800,projSize:7}]},
-  {name:'Szczur',icon:'🐀',danger:1,hp:12,atk:4,def:0,spd:3,desc:'Wiekszosc szczurow ucieka. Ten nie dostal notatki.',tier:1,
+  {name:'Szczur',icon:'🐀',danger:1,hp:12,atk:4,def:0,spd:3,desc:'Większość szczurów ucieka. Ten nie dostał notatki.',tier:1,
     patterns:[{type:'burst',count:5,speed:130,interval:1000,projSize:5},{type:'fan',count:3,speed:110,interval:1500,projSize:5,arc:50}]},
-  {name:'Nietoperz',icon:'🦇',danger:2,hp:18,atk:5,def:1,spd:4,desc:'Lata z zawiazanymi oczami. A i tak trafia lepiej niz ty.',tier:1,
+  {name:'Nietoperz',icon:'🦇',danger:2,hp:18,atk:5,def:1,spd:4,desc:'Lata z zawiązanymi oczami. A i tak trafia lepiej niż ty.',tier:1,
     patterns:[{type:'wave',count:5,speed:110,interval:1100,projSize:6,amplitude:45},{type:'scatter',count:4,speed:100,interval:1400,projSize:6}]},
-  {name:'Pajak',icon:'🕷️',danger:2,hp:20,atk:4,def:2,spd:2,desc:'Utkał ci sweter. Niestety, jestes w nim uwieziony.',tier:1,
+  {name:'Pająk',icon:'🕷️',danger:2,hp:20,atk:4,def:2,spd:2,desc:'Utkał ci sweter. Niestety, jesteś w nim uwięziony.',tier:1,
     patterns:[{type:'spiral',count:8,speed:80,interval:1600,projSize:7},{type:'expand',count:1,speed:40,interval:2200,projSize:4,maxRadius:100}]},
-  {name:'Mala Sluz',icon:'💧',danger:1,hp:10,atk:2,def:0,spd:1,desc:'Sluz-junior. Marzy o byciu duza kaluzą.',tier:1,
+  {name:'Mała Śluz',icon:'💧',danger:1,hp:10,atk:2,def:0,spd:1,desc:'Śluz-junior. Marzy o byciu dużą kałużą.',tier:1,
     patterns:[{type:'scatter',count:4,speed:60,interval:1500,projSize:7}]},
   // tier 2 (danger 3-4)
-  {name:'Szkielet',icon:'💀',danger:3,hp:28,atk:6,def:2,spd:2,desc:'Schudl. Bardzo schudl. Stracil dosłownie wszystko.',tier:2,
+  {name:'Szkielet',icon:'💀',danger:3,hp:28,atk:6,def:2,spd:2,desc:'Schudł. Bardzo schudł. Stracił dosłownie wszystko.',tier:2,
     patterns:[{type:'scatter',count:8,speed:120,interval:1000,projSize:6},{type:'line',count:4,speed:140,interval:1400,projSize:5},{type:'burst',count:6,speed:100,interval:1600,projSize:5}]},
-  {name:'Goblin',icon:'👺',danger:3,hp:25,atk:7,def:2,spd:4,desc:'Kradnie twoje zloto i twoja godnosc. Nic osobistego.',tier:2,
+  {name:'Goblin',icon:'👺',danger:3,hp:25,atk:7,def:2,spd:4,desc:'Kradnie twoje złoto i twoją godność. Nic osobistego.',tier:2,
     patterns:[{type:'fan',count:7,speed:150,interval:800,projSize:5,arc:65},{type:'burst',count:5,speed:120,interval:1200,projSize:5}]},
-  {name:'Zombie',icon:'🧟',danger:3,hp:40,atk:6,def:4,spd:1,desc:'Wolny, glupi i smierdzi. Jak kolega z pracy w poniedzialek.',tier:2,
+  {name:'Zombie',icon:'🧟',danger:3,hp:40,atk:6,def:4,spd:1,desc:'Wolny, głupi i śmierdzi. Jak kolega z pracy w poniedziałek.',tier:2,
     patterns:[{type:'rain',count:8,speed:90,interval:1200,projSize:9},{type:'scatter',count:5,speed:80,interval:1500,projSize:8}]},
-  {name:'Wilk',icon:'🐺',danger:4,hp:30,atk:8,def:2,spd:5,desc:'Nie, nie mozesz go pogłaskac. Tak, probowalem.',tier:2,
+  {name:'Wilk',icon:'🐺',danger:4,hp:30,atk:8,def:2,spd:5,desc:'Nie, nie możesz go pogłaskać. Tak, próbowałem.',tier:2,
     patterns:[{type:'charge',count:2,speed:220,interval:1200,projSize:12},{type:'burst',count:6,speed:130,interval:1000,projSize:6},{type:'fan',count:4,speed:150,interval:1400,projSize:6,arc:40}]},
   // tier 3 (danger 5-6)
-  {name:'Ork',icon:'👹',danger:5,hp:55,atk:14,def:6,spd:2,desc:'Dwa metry miesa, zero metrow intelektu. Ale i tak boli.',tier:3,
+  {name:'Ork',icon:'👹',danger:5,hp:55,atk:14,def:6,spd:2,desc:'Dwa metry mięsa, zero metrów intelektu. Ale i tak boli.',tier:3,
     patterns:[{type:'scatter',count:8,speed:100,interval:1100,projSize:10},{type:'rain',count:6,speed:90,interval:1500,projSize:8}]},
-  {name:'Duch',icon:'👻',danger:4,hp:30,atk:10,def:2,spd:5,desc:'Umarl i nawet to go nie powstrzymalo. Docen upor.',tier:3,
+  {name:'Duch',icon:'👻',danger:4,hp:30,atk:10,def:2,spd:5,desc:'Umarł i nawet to go nie powstrzymało. Doceń upór.',tier:3,
     patterns:[{type:'phase',count:5,speed:90,interval:1400,projSize:7}]},
-  {name:'Mroczny Mag',icon:'🧙',danger:5,hp:40,atk:16,def:3,spd:3,desc:'Skonczyl akademie z jedynkami. Z czarnej magii.',tier:3,
+  {name:'Mroczny Mag',icon:'🧙',danger:5,hp:40,atk:16,def:3,spd:3,desc:'Skończył akademię z jedynkami. Z czarnej magii.',tier:3,
     patterns:[{type:'homing',count:3,speed:70,interval:1800,projSize:6,turnRate:.02},{type:'spiral',count:8,speed:80,interval:2200,projSize:5}]},
-  {name:'Troll',icon:'🧌',danger:6,hp:80,atk:12,def:8,spd:1,desc:'Regeneruje sie szybciej niz ty jesz kolacje. I jest wiekszy.',tier:3,
+  {name:'Troll',icon:'🧌',danger:6,hp:80,atk:12,def:8,spd:1,desc:'Regeneruje się szybciej niż ty jesz kolację. I jest większy.',tier:3,
     patterns:[{type:'rain',count:8,speed:70,interval:1400,projSize:12},{type:'scatter',count:5,speed:90,interval:1600,projSize:10}]},
-  {name:'Bandyta',icon:'🗡️',danger:4,hp:35,atk:12,def:4,spd:4,desc:'Kiedys byl podatkowym. Teraz robi to samo, ale z nozem.',tier:3,
+  {name:'Bandyta',icon:'🗡️',danger:4,hp:35,atk:12,def:4,spd:4,desc:'Kiedyś był podatkowym. Teraz robi to samo, ale z nożem.',tier:3,
     patterns:[{type:'fan',count:7,speed:150,interval:900,projSize:5,arc:45}]},
   // tier 4 (danger 6-7)
-  {name:'Ognisty Zywiolak',icon:'🔥',danger:6,hp:50,atk:18,def:5,spd:3,desc:'Plonacy i wsciekly. Jak pizzę z pieca ale gorsza.',tier:4,
+  {name:'Ognisty Żywiołak',icon:'🔥',danger:6,hp:50,atk:18,def:5,spd:3,desc:'Płonący i wściekły. Jak pizza z pieca ale gorsza.',tier:4,
     patterns:[{type:'spiral',count:10,speed:90,interval:1800,projSize:6},{type:'expand',count:1,speed:50,interval:2500,projSize:4,maxRadius:120}]},
-  {name:'Lodowy Zywiolak',icon:'❄️',danger:6,hp:50,atk:16,def:7,spd:2,desc:'Chodzaca kostka lodu. Nie, nie pasuje do drinka.',tier:4,
+  {name:'Lodowy Żywiołak',icon:'❄️',danger:6,hp:50,atk:16,def:7,spd:2,desc:'Chodząca kostka lodu. Nie, nie pasuje do drinka.',tier:4,
     patterns:[{type:'rain',count:10,speed:60,interval:1200,projSize:8},{type:'scatter',count:6,speed:80,interval:1500,projSize:7}]},
-  {name:'Golem',icon:'🗿',danger:7,hp:100,atk:14,def:12,spd:1,desc:'Kamien z nogami. Nigdy nie przegrywa w "kamien, papier, nozyce".',tier:4,
+  {name:'Golem',icon:'🗿',danger:7,hp:100,atk:14,def:12,spd:1,desc:'Kamień z nogami. Nigdy nie przegrywa w "kamień, papier, nożyce".',tier:4,
     patterns:[{type:'shockwave',count:1,speed:60,interval:2000,projSize:5},{type:'rain',count:7,speed:100,interval:1300,projSize:10}]},
-  {name:'Wampir',icon:'🧛',danger:7,hp:60,atk:18,def:5,spd:4,desc:'Elegancki, przystojny, pije krew. Idealny material na zięcia.',tier:4,
+  {name:'Wampir',icon:'🧛',danger:7,hp:60,atk:18,def:5,spd:4,desc:'Elegancki, przystojny, pije krew. Idealny materiał na zięcia.',tier:4,
     patterns:[{type:'homing',count:4,speed:80,interval:1500,projSize:6,turnRate:.025},{type:'fan',count:5,speed:120,interval:1200,projSize:5,arc:50}]},
-  {name:'Bazyliszek',icon:'🐍',danger:7,hp:70,atk:20,def:6,spd:3,desc:'Jeden jego wzrok i jestes kamień. Dosł. Nie patrz mu w oczy!',tier:4,
+  {name:'Bazyliszek',icon:'🐍',danger:7,hp:70,atk:20,def:6,spd:3,desc:'Jeden jego wzrok i jesteś kamień. Dosł. Nie patrz mu w oczy!',tier:4,
     patterns:[{type:'beam',speed:1.5,interval:3000,projSize:15,duration:1500},{type:'scatter',count:6,speed:100,interval:1400,projSize:6}]},
   // tier 5 (danger 8-10)
-  {name:'Upior',icon:'😈',danger:8,hp:70,atk:22,def:4,spd:5,desc:'Potepiona dusza z obsesja na punkcie zabijania. Terapia nie pomogla.',tier:5,
+  {name:'Upiór',icon:'😈',danger:8,hp:70,atk:22,def:4,spd:5,desc:'Potępiona dusza z obsesją na punkcie zabijania. Terapia nie pomogła.',tier:5,
     patterns:[{type:'phase',count:8,speed:110,interval:1200,projSize:6},{type:'homing',count:3,speed:90,interval:1600,projSize:5,turnRate:.03}]},
-  {name:'Smocze Piskle',icon:'🐲',danger:8,hp:90,atk:24,def:8,spd:3,desc:'Mlody smok. Slodki, gdyby nie te 3 metry ognia z pyska.',tier:5,
+  {name:'Smocze Pisklę',icon:'🐲',danger:8,hp:90,atk:24,def:8,spd:3,desc:'Młody smok. Słodki, gdyby nie te 3 metry ognia z pyska.',tier:5,
     patterns:[{type:'beam',speed:2,interval:2500,projSize:18,duration:1800},{type:'scatter',count:10,speed:110,interval:1200,projSize:7}]},
-  {name:'Demon',icon:'😈',danger:9,hp:100,atk:28,def:8,spd:4,desc:'Wlasnie wrocil z piekla. Urlop mu nie wyszedl na zdrowie.',tier:5,
+  {name:'Demon',icon:'😈',danger:9,hp:100,atk:28,def:8,spd:4,desc:'Właśnie wrócił z piekła. Urlop mu nie wyszedł na zdrowie.',tier:5,
     patterns:[{type:'spiral',count:12,speed:100,interval:1500,projSize:6},{type:'homing',count:5,speed:90,interval:1800,projSize:6,turnRate:.03},{type:'fan',count:9,speed:130,interval:1100,projSize:5,arc:70}]},
-  {name:'Lich',icon:'☠️',danger:9,hp:80,atk:30,def:6,spd:3,desc:'Nekromanta emeryt. Wciaz praktykuje, bo ZUS nie placi.',tier:5,
+  {name:'Lich',icon:'☠️',danger:9,hp:80,atk:30,def:6,spd:3,desc:'Nekromanta emeryt. Wciąż praktykuje, bo ZUS nie płaci.',tier:5,
     patterns:[{type:'spiral',count:10,speed:80,interval:1600,projSize:5},{type:'homing',count:4,speed:100,interval:1400,projSize:7,turnRate:.035},{type:'rain',count:8,speed:90,interval:1200,projSize:6}]},
-  {name:'Smok',icon:'🐉',danger:10,hp:150,atk:35,def:12,spd:3,desc:'Klasyczny smok. Chrapie, zieje ogniem i spi na zlocie. Jak dziadek.',tier:5,
+  {name:'Smok',icon:'🐉',danger:10,hp:150,atk:35,def:12,spd:3,desc:'Klasyczny smok. Chrapie, zieje ogniem i śpi na złocie. Jak dziadek.',tier:5,
     patterns:[{type:'beam',speed:2.5,interval:2000,projSize:20,duration:2000},{type:'scatter',count:12,speed:120,interval:1000,projSize:8},{type:'rain',count:10,speed:100,interval:1100,projSize:9}]},
+  // tier 6 (danger 10-12) — levels 7-9
+  {name:'Mroczny Rycerz',icon:'⚔️',danger:10,hp:120,atk:30,def:10,spd:3,desc:'Rycerz który przeszedł na ciemną stronę. Z ciemną pensją i ciemnymi benefitami.',tier:6,
+    patterns:[{type:'charge',count:3,speed:250,interval:1000,projSize:14},{type:'fan',count:9,speed:160,interval:900,projSize:6,arc:60},{type:'burst',count:8,speed:130,interval:1200,projSize:6}]},
+  {name:'Chimera',icon:'🦁',danger:11,hp:140,atk:28,def:8,spd:4,desc:'Głowa lwa, ciało kozy, ogon węża. Koszmar weterynarza.',tier:6,
+    patterns:[{type:'scatter',count:12,speed:140,interval:900,projSize:7},{type:'beam',speed:2.5,interval:2500,projSize:18,duration:1800},{type:'burst',count:8,speed:130,interval:1100,projSize:6}]},
+  {name:'Banszi',icon:'👻',danger:10,hp:90,atk:35,def:5,spd:5,desc:'Jej krzyk zabija. Jak sąsiadka o 6 rano w weekend.',tier:6,
+    patterns:[{type:'expand',count:1,speed:80,interval:1500,projSize:5,maxRadius:160},{type:'homing',count:5,speed:100,interval:1300,projSize:6,turnRate:.035},{type:'phase',count:8,speed:120,interval:1100,projSize:6}]},
+  {name:'Tropiciel Cieni',icon:'🌑',danger:11,hp:100,atk:32,def:6,spd:6,desc:'Widzisz go? Nie? To dobrze. Znaczy źle. Dla ciebie.',tier:6,
+    patterns:[{type:'phase',count:10,speed:130,interval:1000,projSize:6},{type:'charge',count:4,speed:280,interval:800,projSize:10}]},
+  {name:'Lawowy Golem',icon:'🌋',danger:12,hp:180,atk:25,def:15,spd:1,desc:'Golem z lawy. Przytulanie zdecydowanie niezalecane.',tier:6,
+    patterns:[{type:'rain',count:12,speed:100,interval:1000,projSize:10},{type:'expand',count:1,speed:60,interval:2000,projSize:5,maxRadius:140},{type:'shockwave',count:1,speed:70,interval:1800,projSize:6}]},
+  // tier 7 (danger 12-14) — levels 9-12
+  {name:'Rycerz Śmierci',icon:'💀',danger:13,hp:160,atk:38,def:12,spd:3,desc:'Umarł, ale dress code w lochach jest luźny. Dalej nosi zbroję.',tier:7,
+    patterns:[{type:'fan',count:11,speed:180,interval:800,projSize:7,arc:75},{type:'charge',count:5,speed:300,interval:900,projSize:15},{type:'scatter',count:10,speed:150,interval:1200,projSize:7}]},
+  {name:'Pradawny Smok',icon:'🐉',danger:14,hp:220,atk:40,def:14,spd:3,desc:'Starszy niż twoje wymówki. I bardziej ognisty.',tier:7,
+    patterns:[{type:'beam',speed:3,interval:2000,projSize:22,duration:2200},{type:'scatter',count:14,speed:140,interval:1000,projSize:8},{type:'rain',count:12,speed:120,interval:900,projSize:9}]},
+  {name:'Plugawiec',icon:'🧠',danger:12,hp:110,atk:42,def:8,spd:4,desc:'Czyta myśli. Na szczęście twoje są proste do odczytania.',tier:7,
+    patterns:[{type:'homing',count:7,speed:110,interval:1000,projSize:7,turnRate:.04},{type:'spiral',count:14,speed:100,interval:1400,projSize:6}]},
+  {name:'Demon Otchłani',icon:'👹',danger:14,hp:170,atk:36,def:10,spd:4,desc:'Z najgłębszego poziomu piekła. Tam gdzie nawet WiFi nie sięga.',tier:7,
+    patterns:[{type:'spiral',count:16,speed:120,interval:1100,projSize:7},{type:'homing',count:5,speed:100,interval:1300,projSize:7,turnRate:.035},{type:'fan',count:9,speed:170,interval:900,projSize:6,arc:65}]},
+  {name:'Mroźny Wyrm',icon:'🐛',danger:13,hp:200,atk:34,def:12,spd:2,desc:'Lodowy robak długi na 20 metrów. Przynajmniej nie lata.',tier:7,
+    patterns:[{type:'rain',count:14,speed:110,interval:900,projSize:9},{type:'beam',speed:2.5,interval:2500,projSize:20,duration:2000},{type:'scatter',count:10,speed:130,interval:1100,projSize:8}]},
+  // tier 8 (danger 15-18) — levels 12-15
+  {name:'Pustkowiec',icon:'🌀',danger:15,hp:140,atk:45,def:10,spd:6,desc:'Porusza się między wymiarami. Podatki płaci w żadnym.',tier:8,
+    patterns:[{type:'phase',count:12,speed:150,interval:800,projSize:7},{type:'homing',count:6,speed:120,interval:1000,projSize:7,turnRate:.04},{type:'burst',count:10,speed:160,interval:900,projSize:6}]},
+  {name:'Arcydemon',icon:'😈',danger:17,hp:220,atk:48,def:14,spd:4,desc:'CEO piekielnej korporacji. Nadgodziny są obowiązkowe.',tier:8,
+    patterns:[{type:'spiral',count:18,speed:130,interval:1000,projSize:7},{type:'beam',speed:3,interval:2000,projSize:22,duration:2000},{type:'expand',count:1,speed:90,interval:1500,projSize:5,maxRadius:180}]},
+  {name:'Żniwiarz Dusz',icon:'☠️',danger:16,hp:160,atk:50,def:8,spd:5,desc:'Zbiera dusze jak ty zbierasz kubki w kuchni. Bezlitośnie.',tier:8,
+    patterns:[{type:'homing',count:8,speed:120,interval:900,projSize:7,turnRate:.04},{type:'fan',count:11,speed:190,interval:800,projSize:6,arc:80}]},
+  {name:'Kryształowy Kolos',icon:'💎',danger:18,hp:300,atk:35,def:20,spd:1,desc:'10 ton kryształów. Lśni pięknie. Zabija też pięknie.',tier:8,
+    patterns:[{type:'shockwave',count:1,speed:90,interval:1400,projSize:7},{type:'rain',count:16,speed:120,interval:800,projSize:10},{type:'scatter',count:12,speed:110,interval:1000,projSize:9}]},
+  // tier 9 (danger 18-22) — levels 15-18
+  {name:'Starszy Lich',icon:'☠️',danger:20,hp:200,atk:55,def:12,spd:4,desc:'Lich z 1000-letnim doświadczeniem. Na emeryturę nie idzie.',tier:9,
+    patterns:[{type:'spiral',count:20,speed:140,interval:900,projSize:6},{type:'homing',count:8,speed:130,interval:1000,projSize:7,turnRate:.045},{type:'beam',speed:3.5,interval:1800,projSize:24,duration:2200}]},
+  {name:'Tytan',icon:'🗿',danger:22,hp:400,atk:45,def:25,spd:1,desc:'Wielki jak góra. Głupi jak góra. Ale bije jak góra.',tier:9,
+    patterns:[{type:'shockwave',count:1,speed:100,interval:1200,projSize:8},{type:'rain',count:18,speed:130,interval:700,projSize:12},{type:'charge',count:6,speed:320,interval:1000,projSize:18}]},
+  {name:'Żywiołak Chaosu',icon:'🌪️',danger:19,hp:180,atk:52,def:10,spd:5,desc:'Ogień, lód, wiatr i ziemia naraz. Absolutny chaos. Jak twój pokój.',tier:9,
+    patterns:[{type:'scatter',count:16,speed:160,interval:800,projSize:8},{type:'spiral',count:14,speed:130,interval:1000,projSize:7},{type:'expand',count:1,speed:100,interval:1300,projSize:5,maxRadius:200}]},
+  {name:'Koszmar',icon:'😱',danger:19,hp:170,atk:48,def:8,spd:6,desc:'Twój najgorszy sen z ciałem. I zębami. Dużymi zębami.',tier:9,
+    patterns:[{type:'phase',count:14,speed:160,interval:700,projSize:7},{type:'homing',count:7,speed:140,interval:900,projSize:7,turnRate:.045},{type:'charge',count:5,speed:300,interval:900,projSize:14}]},
+  // tier 10 (danger 22-30) — levels 18-20
+  {name:'Król Otchłani',icon:'👑',danger:25,hp:350,atk:55,def:18,spd:4,desc:'Król demonów. Jego korona to czyste zło. I czyste złoto.',tier:10,
+    patterns:[{type:'spiral',count:20,speed:150,interval:800,projSize:7},{type:'beam',speed:3.5,interval:1600,projSize:24,duration:2500},{type:'homing',count:8,speed:140,interval:1000,projSize:8,turnRate:.05}]},
+  {name:'Smok Cienia',icon:'🐉',danger:28,hp:400,atk:60,def:20,spd:4,desc:'Ostatni smok. Oddycha ciemnością. 0 gwiazdek, nie polecam.',tier:10,
+    patterns:[{type:'beam',speed:4,interval:1500,projSize:25,duration:2500},{type:'scatter',count:18,speed:170,interval:800,projSize:9},{type:'rain',count:16,speed:150,interval:700,projSize:10}]},
+  {name:'Władca Pustki',icon:'🕳️',danger:30,hp:300,atk:65,def:15,spd:5,desc:'Nic. Absolutne nic. I to nic chce cię zjeść.',tier:10,
+    patterns:[{type:'phase',count:16,speed:170,interval:600,projSize:8},{type:'homing',count:10,speed:150,interval:800,projSize:8,turnRate:.05},{type:'expand',count:1,speed:120,interval:1200,projSize:6,maxRadius:220}]},
+  // Pack monsters — multiple units in combat
+  {name:'Stado Szczurów',icon:'🐀',danger:3,hp:36,atk:5,def:1,spd:3,desc:'Tam gdzie jeden szczur, tam dwadzieścia. Matematyka natury.',tier:2,packSize:3,
+    patterns:[{type:'scatter',count:4,speed:100,interval:1200,projSize:5},{type:'burst',count:3,speed:110,interval:1500,projSize:5}]},
+  {name:'Chmara Nietoperzy',icon:'🦇',danger:5,hp:48,atk:8,def:1,spd:5,desc:'Cała chmara! Każdy gryzie osobno. Boli razem.',tier:3,packSize:4,
+    patterns:[{type:'scatter',count:3,speed:120,interval:1000,projSize:5},{type:'fan',count:3,speed:130,interval:1300,projSize:5,arc:40}]},
+  {name:'Sfora Wilków',icon:'🐺',danger:7,hp:60,atk:12,def:3,spd:5,desc:'Polują w grupie. Jak twoi znajomi na pizzę. Tylko gorzej.',tier:4,packSize:3,
+    patterns:[{type:'charge',count:2,speed:240,interval:1000,projSize:12},{type:'burst',count:4,speed:140,interval:1200,projSize:6}]},
+  {name:'Rój Duchów',icon:'👻',danger:13,hp:80,atk:22,def:3,spd:5,desc:'Kilka duchów naraz. Impreza jakiej nie chciałeś.',tier:7,packSize:4,
+    patterns:[{type:'phase',count:4,speed:110,interval:1100,projSize:6},{type:'homing',count:3,speed:90,interval:1400,projSize:6,turnRate:.03}]},
 ];
 
 // ===================== EQUIPMENT DATA =====================
 const RARITY_COLORS = {common:'#aaa',uncommon:'#44ff44',rare:'#4488ff',epic:'#bb44ff',legendary:'#ffd700'};
 const EQUIPMENT_TEMPLATES = [
-  // Weapons (atkType: timing/rapid/charge/magic)
-  {name:'Zardzewialy Miecz',slot:'weapon',rarity:'common',str:2,def:0,spd:0,hp:0,luck:0,ability:null,atkType:'timing',onHit:null,desc:'Rdza dodaje +2 do tetanu. I do sily.'},
-  {name:'Sztylet',slot:'weapon',rarity:'common',str:1,def:0,spd:2,hp:0,luck:0,ability:null,atkType:'rapid',onHit:'poison',desc:'Maly, szybki, trujacy. Jak teściowa.'},
-  {name:'Topor Wojenny',slot:'weapon',rarity:'uncommon',str:5,def:0,spd:-1,hp:0,luck:0,ability:null,atkType:'charge',onHit:'stun',desc:'Ciezki jak twoje grzechy. Ale skuteczny.'},
+  // Weapons (atkType: timing/rapid/charge/magic) - melee weapons buffed for proximity requirement
+  {name:'Zardzewialy Miecz',slot:'weapon',rarity:'common',str:4,def:0,spd:0,hp:0,luck:0,ability:null,atkType:'timing',onHit:null,desc:'Rdza dodaje +2 do tetanu. I do sily.'},
+  {name:'Sztylet',slot:'weapon',rarity:'common',str:3,def:0,spd:2,hp:0,luck:0,ability:null,atkType:'rapid',onHit:'poison',desc:'Maly, szybki, trujacy. Jak teściowa.'},
+  {name:'Topor Wojenny',slot:'weapon',rarity:'uncommon',str:8,def:0,spd:-1,hp:0,luck:0,ability:null,atkType:'charge',onHit:'stun',desc:'Ciezki jak twoje grzechy. Ale skuteczny.'},
   {name:'Magiczna Rozdzka',slot:'weapon',rarity:'uncommon',str:4,def:0,spd:1,hp:0,luck:0,ability:'magicBolt',atkType:'magic',onHit:'weaken',desc:'Nie, to NIE jest patyk. To zaawansowana technologia.'},
-  {name:'Dlugi Miecz',slot:'weapon',rarity:'rare',str:7,def:1,spd:0,hp:0,luck:0,ability:null,atkType:'timing',onHit:'bleedM',desc:'Dlugi na tyle, ze kompensuje... rozne rzeczy.'},
-  {name:'Lodowy Miecz',slot:'weapon',rarity:'rare',str:6,def:0,spd:0,hp:0,luck:0,ability:'freeze',atkType:'timing',onHit:null,desc:'Idealny do drinków. I do zamrazania wrogow.'},
-  {name:'Sztylet Cienia',slot:'weapon',rarity:'rare',str:4,def:0,spd:4,hp:0,luck:2,ability:null,atkType:'rapid',onHit:'poison',desc:'Tak szybki ze sam nie wiesz kiedy kogoś dzgasz.'},
-  {name:'Ognisty Topor',slot:'weapon',rarity:'epic',str:9,def:0,spd:-1,hp:0,luck:0,ability:'burn',atkType:'charge',onHit:'stun',desc:'Podpala wrogow i twoje brwi. Warto!'},
-  {name:'Miecz Swiatla',slot:'weapon',rarity:'epic',str:10,def:2,spd:1,hp:0,luck:0,ability:'holyStrike',atkType:'timing',onHit:'bleedM',desc:'Swieci jak latarnia. Potwory nienawida tego triku!'},
+  {name:'Dlugi Miecz',slot:'weapon',rarity:'rare',str:10,def:1,spd:0,hp:0,luck:0,ability:null,atkType:'timing',onHit:'bleedM',desc:'Dlugi na tyle, ze kompensuje... rozne rzeczy.'},
+  {name:'Lodowy Miecz',slot:'weapon',rarity:'rare',str:9,def:0,spd:0,hp:0,luck:0,ability:'freeze',atkType:'timing',onHit:null,desc:'Idealny do drinków. I do zamrazania wrogow.'},
+  {name:'Sztylet Cienia',slot:'weapon',rarity:'rare',str:7,def:0,spd:4,hp:0,luck:2,ability:null,atkType:'rapid',onHit:'poison',desc:'Tak szybki ze sam nie wiesz kiedy kogoś dzgasz.'},
+  {name:'Ognisty Topor',slot:'weapon',rarity:'epic',str:14,def:0,spd:-1,hp:0,luck:0,ability:'burn',atkType:'charge',onHit:'stun',desc:'Podpala wrogow i twoje brwi. Warto!'},
+  {name:'Miecz Swiatla',slot:'weapon',rarity:'epic',str:15,def:2,spd:1,hp:0,luck:0,ability:'holyStrike',atkType:'timing',onHit:'bleedM',desc:'Swieci jak latarnia. Potwory nienawida tego triku!'},
   {name:'Berlo Burzy',slot:'weapon',rarity:'epic',str:8,def:0,spd:2,hp:10,luck:0,ability:null,atkType:'magic',onHit:'weaken',desc:'Piorun nie trafi dwa razy? Sprawdz sam.'},
-  {name:'Kosa Smierci',slot:'weapon',rarity:'legendary',str:14,def:0,spd:2,hp:0,luck:0,ability:'lifeSteal',atkType:'timing',onHit:'bleedM',desc:'Smierc chce ja z powrotem. Powiedz ze nie ma cie.'},
+  {name:'Kosa Smierci',slot:'weapon',rarity:'legendary',str:20,def:0,spd:2,hp:0,luck:0,ability:'lifeSteal',atkType:'timing',onHit:'bleedM',desc:'Smierc chce ja z powrotem. Powiedz ze nie ma cie.'},
   {name:'Berlo Arcymaga',slot:'weapon',rarity:'legendary',str:12,def:3,spd:0,hp:20,luck:0,ability:'meteor',atkType:'magic',onHit:'weaken',desc:'Sprowadza meteory. Overreaction? Moze troche.'},
-  {name:'Szpony Nocy',slot:'weapon',rarity:'legendary',str:11,def:0,spd:5,hp:0,luck:3,ability:'stealth',atkType:'rapid',onHit:'poison',desc:'Trzy sekund i wrog juz nie wie co go ugryzlo.'},
+  {name:'Szpony Nocy',slot:'weapon',rarity:'legendary',str:16,def:0,spd:5,hp:0,luck:3,ability:'stealth',atkType:'rapid',onHit:'poison',desc:'Trzy sekund i wrog juz nie wie co go ugryzlo.'},
   // Armor
   {name:'Skorzana Zbroja',slot:'armor',rarity:'common',str:0,def:2,spd:0,hp:5,luck:0,ability:null,desc:'Ze skory... czegos. Lepiej nie pytaj czego.'},
   {name:'Kolczuga',slot:'armor',rarity:'uncommon',str:0,def:4,spd:-1,hp:10,luck:0,ability:null,desc:'10000 koleczek. Ktos to musial robic recznie. Biedak.'},
@@ -572,16 +628,26 @@ const EQUIPMENT_TEMPLATES = [
 
 // ===================== BOSS MONSTERS =====================
 const BOSS_TEMPLATES = [
-  {name:'Krol Goblinow',icon:'👑',danger:5,hp:80,atk:12,def:5,spd:3,desc:'Samozwanczy krol. Korona z puszki po piwie.',tier:2,isBoss:true,
+  {name:'Król Goblinów',icon:'👑',danger:5,hp:80,atk:12,def:5,spd:3,desc:'Samozwańczy król. Korona z puszki po piwie.',tier:2,isBoss:true,
     patterns:[{type:'fan',count:9,speed:140,interval:700,projSize:6,arc:70},{type:'burst',count:10,speed:120,interval:1000,projSize:5},{type:'charge',count:3,speed:200,interval:1500,projSize:14}]},
-  {name:'Nekromanta',icon:'💀',danger:7,hp:110,atk:16,def:4,spd:3,desc:'Budzi martwych. Bo zywi go nie odwiedzaja.',tier:3,isBoss:true,
+  {name:'Nekromanta',icon:'💀',danger:7,hp:110,atk:16,def:4,spd:3,desc:'Budzi martwych. Bo żywi go nie odwiedzają.',tier:3,isBoss:true,
     patterns:[{type:'homing',count:5,speed:85,interval:1200,projSize:7,turnRate:.03},{type:'spiral',count:12,speed:100,interval:1400,projSize:6},{type:'rain',count:8,speed:100,interval:1000,projSize:7}]},
-  {name:'Ognisty Wladca',icon:'🔥',danger:8,hp:150,atk:22,def:7,spd:3,desc:'Wiecznie podpalony i wsciekly. Jak grill na imprezie.',tier:4,isBoss:true,
+  {name:'Ognisty Władca',icon:'🔥',danger:8,hp:150,atk:22,def:7,spd:3,desc:'Wiecznie podpalony i wściekły. Jak grill na imprezie.',tier:4,isBoss:true,
     patterns:[{type:'spiral',count:14,speed:110,interval:1200,projSize:7},{type:'expand',count:1,speed:80,interval:1800,projSize:5,maxRadius:140},{type:'beam',speed:2.5,interval:2500,projSize:20,duration:2000}]},
-  {name:'Straznik Otchlani',icon:'👁️',danger:9,hp:200,atk:26,def:8,spd:4,desc:'Jedno oko, zero litosci. Jak szef w poniedzialek.',tier:5,isBoss:true,
+  {name:'Strażnik Otchłani',icon:'👁️',danger:9,hp:200,atk:26,def:8,spd:4,desc:'Jedno oko, zero litości. Jak szef w poniedziałek.',tier:5,isBoss:true,
     patterns:[{type:'homing',count:6,speed:100,interval:1000,projSize:7,turnRate:.035},{type:'fan',count:11,speed:160,interval:800,projSize:6,arc:80},{type:'shockwave',count:1,speed:80,interval:1600,projSize:6}]},
-  {name:'Cien Zar\'Kotha',icon:'👤',danger:10,hp:260,atk:30,def:10,spd:5,desc:'Duch krola. Wciaz wymaga podatkow. Nawet po smierci.',tier:5,isBoss:true,
+  {name:'Cień Zar\'Kotha',icon:'👤',danger:10,hp:260,atk:30,def:10,spd:5,desc:'Duch króla. Wciąż wymaga podatków. Nawet po śmierci.',tier:5,isBoss:true,
     patterns:[{type:'spiral',count:16,speed:120,interval:1000,projSize:6},{type:'beam',speed:3,interval:2000,projSize:22,duration:2200},{type:'homing',count:4,speed:110,interval:1200,projSize:8,turnRate:.04},{type:'phase',count:8,speed:100,interval:1400,projSize:7}]},
+  {name:'Królowa Chimer',icon:'🦁',danger:12,hp:200,atk:30,def:10,spd:4,desc:'Matka wszystkich chimer. Rodzicielstwo w lochach to wyzwanie.',tier:6,isBoss:true,
+    patterns:[{type:'scatter',count:14,speed:150,interval:800,projSize:7},{type:'beam',speed:2.5,interval:2200,projSize:20,duration:2000},{type:'charge',count:4,speed:260,interval:1000,projSize:14},{type:'expand',count:1,speed:70,interval:1600,projSize:5,maxRadius:150}]},
+  {name:'Pradawny Nekromanta',icon:'💀',danger:15,hp:280,atk:35,def:12,spd:3,desc:'Uczeń Zar\'Kotha. Nauczył się jak nie umierać. Reszta... mniej.',tier:7,isBoss:true,
+    patterns:[{type:'homing',count:8,speed:110,interval:900,projSize:7,turnRate:.04},{type:'spiral',count:16,speed:120,interval:1000,projSize:6},{type:'rain',count:12,speed:120,interval:800,projSize:8},{type:'phase',count:10,speed:120,interval:1200,projSize:7}]},
+  {name:'Żelazny Władca',icon:'⚙️',danger:18,hp:400,atk:40,def:18,spd:2,desc:'Konstrukt z metalu i gniewu. 0% satysfakcji z walki gwarantowane.',tier:8,isBoss:true,
+    patterns:[{type:'shockwave',count:1,speed:100,interval:1200,projSize:7},{type:'rain',count:18,speed:140,interval:700,projSize:11},{type:'charge',count:6,speed:300,interval:900,projSize:16},{type:'fan',count:13,speed:190,interval:800,projSize:7,arc:85}]},
+  {name:'Avatar Zar\'Kotha',icon:'👤',danger:25,hp:600,atk:55,def:18,spd:4,desc:'Cień króla z pełnią mocy. Podatki, nekromancja i osobisty uraz.',tier:10,isBoss:true,
+    patterns:[{type:'spiral',count:20,speed:150,interval:800,projSize:7},{type:'beam',speed:3.5,interval:1600,projSize:24,duration:2500},{type:'homing',count:8,speed:140,interval:900,projSize:8,turnRate:.05},{type:'phase',count:12,speed:140,interval:1000,projSize:7}]},
+  {name:'Serce Otchłani',icon:'❤️‍🔥',danger:35,hp:800,atk:60,def:15,spd:5,desc:'Źródło wszelkiego zła. Pulsuje. I chce cię zjeść.',tier:10,isBoss:true,
+    patterns:[{type:'expand',count:1,speed:120,interval:1000,projSize:6,maxRadius:200},{type:'spiral',count:24,speed:160,interval:700,projSize:7},{type:'homing',count:10,speed:150,interval:800,projSize:8,turnRate:.05},{type:'beam',speed:4,interval:1400,projSize:26,duration:2500},{type:'rain',count:20,speed:160,interval:600,projSize:10}]},
 ];
 
 // ===================== MAP CONSUMABLES =====================
@@ -590,7 +656,7 @@ const MAP_CONSUMABLES = [
   {id:'tracker',name:'Krysztal Tropiciela',icon:'🔮',desc:'Mrugajaca lokalizacja bossa (3s).',basePrice:30,pricePerLvl:8},
   {id:'spyglass',name:'Luneta Zwiadowcy',icon:'🔭',desc:'Kliknij 3 dowolne pola by odkryc.',basePrice:20,pricePerLvl:4},
   {id:'compass',name:'Kompas Skarbow',icon:'💎',desc:'Odkrywa pola ze zlotem/ekwip./sklepem.',basePrice:35,pricePerLvl:6},
-  {id:'safety',name:'Kamien Bezpieczenstwa',icon:'🛡️',desc:'Odkrywa pola z potworami jako ❓.',basePrice:90,pricePerLvl:15,rare:true},
+  {id:'safety',name:'Kamień Bezpieczeństwa',icon:'🛡️',desc:'Odkrywa pola z potworami jako ❓.',basePrice:90,pricePerLvl:15,rare:true},
 ];
 
 // Monster debuffs they can apply on hit
@@ -609,16 +675,24 @@ const PLAYER_DEBUFFS = {
 };
 // Which monsters can debuff the player (by tier)
 const MONSTER_DEBUFF_TABLE = {
-  'Pajak':'slow','Nietoperz':'slow',
+  'Pająk':'slow','Nietoperz':'slow',
   'Zombie':'weakness','Wilk':'bleedP',
   'Mroczny Mag':'weakness','Bandyta':'bleedP',
-  'Ognisty Zywiolak':'poison','Lodowy Zywiolak':'slow',
+  'Ognisty Żywiołak':'poison','Lodowy Żywiołak':'slow',
   'Wampir':'weakness','Bazyliszek':'slow',
-  'Upior':'weakness','Demon':'poison',
+  'Upiór':'weakness','Demon':'poison',
   'Lich':'weakness','Smok':'poison',
-  'Krol Goblinow':'bleedP','Nekromanta':'weakness',
-  'Ognisty Wladca':'poison','Straznik Otchlani':'slow',
-  'Cien Zar\'Kotha':'weakness',
+  'Król Goblinów':'bleedP','Nekromanta':'weakness',
+  'Ognisty Władca':'poison','Strażnik Otchłani':'slow',
+  'Cień Zar\'Kotha':'weakness',
+  'Mroczny Rycerz':'bleedP','Chimera':'poison','Banszi':'weakness','Tropiciel Cieni':'bleedP','Lawowy Golem':'poison',
+  'Rycerz Śmierci':'bleedP','Pradawny Smok':'poison','Plugawiec':'weakness','Demon Otchłani':'poison','Mroźny Wyrm':'slow',
+  'Pustkowiec':'weakness','Arcydemon':'poison','Żniwiarz Dusz':'weakness','Kryształowy Kolos':'slow',
+  'Starszy Lich':'weakness','Tytan':'bleedP','Żywiołak Chaosu':'poison','Koszmar':'weakness',
+  'Król Otchłani':'poison','Smok Cienia':'poison','Władca Pustki':'weakness',
+  'Stado Szczurów':'poison','Chmara Nietoperzy':'slow','Sfora Wilków':'bleedP','Rój Duchów':'weakness',
+  'Królowa Chimer':'poison','Pradawny Nekromanta':'weakness','Żelazny Władca':'slow',
+  'Avatar Zar\'Kotha':'weakness','Serce Otchłani':'poison',
 };
 
 // ===================== RUNE PATTERNS (magic attack) =====================
@@ -637,121 +711,185 @@ const RUNE_PATTERNS = [
 const PERM_UPGRADES = [
   {id:'hp',name:'Wytrzymalosc',desc:'+5 HP na poziom',icon:'❤️',perLevel:5,stat:'hp',maxLevel:20},
   {id:'str',name:'Moc Duszy',desc:'+1 Sila na poziom',icon:'⚔️',perLevel:1,stat:'str',maxLevel:15},
-  {id:'def',name:'Odpornosc',desc:'+1 Obrona na poziom',icon:'🛡️',perLevel:1,stat:'def',maxLevel:15},
-  {id:'atkSpd',name:'Precyzja',desc:'+1 Szybkosc Ataku na poziom',icon:'⚡',perLevel:1,stat:'atkSpd',maxLevel:10},
-  {id:'dodgeSpd',name:'Refleks',desc:'+1 Szybkosc Uniku na poziom',icon:'💨',perLevel:1,stat:'dodgeSpd',maxLevel:10},
-  {id:'luck',name:'Fortuna',desc:'+1 Szczescie na poziom',icon:'🍀',perLevel:1,stat:'luck',maxLevel:10},
+  {id:'def',name:'Odporność',desc:'+1 Obrona na poziom',icon:'🛡️',perLevel:1,stat:'def',maxLevel:15},
+  {id:'atkSpd',name:'Precyzja',desc:'+1 Szybkość Ataku na poziom',icon:'⚡',perLevel:1,stat:'atkSpd',maxLevel:10},
+  {id:'dodgeSpd',name:'Refleks',desc:'+1 Szybkość Uniku na poziom',icon:'💨',perLevel:1,stat:'dodgeSpd',maxLevel:10},
+  {id:'luck',name:'Fortuna',desc:'+1 Szczęście na poziom',icon:'🍀',perLevel:1,stat:'luck',maxLevel:10},
   {id:'regen',name:'Regeneracja',desc:'Lecz 1 HP za odkryte pole',icon:'💚',perLevel:1,stat:'regen',maxLevel:5},
 ];
 
 // ===================== ABILITY DESCRIPTIONS =====================
 const ABILITY_INFO = {
   magicBolt:{name:'Mag. Pocisk',desc:'Pew pew, ale magicznie',combat:'Strzela kulą za 150% obr. Bo po co miecz?',cooldown:3},
-  freeze:{name:'Zamrozenie',desc:'Chlodno jak moja ex',combat:'Zamraza potwora na 2s. Slisko!',cooldown:4},
-  burn:{name:'Podpalenie',desc:'Hej, to sie pali!',combat:'Potwor plonie. Nie podlewaj.',cooldown:3},
-  holyStrike:{name:'Swiety Cios',desc:'Bóg patrzy i pomaga',combat:'200% obr. + leczenie. Bóg lubi ciebie.',cooldown:5},
-  lifeSteal:{name:'Kradziez Zycia',desc:'Twoje HP? Moje HP.',combat:'Kazdy atak kradnie 20% HP. Legalne? Watpliwe.',cooldown:0},
-  meteor:{name:'Meteor',desc:'Z nieba pada kamien. Duzy.',combat:'300% obr. Przesada? Nie, to METEOR.',cooldown:6},
-  magicShield:{name:'Mag. Tarcza',desc:'Bańka ochronna deluxe',combat:'Bańka absorbuje nastepny atak. Pop!',cooldown:5},
-  fireResist:{name:'Ognioodpornosc',desc:'Cieplutko, nie goracy',combat:'-25% obr. od ognia. Grillowanie anulowane.',cooldown:0},
-  shadowCloak:{name:'Plasz Cienia',desc:'Teraz mnie widzisz, teraz nie',combat:'2s niewidzialnosci. Pociski: "Gdzie on?!"',cooldown:6},
-  rage:{name:'Szal',desc:'AAAAAA!!!',combat:'+50% obr. na 3s, +25% bolu. WORTH IT!',cooldown:5},
-  stealth:{name:'Ukrycie',desc:'Ninja mode ON',combat:'1.5s niewidzialnosci. Ciiii.',cooldown:5},
-  command:{name:'Rozkaz',desc:'BO TAK POWIEDZIALEM',combat:'Potwor traci 30% obrony. Bo mu kazales.',cooldown:5},
-  dash:{name:'Unik',desc:'Wrrr i juz nie ma',combat:'Teleport w najbezpieczniejsze miejsce. Magia!',cooldown:3},
+  freeze:{name:'Zamrożenie',desc:'Chłodno jak moja ex',combat:'Zamraża potwora na 2s. Ślisko!',cooldown:4},
+  burn:{name:'Podpalenie',desc:'Hej, to się pali!',combat:'Potwór płonie. Nie podlewaj.',cooldown:3},
+  holyStrike:{name:'Święty Cios',desc:'Bóg patrzy i pomaga',combat:'200% obr. + leczenie. Bóg lubi ciebie.',cooldown:5},
+  lifeSteal:{name:'Kradzież Życia',desc:'Twoje HP? Moje HP.',combat:'Każdy atak kradnie 20% HP. Legalne? Wątpliwe.',cooldown:0},
+  meteor:{name:'Meteor',desc:'Z nieba pada kamień. Duży.',combat:'300% obr. Przesada? Nie, to METEOR.',cooldown:6},
+  magicShield:{name:'Mag. Tarcza',desc:'Bańka ochronna deluxe',combat:'Bańka absorbuje następny atak. Pop!',cooldown:5},
+  fireResist:{name:'Ognioodporność',desc:'Cieplutko, nie gorący',combat:'-25% obr. od ognia. Grillowanie anulowane.',cooldown:0},
+  shadowCloak:{name:'Płaszcz Cienia',desc:'Teraz mnie widzisz, teraz nie',combat:'2s niewidzialności. Pociski: "Gdzie on?!"',cooldown:6},
+  rage:{name:'Szał',desc:'AAAAAA!!!',combat:'+50% obr. na 3s, +25% bólu. WORTH IT!',cooldown:5},
+  stealth:{name:'Ukrycie',desc:'Ninja mode ON',combat:'1.5s niewidzialności. Ciiii.',cooldown:5},
+  command:{name:'Rozkaz',desc:'BO TAK POWIEDZIAŁEM',combat:'Potwór traci 30% obrony. Bo mu kazałeś.',cooldown:5},
+  dash:{name:'Unik',desc:'Wrrr i już nie ma',combat:'Teleport w najbezpieczniejsze miejsce. Magia!',cooldown:3},
   regen:{name:'Regeneracja',desc:'Jak jaszczurka, ale lepiej',combat:'Leczy 10% max HP. Nie odrasta ogon.',cooldown:4},
-  fireShield:{name:'Ognista Tarcza',desc:'Nie dotykaj mnie!',combat:'Niszczy pociski w poblizu. Goracy krąg.',cooldown:4},
-  immortal:{name:'Niesmiertelnosc',desc:'Umierasz? LOL nie.',combat:'Zamiast umrzec - 1 HP. Raz na walke. Ceń to.',cooldown:99},
-  warCry:{name:'Okrzyk Wojenny',desc:'TRUUUUU!!!',combat:'Potwor traci 40% ATK na 4s. Gluchnie ze strachu.',cooldown:5},
-  ironSkin:{name:'Zelazna Skora',desc:'Twardszy niz twoj charakter',combat:'+50% obrony na 4s. Nawet kulki odbija.',cooldown:5},
-  haste:{name:'Przyspieszenie',desc:'Szybszy niz WiFi',combat:'+3 do obu Szybkosci na 4s. Zoom zoom!',cooldown:5},
-  curse:{name:'Klatwa',desc:'Niecenzuralna klatwa',combat:'Potwor traci 50% obrony na 5s. Obrazliwe ale skuteczne.',cooldown:6},
+  fireShield:{name:'Ognista Tarcza',desc:'Nie dotykaj mnie!',combat:'Niszczy pociski w pobliżu. Gorący krąg.',cooldown:4},
+  immortal:{name:'Nieśmiertelność',desc:'Umierasz? LOL nie.',combat:'Zamiast umrzeć - 1 HP. Raz na walkę. Ceń to.',cooldown:99},
+  warCry:{name:'Okrzyk Wojenny',desc:'TRUUUUU!!!',combat:'Potwór traci 40% ATK na 4s. Głuchnie ze strachu.',cooldown:5},
+  ironSkin:{name:'Żelazna Skóra',desc:'Twardszy niż twój charakter',combat:'+50% obrony na 4s. Nawet kulki odbija.',cooldown:5},
+  haste:{name:'Przyspieszenie',desc:'Szybszy niż WiFi',combat:'+3 do obu Szybkości na 4s. Zoom zoom!',cooldown:5},
+  curse:{name:'Klątwa',desc:'Niecenzuralna klątwa',combat:'Potwór traci 50% obrony na 5s. Obraźliwe ale skuteczne.',cooldown:6},
 };
 
 // ===================== NPC & QUEST DATA =====================
 const NPC_TEMPLATES = [
   {id:'borek',name:'Borek',icon:'🧔',role:'Stary Wojak (na emeryturze)',
     lines:[
-      'O, zywy czlowiek! Dawno nie widzialem. Ostatni powiedzial "zaraz wracam" trzy lata temu.',
-      'Te lochy? Kiedys bylo tu krolestwo. Krol Zar\'Koth zwariowal i zamienił pałac w escape room. Z którego nikt nie ucieka.',
-      'Potwory tu rosna jak grzyby po deszczu. I sa rownie przyjemne do spotkania w ciemnosci.',
+      'O, żywy człowiek! Dawno nie widziałem. Ostatni powiedział "zaraz wracam" trzy lata temu.',
+      'Te lochy? Kiedyś było tu królestwo. Król Zar\'Koth zwariował i zamienił pałac w escape room. Z którego nikt nie ucieka.',
+      'Potwory tu rosną jak grzyby po deszczu. I są równie przyjemne do spotkania w ciemności.',
     ],
-    questLine:'Sluchaj, te $MONSTER_PL tu wszedzie lazą. Pokonaj $TARGET i wroc. Dam ci zloto. Nie pytaj skad mam - w lochach nie ma podatkow.',
-    rewardLine:'Wrociles zywy?! Znaczy... oczywiscie ze wrociles. Nigdy nie watpilem. Oto twoje zloto, zasluzyles!',
-    postQuestLine:'A wiec pokonales te bestie! Kiedy bylem mlody to walczylem z trzema naraz. No dobra, z jednym. No dobra, ucieklam. Ale szybko! To tez umiejetnosc.',
-    quest:{type:'killSpecific',target:4,reward:{gold:80},rewardDesc:'80 zlota'}},
+    questLine:'Słuchaj, te $MONSTER_PL tu wszędzie łażą. Pokonaj $TARGET i wróć. Dam ci złoto. Nie pytaj skąd mam - w lochach nie ma podatków.',
+    rewardLine:'Wróciłeś żywy?! Znaczy... oczywiście że wróciłeś. Nigdy nie wątpiłem. Oto twoje złoto, zasłużyłeś!',
+    postQuestLine:'A więc pokonałeś te bestie! Kiedy byłem młody to walczyłem z trzema naraz. No dobra, z jednym. No dobra, uciekłam. Ale szybko! To też umiejętność.',
+    quest:{type:'killSpecific',target:4,reward:{gold:80},rewardDesc:'80 złota'}},
   {id:'mirela',name:'Mirela',icon:'👩‍🔬',role:'Naukowiec (Lekko Szalona)',
     lines:[
-      'ZYWA ISTOTA! Czekaj, muszę pobrac probkę... Zartuje. Chyba.',
-      'Badam te lochy od 3 lat. Moja praca doktorska brzmi "Dlaczego labirynty chca nas zjesc - analiza porównawcza". Promotor nie odpisal.',
-      'Krol Zar\'Koth mial zone, Isenthe. Próbowala go powstrzymac. Nie wyszlo. Klasyczny malzenski spor o budżet na nekromancie.',
+      'ŻYWA ISTOTA! Czekaj, muszę pobrać próbkę... Żartuję. Chyba.',
+      'Badam te lochy od 3 lat. Moja praca doktorska brzmi "Dlaczego labirynty chcą nas zjeść - analiza porównawcza". Promotor nie odpisał.',
+      'Król Zar\'Koth miał żonę, Isenthe. Próbowała go powstrzymać. Nie wyszło. Klasyczny małżeński spór o budżet na nekromancję.',
     ],
-    questLine:'Potrzebuje probek z $MONSTER_D. Zabij $TARGET sztuk i wroc z danymi. Tak, to łapówka naukowa. Naukowcy tez musza jesc.',
-    rewardLine:'Dane! Wspaniale! Znaczy, cieszę się ze zyjesz. Ale glownie dane. Oto twoja zaplata i mapa!',
-    postQuestLine:'Wiesz, napisalam o tobie w dzienniku badawczym. Rozdział 7: "Obiekt testowy A przezywa wbrew logice". Nie dziekuj, to komplement naukowy.',
-    quest:{type:'killSpecific',target:3,reward:{gold:40,revealMap:true},rewardDesc:'40 zlota + odkrycie mapy'},
+    questLine:'Potrzebuję próbek z $MONSTER_D. Zabij $TARGET sztuk i wróć z danymi. Tak, to łapówka naukowa. Naukowcy też muszą jeść.',
+    rewardLine:'Dane! Wspaniale! Znaczy, cieszę się że żyjesz. Ale głównie dane. Oto twoja zapłata i mapa!',
+    postQuestLine:'Wiesz, napisałam o tobie w dzienniku badawczym. Rozdział 7: "Obiekt testowy A przeżywa wbrew logice". Nie dziękuj, to komplement naukowy.',
+    quest:{type:'killSpecific',target:3,reward:{gold:40,revealMap:true},rewardDesc:'40 złota + odkrycie mapy'},
     canReveal:true},
   {id:'grzegorz',name:'Grzegorz',icon:'🧑‍🦳',role:'Kupiec (Bez Towaru)',
     lines:[
-      'Moja karawana... bestie zjadly towar, konie i prawie mnie. Ubezpieczenie tego nie pokryje.',
-      'Handlowalem na nizszych poziomach. Ludzie tam zyja! Maja nawet pizzerie. Bez sera, ale zawsze.',
-      'Moj wspólnik Tomasz gdzies tu jest. Albo juz go nie ma. W kazdym razie jest mi winien 100 zlota.',
+      'Moja karawana... bestie zjadły towar, konie i prawie mnie. Ubezpieczenie tego nie pokryje.',
+      'Handlowałem na niższych poziomach. Ludzie tam żyją! Mają nawet pizzerię. Bez sera, ale zawsze.',
+      'Mój wspólnik Tomasz gdzieś tu jest. Albo już go nie ma. W każdym razie jest mi winien 100 złota.',
     ],
-    questLine:'Te $MONSTER_PL blokuja szlaki handlowe! Pokonaj $TARGET i droga bedzie wolna. Zaplac...znaczy, zaplACE ci 100 zlota.',
-    rewardLine:'Droga wolna! Tomasz pewnie dalej gdzies jest, ale przynajmniej karawany moga przejechac. Oto twoje 100 zlota!',
-    postQuestLine:'Wiesz co, juz mi sie tu podoba. Otworzę filię sklepu. "Grzegorz i Syn - Towary z Lochow". Syn jest wymyslony ale brzmi profesjonalniej.',
-    quest:{type:'killSpecific',target:3,reward:{gold:100},rewardDesc:'100 zlota'}},
-  {id:'xardas',name:'Xardas',icon:'🧙‍♂️',role:'Mag (Niepokojaco Radosny)',
+    questLine:'Te $MONSTER_PL blokują szlaki handlowe! Pokonaj $TARGET i droga będzie wolna. Zapłać...znaczy, zapłACĘ ci 100 złota.',
+    rewardLine:'Droga wolna! Tomasz pewnie dalej gdzieś jest, ale przynajmniej karawany mogą przejechać. Oto twoje 100 złota!',
+    postQuestLine:'Wiesz co, już mi się tu podoba. Otworzę filię sklepu. "Grzegorz i Syn - Towary z Lochów". Syn jest wymyślony ale brzmi profesjonalniej.',
+    quest:{type:'killSpecific',target:3,reward:{gold:100},rewardDesc:'100 złota'}},
+  {id:'xardas',name:'Xardas',icon:'🧙‍♂️',role:'Mag (Niepokojąco Radosny)',
     lines:[
-      'O! Jeszcze zyjesz! Stawialem 3:1 ze nie. Coz, tracę zaklad z Borkiem.',
-      'Krol stworzyl Serce Otchlani z krwi i slodkiej papryki. Nie, czekaj, bez papryki. Sama krew. Mniej smaczne.',
-      'Kazdy poziom to kolejna warstwa koszmarów Serca. Ale spokojnie - najgorsze co moze sie stac to smierc. I to juz raz ci sie przydarzylo. Nie? Daj czas.',
+      'O! Jeszcze żyjesz! Stawiałem 3:1 że nie. Cóż, tracę zakład z Borkiem.',
+      'Król stworzył Serce Otchłani z krwi i słodkiej papryki. Nie, czekaj, bez papryki. Sama krew. Mniej smaczne.',
+      'Każdy poziom to kolejna warstwa koszmarów Serca. Ale spokojnie - najgorsze co może się stać to śmierć. I to już raz ci się przydarzyło. Nie? Daj czas.',
     ],
-    questLine:'Na dole pelno $MONSTER_D. Pokonaj $TARGET - to mi powie czy pieczec trzyma. Jak nie trzyma... cóz, to juz nie bedzie twoj problem. Pokaze ci mape!',
-    rewardLine:'Zyjesz! To znaczy ze pieczec trzyma. Albo ze miales KOSMALNE szczescie. Oto twoja nagroda i mapa okolicy!',
-    postQuestLine:'Wiesz ze statystycznie powinienes juz nie zyc? Nie mowie tego zeby cie zdenerwowac, mowie to bo jestem pod wrazeniem. Mam zaklad z Borkiem na twoje przezycie - nie zgin mi tu.',
-    quest:{type:'killSpecific',target:3,reward:{gold:60,revealMap:true},rewardDesc:'60 zlota + odkrycie mapy'},
+    questLine:'Na dole pełno $MONSTER_D. Pokonaj $TARGET - to mi powie czy pieczęć trzyma. Jak nie trzyma... cóż, to już nie będzie twój problem. Pokażę ci mapę!',
+    rewardLine:'Żyjesz! To znaczy że pieczęć trzyma. Albo że miałeś KOSMALNE szczęście. Oto twoja nagroda i mapa okolicy!',
+    postQuestLine:'Wiesz że statystycznie powinieneś już nie żyć? Nie mówię tego żeby cię zdenerwować, mówię to bo jestem pod wrażeniem. Mam zakład z Borkiem na twoje przeżycie - nie zgiń mi tu.',
+    quest:{type:'killSpecific',target:3,reward:{gold:60,revealMap:true},rewardDesc:'60 złota + odkrycie mapy'},
     canReveal:true},
-  {id:'kasia',name:'Kasia',icon:'👧',role:'Dziecko (Bardziej Twarde Niz Ty)',
+  {id:'kasia',name:'Kasia',icon:'👧',role:'Dziecko (Bardziej Twarde Niż Ty)',
     lines:[
-      'Szukam taty. Wlazl do lochow i nie wrocil. Typowe.',
-      'Mama mowi ze tata to bohater. Tata mowi ze mama go wygonila. Prawda jest pewnie posrodku, na 4 pietrze lochow.',
-      'Weszlam tu sama! Mam kamien i sznurek. Jestem lepiej uzbrojona niz polowa awanturnikow tu na dole.',
+      'Szukam taty. Włazł do lochów i nie wrócił. Typowe.',
+      'Mama mówi że tata to bohater. Tata mówi że mama go wygoniła. Prawda jest pewnie pośrodku, na 4 piętrze lochów.',
+      'Weszłam tu sama! Mam kamień i sznurek. Jestem lepiej uzbrojona niż połowa awanturników tu na dole.',
     ],
-    questLine:'Tata poszedl w strone $MONSTER_D. Pokonaj $TARGET z nich, to moze bedzie bezpieczniej! Prosze? Dam ci moje oszczednosci!',
-    rewardLine:'Pokonales je! Moze tata jest bezpieczniejszy! Mam tylko 30 zlota ale daje ci je wszystkie. I... *przytula*.',
-    postQuestLine:'Wiesz ze jestes teraz moim honorowym wujkiem? Nie pytalam, informuje. Wujku, jedz ostroznie na dol. Jak zginiesz to kto bedzie moim wujkiem? Myslalem?',
-    quest:{type:'killSpecific',target:2,reward:{gold:30},rewardDesc:'30 zlota + przytulenie'}},
-  {id:'aelindra',name:'Aelindra',icon:'🧝‍♀️',role:'Elfka (Jakby To Nie Bylo Jasne)',
+    questLine:'Tata poszedł w stronę $MONSTER_D. Pokonaj $TARGET z nich, to może będzie bezpieczniej! Proszę? Dam ci moje oszczędności!',
+    rewardLine:'Pokonałeś je! Może tata jest bezpieczniejszy! Mam tylko 30 złota ale daję ci je wszystkie. I... *przytula*.',
+    postQuestLine:'Wiesz że jesteś teraz moim honorowym wujkiem? Nie pytałam, informuję. Wujku, jedź ostrożnie na dół. Jak zginiesz to kto będzie moim wujkiem? Myślałeś?',
+    quest:{type:'killSpecific',target:2,reward:{gold:30},rewardDesc:'30 złota + przytulenie'}},
+  {id:'aelindra',name:'Aelindra',icon:'🧝‍♀️',role:'Elfka (Jakby To Nie Było Jasne)',
     lines:[
-      'Cicho! Sledze cos... tak naprawde to siedze tu od tygodnia i udaje ze mam plan.',
-      'Elfy pilnuja Serca Otchlani. Znaczy, pilnowaly. Teraz glownie wysylamy innych zeby pilnowali. Delegowanie!',
-      'Sciany sie ruszaja. Powoli. Jak kolejka w urzedzie. I równie przerażająco.',
+      'Cicho! Śledzę coś... tak naprawdę to siedzę tu od tygodnia i udaję że mam plan.',
+      'Elfy pilnują Serca Otchłani. Znaczy, pilnowały. Teraz głównie wysyłamy innych żeby pilnowali. Delegowanie!',
+      'Ściany się ruszają. Powoli. Jak kolejka w urzędzie. I równie przerażająco.',
     ],
-    questLine:'Te $MONSTER_PL terroryzuja okolice! Pokonaj $TARGET. Elficki lud bedzie wdzieczny. Wdzięczność elfów = dużo złota.',
-    rewardLine:'Pokonales je! Elficka Rada przeslala nagrode. Normalnie wysylaja wierszyki z podziekowaniami, ale przekonalem ich ze wolisz zloto.',
-    postQuestLine:'Musisz wiedziec ze elfy pisza o tobie piesni. Niestety, tlumaczyc nie bede bo sa w elfickim i rymuja sie ze slowem "katastrofa". To komplement. Chyba.',
-    quest:{type:'killSpecific',target:5,reward:{gold:150},rewardDesc:'150 zlota'}},
+    questLine:'Te $MONSTER_PL terroryzują okolicę! Pokonaj $TARGET. Elficki lud będzie wdzięczny. Wdzięczność elfów = dużo złota.',
+    rewardLine:'Pokonałeś je! Elficka Rada przesłała nagrodę. Normalnie wysyłają wierszyki z podziękowaniami, ale przekonałam ich że wolisz złoto.',
+    postQuestLine:'Musisz wiedzieć że elfy piszą o tobie pieśni. Niestety, tłumaczyć nie będę bo są w elfickim i rymują się ze słowem "katastrofa". To komplement. Chyba.',
+    quest:{type:'killSpecific',target:5,reward:{gold:150},rewardDesc:'150 złota'}},
   {id:'bromir',name:'Bromir',icon:'⛏️',role:'Krasnolud (Wiecznie Spragniony)',
     lines:[
-      'Ha! Ktos kto nie probuje mnie zjesc! Chodz, napij sie... czekaj, nie mam piwa. To jest KRYZYS.',
-      'Kuje broń z tego co znajde. Ostatni miecz zrobilem z latarki i nadziei. Dziala srednia.',
-      'Krasnoludy kopaly te tunele. Potem Zar\'Koth je "pozyczyl". Oddal? A wyglada jakby oddal?!',
+      'Ha! Ktoś kto nie próbuje mnie zjeść! Chodź, napij się... czekaj, nie mam piwa. To jest KRYZYS.',
+      'Kuję broń z tego co znajdę. Ostatni miecz zrobiłem z latarki i nadziei. Działa średnio.',
+      'Krasnoludy kopały te tunele. Potem Zar\'Koth je "pożyczył". Oddał? A wygląda jakby oddał?!',
     ],
-    questLine:'Potrzebuje materialow z $MONSTER_D. Pobij $TARGET - z ich szczatków wykuje cos. Pewnie miecz. Albo otwieracz do piwa.',
-    rewardLine:'Ha! Przyniosles! Z tych materialow wykuje... hmm... no dobra, za malo na miecz. Ale otwieracz wyjdzie swietny! A tak serio, oto twoja zaplata.',
-    postQuestLine:'Z reszty materialów zrobilem sobie nowy mlot kowalski. Stary zgubilam. W czyjejs glowie. Nie pytaj. Jak bedziesz potrzebowal naprawy zbroi to wpadaj. Za doplata oczywiscie.',
-    quest:{type:'killSpecific',target:4,reward:{gold:70},rewardDesc:'70 zlota + niespodzianka'}},
-  {id:'aldric',name:'Sir Aldric',icon:'👻',role:'Duch (1-gwiazdkowa recenzja zycia)',
+    questLine:'Potrzebuję materiałów z $MONSTER_D. Pobij $TARGET - z ich szczątków wykuję coś. Pewnie miecz. Albo otwieracz do piwa.',
+    rewardLine:'Ha! Przyniosłeś! Z tych materiałów wykuję... hmm... no dobra, za mało na miecz. Ale otwieracz wyjdzie świetny! A tak serio, oto twoja zapłata.',
+    postQuestLine:'Z reszty materiałów zrobiłem sobie nowy młot kowalski. Stary zgubiłem. W czyjejś głowie. Nie pytaj. Jak będziesz potrzebował naprawy zbroi to wpadaj. Za dopłatą oczywiście.',
+    quest:{type:'killSpecific',target:4,reward:{gold:70},rewardDesc:'70 złota + niespodzianka'}},
+  {id:'aldric',name:'Sir Aldric',icon:'👻',role:'Duch (1-gwiazdkowa recenzja życia)',
     lines:[
-      'Jestem duchem. Tak, wiem, zaskoczenie. Umarlem tu 300 lat temu i nadal nie dostałem zwrotu za zbroję.',
-      'Sluzylam krolowi. Patrzylam jak tworzy Serce Otchlani. Potem umarlam. 2/10, nie polecam.',
-      'Blakam sie tu wiecznie. Przynajmniej nie place czynszu. Jedyny plus bycia duchem.',
+      'Jestem duchem. Tak, wiem, zaskoczenie. Umarłem tu 300 lat temu i nadal nie dostałem zwrotu za zbroję.',
+      'Służyłem królowi. Patrzyłem jak tworzy Serce Otchłani. Potem umarłem. 2/10, nie polecam.',
+      'Błąkam się tu wiecznie. Przynajmniej nie płacę czynszu. Jedyny plus bycia duchem.',
     ],
-    questLine:'Te $MONSTER_PL nie daja mi spokoju. Pokonaj $TARGET i moze wreszcie bede miec cisze. Nie spieszę sie, mam wiecznosc.',
-    rewardLine:'Spokój! Czuje jak moja dusza lzejsza... o 50 zlota. Tak, duch moze miec zloto. Nie pytaj o logike zaswiatow.',
-    postQuestLine:'Wiesz, od kiedy mi pomogles czuje sie lepiej. Dalej jestem martwy, ale przynajmniej mam pozytywne nastawienie. Polecam smierc - zero rachunkow, zero stresow. No, poza wiecznym bledoniem sie.',
-    quest:{type:'killSpecific',target:3,reward:{gold:50},rewardDesc:'50 zlota + blogoslawienstwo'}},
+    questLine:'Te $MONSTER_PL nie dają mi spokoju. Pokonaj $TARGET i może wreszcie będę mieć ciszę. Nie śpieszę się, mam wieczność.',
+    rewardLine:'Spokój! Czuję jak moja dusza lżejsza... o 50 złota. Tak, duch może mieć złoto. Nie pytaj o logikę zaświatów.',
+    postQuestLine:'Wiesz, od kiedy mi pomogłeś czuję się lepiej. Dalej jestem martwy, ale przynajmniej mam pozytywne nastawienie. Polecam śmierć - zero rachunków, zero stresów. No, poza wiecznym błądzeniem.',
+    quest:{type:'killSpecific',target:3,reward:{gold:50},rewardDesc:'50 złota + błogosławieństwo'}},
+];
+
+// ===================== MAIN STORYLINE =====================
+const MAIN_STORY = [
+  {id:1, title:'Pierwszy Krok', type:'reachLevel', target:3,
+    objectiveDesc:'Zejdź na poziom 3',
+    introText:'Korupcja spod ruin pałacu Zar\'Kotha sięga już na powierzchnię. Rada Srebrnego Świtu wysłała cię — najmłodszego adepta — na rekonesans. "Zejdź, zobacz co tam jest, i wróć żywy" — powiedzieli. Łatwo powiedzieć.',
+    progressText:'Pierwsze poziomy pełne robactwa. Coś je tu przyciąga... coś z głębi.',
+    completeText:'Korytarze robią się ciemniejsze. Słyszysz dziwne dudnienie z dołu... jak bicie serca. Musisz iść głębiej.',
+    reward:{gold:50}, rewardDesc:'50 złota'},
+  {id:2, title:'Mroczne Korytarze', type:'killCount', target:10,
+    objectiveDesc:'Pokonaj 10 potworów',
+    introText:'Droga w głąb jest zablokowana przez hordy bestii. Musisz przebić się przez nie siłą.',
+    progressText:'Każdy pokonany potwór to krok bliżej prawdy o korupcji.',
+    completeText:'Droga wolna... na razie. W szczątkach potworów znalazłeś dziwne czarne odłamki. Pulsują jak... żywe.',
+    reward:{gold:80}, rewardDesc:'80 złota'},
+  {id:3, title:'Zaginiony Zwiadowca', type:'reachLevel', target:6,
+    objectiveDesc:'Zejdź na poziom 6',
+    introText:'Zwiadowca Taren został wysłany przed tobą i nie wrócił. Jego ostatni meldunek mówił o "pulsującym mroku" na poziomie 6.',
+    progressText:'Z każdym poziomem powietrze gęstnieje od mrocznej magii.',
+    completeText:'Znalazłeś notatnik Tarena. Ostatni wpis: "Pieczęcie pękają. Coś się budzi. Nie wracam - muszę to zobaczyć." Reszta stron jest pusta... i zimna.',
+    reward:{gold:100,revealMap:true}, rewardDesc:'100 złota + mapa'},
+  {id:4, title:'Złamane Pieczęcie', type:'killCount', target:15,
+    objectiveDesc:'Pokonaj 15 potworów',
+    introText:'Stare pieczęcie trzymające korupcję w ryzach pękają. Silniejsze potwory noszą ich fragmenty — zabij je i odzyskaj odłamki.',
+    progressText:'Fragmenty pieczęci wirują w twoich dłoniach... ale są zbyt zniszczone by je naprawić.',
+    completeText:'Zebrane fragmenty rozsypują się w proch. Pieczęć jest złamana nieodwracalnie. Jedyna nadzieja: zniszcz źródło — Serce Otchłani na samym dnie.',
+    reward:{gold:150}, rewardDesc:'150 złota'},
+  {id:5, title:'Ciemne Głębiny', type:'reachLevel', target:9,
+    objectiveDesc:'Zejdź na poziom 9',
+    introText:'Gdzieś na poziomie 9 Zakon miał ukrytą placówkę. Może znajdziesz tam pomoc... albo to co z niej zostało.',
+    progressText:'Im głębiej, tym silniejsze bestie. I tym dziwniejsze szepty w ciemności.',
+    completeText:'Placówka Zakonu jest opuszczona. Ale zostawili zapasy i... ostrzeżenie: "Serce bije mocniej z każdym dniem. Nie pozwólcie mu się obudzić." Za późno na to.',
+    reward:{gold:200,healFull:true}, rewardDesc:'200 złota + pełne leczenie'},
+  {id:6, title:'Klątwa Mroku', type:'killCount', target:20,
+    objectiveDesc:'Pokonaj 20 potworów',
+    introText:'Korupcja zmienia potwory w coś gorszego — szybszego, silniejszego, wścieklejszego. Musisz przebić się przez fale bestii.',
+    progressText:'Z każdym zabitym potworem czujesz, jak korupcja osłabła... odrobinę.',
+    completeText:'Czarne odłamki zebrane z potworów zaczynają świecić słabym światłem. Jakby coś w tobie odpowiadało na korupcję. To... chyba dobrze?',
+    reward:{gold:250}, rewardDesc:'250 złota'},
+  {id:7, title:'Brama Otchłani', type:'reachLevel', target:13,
+    objectiveDesc:'Zejdź na poziom 13',
+    introText:'Na poziomie 13 znajduje się Brama Otchłani — starożytne wrota zbudowane przez Zar\'Kotha. To przez nie korupcja spływa w głąb świata.',
+    progressText:'Ściany trzeszczą od energii. Coś za Bramą czeka...',
+    completeText:'Brama jest otwarta na oścież. Za nią — morze ciemności. Ale też... słaby blask. Coś tam jest. Coś co chce być znalezione.',
+    reward:{gold:300,revealMap:true}, rewardDesc:'300 złota + mapa'},
+  {id:8, title:'Armia Ciemności', type:'killCount', target:25,
+    objectiveDesc:'Pokonaj 25 potworów',
+    introText:'Za Bramą czeka armia mroku — strażnicy Serca Otchłani. Nie przepuszczą nikogo. Będziesz musiał ich pokonać wszystkich.',
+    progressText:'Strażnicy padają, ale wciąż nadciągają nowi. Ile ich tu jest?!',
+    completeText:'Armia słabnie. Czujesz, że Serce Otchłani jest blisko — jego pulsowanie wypełnia powietrze. Dwa, może trzy poziomy dalej.',
+    reward:{gold:400,healFull:true}, rewardDesc:'400 złota + pełne leczenie'},
+  {id:9, title:'Korytarz Śmierci', type:'reachLevel', target:18,
+    objectiveDesc:'Zejdź na poziom 18',
+    introText:'Ostatnie poziomy przed Sercem to korytarz śmierci — pełno najpotężniejszych strażników jakich widział ten świat. Nikt tu nigdy nie dotarł.',
+    progressText:'Ściany płoną ciemnym ogniem. Podłoga drży. Jesteś pierwszy od tysiącleci.',
+    completeText:'Jesteś blisko. Pulsowanie Serca jest tak silne, że czujesz je w kościach. Jeszcze dwa poziomy. Tam kończy się ta historia — tak albo inaczej.',
+    reward:{gold:500}, rewardDesc:'500 złota'},
+  {id:10, title:'Serce Otchłani', type:'reachLevel', target:20,
+    objectiveDesc:'Zejdź na poziom 20 i zniszcz Serce',
+    introText:'To jest to. Dno lochów. Poziom 20. Serce Otchłani czeka — pulsujące, potężne, głodne. Zniszcz je, a korupcja ustanie. Polegnij, a świat zapłacze. Krótko.',
+    progressText:'Serce bije tuż za ścianą. Czujesz jego żar...',
+    completeText:'SERCE OTCHŁANI ZOSTAŁO ZNISZCZONE! Ciemność ustępuje jak mgła o poranku. Korytarze rozjaśniają się. Potwory uciekają. Zar\'Koth krzyczy w pustkę — jego klątwa została złamana! Jesteś bohaterem... i wciąż żywym. To najlepsza część.',
+    reward:{gold:1000}, rewardDesc:'1000 złota + ZWYCIĘSTWO'},
 ];
 
 function getItemPrice(item) {
@@ -916,9 +1054,12 @@ function newGame() {
     levelNodes: {}, // nodeId -> {depth, parentId, board, boardW, boardH, mapMask, playerPos, treasurePos}
     currentNodeId: '1',
     nextNodeCounter: 2,
+    // Main storyline
+    mainQuest: {stage: 0, progress: 0},
+    questCompletePopup: null,
   };
   game.levelNodes['1'] = {depth: 1, parentId: null};
-  generateBoard();
+  game.screen = 'intro';
   render();
 }
 
@@ -1006,16 +1147,20 @@ function generateBoard() {
   }
 
   // Available monsters - weighted by tier to keep early levels manageable
-  const maxTier = lvl <= 1 ? 1 : lvl <= 2 ? 2 : lvl <= 4 ? 3 : lvl <= 6 ? 4 : 5;
+  const maxTier = lvl <= 1 ? 1 : lvl <= 2 ? 2 : lvl <= 4 ? 3 : lvl <= 6 ? 4 : lvl <= 8 ? 5 : lvl <= 10 ? 6 : lvl <= 12 ? 7 : lvl <= 14 ? 8 : lvl <= 17 ? 9 : 10;
   const availableMonsters = [];
   MONSTER_TEMPLATES.forEach(m => {
     if (m.tier > maxTier) return;
-    // Lower tiers appear more often at early levels
     let weight = 1;
-    if (lvl <= 2) weight = m.tier <= 1 ? 3 : 1; // level 1-2: mostly weak
-    else if (lvl <= 4) weight = m.tier <= 1 ? 1 : m.tier <= 2 ? 3 : m.tier <= 3 ? 2 : 1; // level 3-4: mid focus
-    else if (lvl <= 6) weight = m.tier <= 2 ? 1 : m.tier <= 3 ? 3 : 2; // level 5-6: harder monsters
-    else weight = m.tier <= 2 ? 1 : m.tier <= 3 ? 2 : m.tier <= 4 ? 3 : 2; // level 7+: hardest focus
+    if (lvl <= 2) weight = m.tier <= 1 ? 3 : 1;
+    else if (lvl <= 4) weight = m.tier <= 1 ? 1 : m.tier <= 2 ? 3 : m.tier <= 3 ? 2 : 1;
+    else if (lvl <= 6) weight = m.tier <= 2 ? 1 : m.tier <= 3 ? 3 : m.tier <= 4 ? 2 : 1;
+    else if (lvl <= 8) weight = m.tier <= 3 ? 1 : m.tier <= 4 ? 2 : m.tier <= 5 ? 3 : m.tier <= 6 ? 2 : 1;
+    else if (lvl <= 10) weight = m.tier <= 4 ? 1 : m.tier <= 5 ? 2 : m.tier <= 6 ? 3 : m.tier <= 7 ? 2 : 1;
+    else if (lvl <= 12) weight = m.tier <= 5 ? 1 : m.tier <= 6 ? 2 : m.tier <= 7 ? 3 : m.tier <= 8 ? 2 : 1;
+    else if (lvl <= 14) weight = m.tier <= 6 ? 1 : m.tier <= 7 ? 2 : m.tier <= 8 ? 3 : m.tier <= 9 ? 2 : 1;
+    else if (lvl <= 17) weight = m.tier <= 7 ? 1 : m.tier <= 8 ? 2 : m.tier <= 9 ? 3 : 2;
+    else weight = m.tier <= 8 ? 1 : m.tier <= 9 ? 2 : 3; // level 18+: tier 10 focus
     for (let i = 0; i < weight; i++) availableMonsters.push(m);
   });
 
@@ -1038,8 +1183,9 @@ function generateBoard() {
     return null;
   };
 
-  const scale = 1 + (lvl - 1) * 0.25;
-  const atkScale = 1 + (lvl - 1) * 0.3;
+  // Slower scaling for deep levels to prevent impossible stats
+  const scale = lvl <= 6 ? 1 + (lvl - 1) * 0.25 : 2.25 + (lvl - 6) * 0.12;
+  const atkScale = lvl <= 6 ? 1 + (lvl - 1) * 0.3 : 2.5 + (lvl - 6) * 0.15;
   let placed = 0, attempts = 0;
   while (placed < monsterCount && attempts < 500) {
     let p;
@@ -1071,11 +1217,16 @@ function generateBoard() {
         if (lvl <= 3) return b.tier <= 2;
         if (lvl <= 5) return b.tier <= 3;
         if (lvl <= 7) return b.tier <= 4;
+        if (lvl <= 9) return b.tier <= 5;
+        if (lvl <= 11) return b.tier <= 6;
+        if (lvl <= 13) return b.tier <= 7;
+        if (lvl <= 15) return b.tier <= 8;
+        if (lvl <= 17) return b.tier <= 9;
         return true;
       });
       const bossTemplate = pick(availBosses);
-      const bossScale = 1 + (lvl - 1) * 0.25;
-      const bossAtkScale = 1 + (lvl - 1) * 0.30;
+      const bossScale = lvl <= 6 ? 1 + (lvl - 1) * 0.25 : 2.25 + (lvl - 6) * 0.12;
+      const bossAtkScale = lvl <= 6 ? 1 + (lvl - 1) * 0.3 : 2.5 + (lvl - 6) * 0.15;
       board[bp.y][bp.x].type = 'monster';
       board[bp.y][bp.x].monster = {
         ...bossTemplate,
@@ -1409,13 +1560,13 @@ function movePlayer(x, y) {
     game.goldCollected += amt;
     cell.type = 'empty';
     cell.goldAmount = 0;
-    addLog(`Znaleziono ${amt} zlota!`, 'good');
+    addLog(`Znaleziono ${amt} złota!`, 'good');
     playSfx('pickup');
     // 15% chance to find Luneta Zwiadowcy
     if(Math.random() < 0.15){
       const mc = MAP_CONSUMABLES.find(c=>c.id==='spyglass');
       game.consumables.push({id:mc.id,name:mc.name,icon:mc.icon,desc:mc.desc});
-      addLog(`${mc.icon} Znaleziono ${mc.name} w zlotym stosie!`,'info');
+      addLog(`${mc.icon} Znaleziono ${mc.name} w złotym stosie!`,'info');
     }
     revealSafeNeighbors(x, y);
     render();
@@ -1453,9 +1604,10 @@ function movePlayer(x, y) {
     }
     game.currentNodeId = targetNodeId;
     game.level = game.levelNodes[targetNodeId].depth;
+    checkMainQuestProgress();
     game.screen = 'levelcomplete';
     playSfx('levelup');
-    addLog(`Znaleziono wyjscie! Poziom ${game.level} ---`, 'good');
+    addLog(`Znaleziono wyjście! Poziom ${game.level} ---`, 'good');
     render();
     return;
   }
@@ -1535,6 +1687,20 @@ function startCombat(monster, cx, cy) {
   const stats = getPlayerStats();
   game.screen = 'combat';
   startCombatMusic();
+  // Pack monster setup
+  const isPack = monster.packSize && monster.packSize > 1;
+  const packCount = isPack ? monster.packSize : 1;
+  const unitHp = isPack ? Math.ceil(monster.hp / packCount) : monster.hp;
+  const packUnits = [];
+  for (let i = 0; i < packCount; i++) {
+    const spread = packCount > 1 ? (i - (packCount-1)/2) * 80 : 0;
+    packUnits.push({
+      x: 250 + spread, y: 80 + (Math.random()-0.5)*30,
+      vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.3,
+      hp: unitHp, maxHp: unitHp, alive: true,
+      moveTimer: Math.random()*2000, icon: monster.icon
+    });
+  }
   combatState = {
     monster: {...monster},
     monsterMaxHp: monster.maxHp || monster.hp,
@@ -1544,11 +1710,21 @@ function startCombat(monster, cx, cy) {
     phaseTimer: 0,
     phaseText: '',
     // player in arena
-    px: 250, py: 250,
+    px: 250, py: 280,
     pSize: 12,
     pSpeed: 2 + stats.dodgeSpd * 0.3,
     pInvincible: 0,
     pVisible: true,
+    // monster position (main/single)
+    mx: 250, my: 80,
+    mVx: 0, mVy: 0,
+    mMoveTimer: 0,
+    // pack monsters
+    isPack: isPack,
+    packUnits: packUnits,
+    // melee range (timing/rapid/charge = melee, magic = ranged)
+    meleeRange: 120,
+    isMelee: ['timing','rapid','charge'].includes((game.equipment.weapon && game.equipment.weapon.atkType) || 'timing'),
     // projectiles
     projectiles: [],
     // attack bar
@@ -1699,7 +1875,18 @@ function updateDodgePhase(dt) {
   if (cs.burning) {
     cs.burnTimer -= dt;
     if (cs.burnTimer <= 0) {
-      cs.monster.hp -= cs.burnDamage;
+      if (cs.isPack) {
+        // Burn damages a random alive unit
+        const alive = cs.packUnits.filter(u=>u.alive);
+        if (alive.length > 0) {
+          const t = alive[Math.floor(Math.random()*alive.length)];
+          t.hp -= cs.burnDamage;
+          if (t.hp <= 0) { t.hp = 0; t.alive = false; }
+          cs.monster.hp = cs.packUnits.reduce((s,u)=>s+(u.alive?u.hp:0),0);
+        }
+      } else {
+        cs.monster.hp -= cs.burnDamage;
+      }
       cs.burnTimer = 1000;
       if (cs.monster.hp <= 0) {
         combatVictory();
@@ -1772,22 +1959,57 @@ function updateDodgePhase(dt) {
   cs.px = clamp(cs.px, cs.pSize, 500 - cs.pSize);
   cs.py = clamp(cs.py, cs.pSize, 350 - cs.pSize);
 
+  // Monster movement AI
+  const mSpd = 0.3 + cs.monster.spd * 0.08;
+  if (cs.isPack) {
+    cs.packUnits.forEach(u => {
+      if (!u.alive) return;
+      u.moveTimer -= dt;
+      if (u.moveTimer <= 0) {
+        u.moveTimer = 1200 + Math.random()*1500;
+        u.vx = (Math.random()-0.5) * mSpd * 2;
+        u.vy = (Math.random()-0.5) * mSpd * 1.5;
+      }
+      u.x += u.vx * dt * 0.08;
+      u.y += u.vy * dt * 0.08;
+      u.x = clamp(u.x, 30, 470);
+      u.y = clamp(u.y, 25, 200);
+    });
+  } else {
+    cs.mMoveTimer -= dt;
+    if (cs.mMoveTimer <= 0) {
+      cs.mMoveTimer = 1500 + Math.random()*2000;
+      cs.mVx = (Math.random()-0.5) * mSpd * 2;
+      cs.mVy = (Math.random()-0.5) * mSpd * 1.5;
+    }
+    cs.mx += cs.mVx * dt * 0.08;
+    cs.my += cs.mVy * dt * 0.08;
+    cs.mx = clamp(cs.mx, 40, 460);
+    cs.my = clamp(cs.my, 30, 190);
+  }
+
   // Spawn projectiles
   const pattern = cs.monster.patterns[cs.attackPatternIndex % cs.monster.patterns.length];
   const interval = cs.frozen ? pattern.interval * 1.8 : pattern.interval;
 
   if (cs.spawnTimer >= interval && !isStunned) {
     cs.spawnTimer = 0;
-    spawnProjectiles(pattern);
-    // Always add one projectile aimed directly at the player
-    const angle = Math.atan2(cs.py - 30, cs.px - 250);
-    const aimSpd = (pattern.speed || 80) * 1.3;
-    cs.projectiles.push({
-      x: 250, y: 30,
-      vx: Math.cos(angle) * aimSpd / 60,
-      vy: Math.sin(angle) * aimSpd / 60,
-      size: pattern.projSize || 6, age: 0, movement: 'linear'
-    });
+    if (cs.isPack) {
+      // Each alive pack unit spawns projectiles from its position
+      cs.packUnits.forEach(u => {
+        if (!u.alive) return;
+        spawnProjectiles(pattern, u.x, u.y);
+        const angle = Math.atan2(cs.py - u.y, cs.px - u.x);
+        const aimSpd = (pattern.speed || 80) * 1.3;
+        cs.projectiles.push({x:u.x,y:u.y,vx:Math.cos(angle)*aimSpd/60,vy:Math.sin(angle)*aimSpd/60,size:pattern.projSize||6,age:0,movement:'linear'});
+      });
+    } else {
+      spawnProjectiles(pattern, cs.mx, cs.my);
+      // Always add one projectile aimed directly at the player
+      const angle = Math.atan2(cs.py - cs.my, cs.px - cs.mx);
+      const aimSpd = (pattern.speed || 80) * 1.3;
+      cs.projectiles.push({x:cs.mx,y:cs.my,vx:Math.cos(angle)*aimSpd/60,vy:Math.sin(angle)*aimSpd/60,size:pattern.projSize||6,age:0,movement:'linear'});
+    }
   }
 
   // Update projectiles
@@ -1913,9 +2135,12 @@ function updateDodgePhase(dt) {
   }
 }
 
-function spawnProjectiles(pattern) {
+function spawnProjectiles(pattern, ox, oy) {
   const cs = combatState;
   const arenaW = 500, arenaH = 350;
+  // ox, oy = origin position (monster or pack unit)
+  const mx = ox || cs.mx || arenaW/2;
+  const my = oy || cs.my || 80;
 
   switch (pattern.type) {
     case 'scatter': {
@@ -1923,8 +2148,8 @@ function spawnProjectiles(pattern) {
         const angle = Math.random() * Math.PI * 2;
         const spd = pattern.speed * (0.8 + Math.random() * 0.4);
         cs.projectiles.push({
-          x: arenaW/2 + (Math.random()-.5)*100,
-          y: 30 + Math.random()*30,
+          x: mx + (Math.random()-.5)*60,
+          y: my + Math.random()*20,
           vx: Math.cos(angle) * spd / 60,
           vy: Math.sin(angle) * spd / 60 + 1,
           size: pattern.projSize, age: 0, movement: 'linear'
@@ -1933,11 +2158,10 @@ function spawnProjectiles(pattern) {
       break;
     }
     case 'burst': {
-      const cx = arenaW/2, cy = 50;
       for (let i = 0; i < pattern.count; i++) {
         const angle = (i / pattern.count) * Math.PI * 2 + Math.random() * 0.3;
         cs.projectiles.push({
-          x: cx, y: cy,
+          x: mx, y: my,
           vx: Math.cos(angle) * pattern.speed / 60,
           vy: Math.sin(angle) * pattern.speed / 60,
           size: pattern.projSize, age: 0, movement: 'linear'
@@ -1947,11 +2171,11 @@ function spawnProjectiles(pattern) {
     }
     case 'fan': {
       const arc = (pattern.arc || 60) * Math.PI / 180;
-      const baseAngle = Math.atan2(cs.py - 30, cs.px - arenaW/2);
+      const baseAngle = Math.atan2(cs.py - my, cs.px - mx);
       for (let i = 0; i < pattern.count; i++) {
         const a = baseAngle - arc/2 + (i / (pattern.count-1)) * arc;
         cs.projectiles.push({
-          x: arenaW/2, y: 30,
+          x: mx, y: my,
           vx: Math.cos(a) * pattern.speed / 60,
           vy: Math.sin(a) * pattern.speed / 60,
           size: pattern.projSize, age: 0, movement: 'linear'
@@ -1976,7 +2200,7 @@ function spawnProjectiles(pattern) {
       for (let i = 0; i < pattern.count; i++) {
         const a = baseAngle + (i / pattern.count) * Math.PI * 2;
         cs.projectiles.push({
-          x: arenaW/2, y: arenaH/3,
+          x: mx, y: my,
           vx: Math.cos(a) * pattern.speed / 60,
           vy: Math.sin(a) * pattern.speed / 60,
           size: pattern.projSize, age: 0, movement: 'linear'
@@ -2005,11 +2229,11 @@ function spawnProjectiles(pattern) {
     }
     case 'wave': {
       for (let i = 0; i < pattern.count; i++) {
-        const angle = Math.atan2(cs.py - 30, cs.px - arenaW/2) + (i - pattern.count/2) * 0.3;
+        const angle = Math.atan2(cs.py - my, cs.px - mx) + (i - pattern.count/2) * 0.3;
         const vx = Math.cos(angle) * pattern.speed / 60;
         const vy = Math.sin(angle) * pattern.speed / 60;
         cs.projectiles.push({
-          x: arenaW/2, y: 30,
+          x: mx, y: my,
           vx, vy, baseVx: vx, baseVy: vy,
           size: pattern.projSize, age: 0, movement: 'wave',
           amplitude: pattern.amplitude || 30, wavePhase: i * 1.5
@@ -2018,9 +2242,9 @@ function spawnProjectiles(pattern) {
       break;
     }
     case 'charge': {
-      const angle = Math.atan2(cs.py - arenaH/3, cs.px - arenaW/2);
+      const angle = Math.atan2(cs.py - my, cs.px - mx);
       cs.projectiles.push({
-        x: arenaW/2, y: arenaH/3,
+        x: mx, y: my,
         vx: Math.cos(angle) * pattern.speed / 60,
         vy: Math.sin(angle) * pattern.speed / 60,
         size: pattern.projSize * 2, age: 0, movement: 'linear'
@@ -2042,17 +2266,19 @@ function spawnProjectiles(pattern) {
     }
     case 'beam': {
       cs.beamActive = true;
-      cs.beamAngle = Math.atan2(cs.py - arenaH/3, cs.px - arenaW/2);
+      cs.beamAngle = Math.atan2(cs.py - my, cs.px - mx);
       cs.beamTimer = pattern.duration || 1500;
       cs.beamSpeed = pattern.speed || 1.5;
       cs.beamDamage = cs.monster.atk;
+      cs.beamOx = mx;
+      cs.beamOy = my;
       break;
     }
     case 'shockwave': {
       for (let i = 0; i < 16; i++) {
         const a = (i / 16) * Math.PI * 2;
         cs.projectiles.push({
-          x: arenaW/2, y: arenaH/2,
+          x: mx, y: my,
           vx: Math.cos(a) * pattern.speed / 60,
           vy: Math.sin(a) * pattern.speed / 60,
           size: pattern.projSize, age: 0, movement: 'linear'
@@ -2089,6 +2315,33 @@ function spawnProjectiles(pattern) {
 function updateAttackPhase(dt) {
   const cs = combatState;
   const at = cs.atkType;
+
+  // Allow player movement during attack phase for melee weapons
+  if (cs.isMelee) {
+    const spd = cs.pSpeed * 0.7; // slightly slower during attack
+    if (cs.keys['ArrowLeft'] || cs.keys['KeyA']) cs.px -= spd * dt * 0.25;
+    if (cs.keys['ArrowRight'] || cs.keys['KeyD']) cs.px += spd * dt * 0.25;
+    if (cs.keys['ArrowUp'] || cs.keys['KeyW']) cs.py -= spd * dt * 0.25;
+    if (cs.keys['ArrowDown'] || cs.keys['KeyS']) cs.py += spd * dt * 0.25;
+    cs.px = clamp(cs.px, cs.pSize, 500 - cs.pSize);
+    cs.py = clamp(cs.py, cs.pSize, 350 - cs.pSize);
+  }
+
+  // Monster keeps moving during attack phase
+  if (cs.isPack) {
+    cs.packUnits.forEach(u => {
+      if (!u.alive) return;
+      u.x += u.vx * dt * 0.05;
+      u.y += u.vy * dt * 0.05;
+      u.x = clamp(u.x, 30, 470);
+      u.y = clamp(u.y, 25, 200);
+    });
+  } else {
+    cs.mx += cs.mVx * dt * 0.05;
+    cs.my += cs.mVy * dt * 0.05;
+    cs.mx = clamp(cs.mx, 40, 460);
+    cs.my = clamp(cs.my, 30, 190);
+  }
 
   if (at === 'timing' && cs.attackReady) {
     cs.timingTimer += dt;
@@ -2178,6 +2431,20 @@ function finishAttack() {
 function dealDamage(multiplier, qualityText) {
   const cs = combatState;
   if (!cs) return;
+  // Melee range check - if melee weapon and too far from nearest monster, no damage
+  if (cs.isMelee && multiplier > 0) {
+    let tgtX = cs.mx, tgtY = cs.my;
+    if (cs.isPack) {
+      let nearDist = Infinity;
+      cs.packUnits.forEach(u => { if (!u.alive) return; const d=Math.sqrt((cs.px-u.x)**2+(cs.py-u.y)**2); if(d<nearDist){nearDist=d;tgtX=u.x;tgtY=u.y;} });
+    }
+    const dist = Math.sqrt((cs.px-tgtX)**2 + (cs.py-tgtY)**2);
+    if (dist > cs.meleeRange) {
+      multiplier = 0;
+      qualityText = 'Za daleko!';
+      cs.floatingDmg.push({x:cs.px,y:cs.py-20,text:'POZA ZASIĘGIEM!',color:'#ff4444',age:0});
+    }
+  }
   if (multiplier <= 0) playSfx('miss');
   else if (multiplier >= 1.5) playSfx('crit');
   else playSfx('attack');
@@ -2187,7 +2454,7 @@ function dealDamage(multiplier, qualityText) {
   if (cs.rageActive) baseDmg = Math.floor(baseDmg * 1.5);
   const monDef = Math.max(0, cs.monster.def - cs.defReduction);
   const rawDmg = Math.floor(baseDmg * multiplier);
-  let damage = Math.max(1, rawDmg - monDef);
+  let damage = Math.max(multiplier > 0 ? 1 : 0, rawDmg - monDef);
 
   // Life steal
   if (stats.abilities.includes('lifeSteal')) {
@@ -2195,12 +2462,35 @@ function dealDamage(multiplier, qualityText) {
     game.player.hp = Math.min(stats.maxHp, game.player.hp + heal);
   }
 
-  cs.monster.hp -= damage;
+  // Pack monster: damage nearest alive unit
+  if (cs.isPack && damage > 0) {
+    let nearest = null, nearDist = Infinity;
+    cs.packUnits.forEach(u => {
+      if (!u.alive) return;
+      const d = Math.sqrt((cs.px-u.x)**2 + (cs.py-u.y)**2);
+      if (d < nearDist) { nearDist = d; nearest = u; }
+    });
+    if (nearest) {
+      nearest.hp -= damage;
+      cs.floatingDmg.push({x:nearest.x+(Math.random()-0.5)*30,y:nearest.y-10,text:`-${damage}`,color:multiplier>=1.5?'#ffdd00':'#44ff44',age:0});
+      if (nearest.hp <= 0) {
+        nearest.hp = 0;
+        nearest.alive = false;
+        addLog(`Jedna z ${cs.monster.name} pada!`, 'good');
+      }
+      // Update total monster HP = sum of alive units
+      cs.monster.hp = cs.packUnits.reduce((s,u) => s + (u.alive ? u.hp : 0), 0);
+    }
+  } else {
+    cs.monster.hp -= damage;
+    const fdx = cs.mx;
+    const fdy = cs.my;
+    cs.floatingDmg.push({x: fdx + (Math.random()-0.5)*40, y: fdy + (Math.random()-0.5)*20, text: `-${damage}`, color: multiplier >= 1.5 ? '#ffdd00' : '#44ff44', age: 0});
+  }
   cs.phaseText = `${qualityText} -${damage} HP`;
   cs.dmgLog = `Zadano ${damage} (sila:${baseDmg} x${Math.round(multiplier*100)}% = ${rawDmg} - obr:${monDef})`;
   cs.dmgLogTimer = 3000;
   cs.combatJournal.push({type:'dealt', text:`${qualityText} -${damage} (sila ${baseDmg} x${Math.round(multiplier*100)}% - obr ${monDef})`, color: multiplier >= 1.5 ? '#ffdd00' : '#44ff44'});
-  cs.floatingDmg.push({x: 250 + (Math.random()-0.5)*60, y: 50 + (Math.random()-0.5)*30, text: `-${damage}`, color: multiplier >= 1.5 ? '#ffdd00' : '#44ff44', age: 0});
   cs.phaseTimer = 0;
 
   // Apply weapon on-hit debuff
@@ -2233,6 +2523,28 @@ function dealDamage(multiplier, qualityText) {
   }, 800);
 }
 
+// Helper: apply direct damage to monster/pack, returns true if monster dies
+function applyDirectDamage(dmg) {
+  const cs = combatState;
+  if (!cs) return false;
+  if (cs.isPack) {
+    const alive = cs.packUnits.filter(u=>u.alive);
+    if (alive.length > 0) {
+      // Damage nearest alive unit to player
+      let nearest = alive[0], nd = Infinity;
+      alive.forEach(u => { const d=Math.sqrt((cs.px-u.x)**2+(cs.py-u.y)**2); if(d<nd){nd=d;nearest=u;} });
+      nearest.hp -= dmg;
+      cs.floatingDmg.push({x:nearest.x,y:nearest.y-10,text:`-${dmg}`,color:'#bb88ff',age:0});
+      if (nearest.hp <= 0) { nearest.hp = 0; nearest.alive = false; }
+      cs.monster.hp = cs.packUnits.reduce((s,u)=>s+(u.alive?u.hp:0),0);
+    }
+  } else {
+    cs.monster.hp -= dmg;
+    cs.floatingDmg.push({x:cs.mx+(Math.random()-.5)*30,y:cs.my-10,text:`-${dmg}`,color:'#bb88ff',age:0});
+  }
+  return cs.monster.hp <= 0;
+}
+
 function useAbility(abilityId) {
   if (!combatState) return;
   const cs = combatState;
@@ -2247,7 +2559,7 @@ function useAbility(abilityId) {
   switch (abilityId) {
     case 'magicBolt': {
       const dmg = Math.max(1, Math.floor(stats.str * 1.5) - cs.monster.def);
-      cs.monster.hp -= dmg;
+      if (applyDirectDamage(dmg)) { setTimeout(()=>combatVictory(),400); return; }
       cs.phaseText = `Mag. Pocisk! -${dmg}`;
       cs.phaseTimer = 0;
       break;
@@ -2267,7 +2579,7 @@ function useAbility(abilityId) {
       break;
     case 'holyStrike': {
       const dmg = Math.max(1, Math.floor(stats.str * 2) - cs.monster.def);
-      cs.monster.hp -= dmg;
+      if (applyDirectDamage(dmg)) { setTimeout(()=>combatVictory(),400); return; }
       game.player.hp = Math.min(stats.maxHp, game.player.hp + Math.floor(dmg * 0.3));
       cs.phaseText = `Sw. Cios! -${dmg}`;
       cs.phaseTimer = 0;
@@ -2275,7 +2587,7 @@ function useAbility(abilityId) {
     }
     case 'meteor': {
       const dmg = Math.max(1, Math.floor(stats.str * 3) - cs.monster.def);
-      cs.monster.hp -= dmg;
+      if (applyDirectDamage(dmg)) { setTimeout(()=>combatVictory(),400); return; }
       cs.phaseText = `METEOR! -${dmg}`;
       cs.phaseTimer = 0;
       break;
@@ -2423,6 +2735,11 @@ function combatVictory() {
   combatState.phase = 'victory';
   playSfx('victory');
   game.monstersKilled++;
+  // Main quest kill tracking
+  if (game.mainQuest && game.mainQuest.stage < MAIN_STORY.length) {
+    const mq = MAIN_STORY[game.mainQuest.stage];
+    if (mq && mq.type === 'killCount') game.mainQuest.progress++;
+  }
   const isBoss = combatState.monster.isBoss;
   const goldDrop = isBoss ? combatState.monster.danger * rng(8, 15) + rng(10, 30) : combatState.monster.danger * rng(2, 5) + rng(1, 6);
   game.gold += goldDrop;
@@ -2441,9 +2758,10 @@ function combatVictory() {
     if(q.type==='killSpecific' && q.targetMonster === killedName) q.progress++;
   });
   checkQuestCompletion();
+  checkMainQuestProgress();
 
   if (isBoss) {
-    addLog(`BOSS POKONANY: ${combatState.monster.icon} ${combatState.monster.name}! +${goldDrop} zlota`, 'epic');
+    addLog(`BOSS POKONANY: ${combatState.monster.icon} ${combatState.monster.name}! +${goldDrop} złota`, 'epic');
     // Boss kill counts as 2 quest kills for specific monster quests
     game.quests.forEach(q => {
       if(q.completed || q.readyForReward) return;
@@ -2456,7 +2774,7 @@ function combatVictory() {
       addLog(`${mc.icon} Boss upuscil ${mc.name}!`,'epic');
     }
   } else {
-    addLog(`Pokonano ${combatState.monster.icon} ${combatState.monster.name}! +${goldDrop} zlota`, 'good');
+    addLog(`Pokonano ${combatState.monster.icon} ${combatState.monster.name}! +${goldDrop} złota`, 'good');
   }
   render();
 
@@ -2559,7 +2877,7 @@ function itemTooltipHtml(item) {
     else stats += `<div class="tt-stat">Szb. At/Un: <span style="color:#44ff44">${item.spd>0?'+':''}${item.spd}</span></div>`;
   }
   if (item.hp) stats += `<div class="tt-stat">HP: <span style="color:#ff4444">+${item.hp}</span></div>`;
-  if (item.luck) stats += `<div class="tt-stat">Szczescie: <span style="color:#ffd700">+${item.luck}</span></div>`;
+  if (item.luck) stats += `<div class="tt-stat">Szczęście: <span style="color:#ffd700">+${item.luck}</span></div>`;
   if (item.ability) { const ai=ABILITY_INFO[item.ability]; if(ai) stats+=`<div class="tt-stat" style="color:#bb88ff;">${ai.name}</div>`; }
   return `<div class="eq-tooltip"><div class="tt-name" style="color:${col}">${item.name}</div><div style="color:${col};font-size:.85em;margin-bottom:3px;">${rarityNames[item.rarity]}</div>${stats}<div style="color:#666;font-size:.85em;margin-top:3px;">Kliknij by zdjac</div></div>`;
 }
@@ -2614,11 +2932,11 @@ function shopBuy(index) {
   } else if(item.isMapConsumable) {
     const mc = MAP_CONSUMABLES.find(c => c.id === item.consumableId);
     if(mc) game.consumables.push({id:mc.id,name:mc.name,icon:mc.icon,desc:mc.desc});
-    addLog(`Kupiono: ${item.name} za ${item.price} zlota`,'info');
+    addLog(`Kupiono: ${item.name} za ${item.price} złota`,'info');
   } else {
     game.inventory.push({...item});
     game.equipmentFound++;
-    addLog(`Kupiono: ${item.name} za ${item.price} zlota`, 'info');
+    addLog(`Kupiono: ${item.name} za ${item.price} złota`, 'info');
   }
   s.stock.splice(index, 1);
   render();
@@ -2630,7 +2948,7 @@ function shopSell(index) {
   const price = Math.floor(getItemPrice(item) * 0.4);
   game.gold += price;
   game.inventory.splice(index, 1);
-  addLog(`Sprzedano: ${item.name} za ${price} zlota`, 'info');
+  addLog(`Sprzedano: ${item.name} za ${price} złota`, 'info');
   render();
 }
 
@@ -2641,7 +2959,7 @@ function shopSellConsumable(index) {
   const price = mc ? Math.floor((mc.basePrice + game.level * mc.pricePerLvl) * 0.4) : 5;
   game.gold += price;
   game.consumables.splice(index, 1);
-  addLog(`Sprzedano: ${c.name} za ${price} zlota`, 'info');
+  addLog(`Sprzedano: ${c.name} za ${price} złota`, 'info');
   render();
 }
 
@@ -2680,7 +2998,7 @@ function advanceDialogue() {
 function getQuestMonster(level) {
   // Pick a monster that can appear on this or the next level
   const nextLvl = level + 1;
-  const maxTier = nextLvl <= 1 ? 1 : nextLvl <= 2 ? 2 : nextLvl <= 4 ? 3 : nextLvl <= 6 ? 4 : 5;
+  const maxTier = nextLvl <= 1 ? 1 : nextLvl <= 2 ? 2 : nextLvl <= 4 ? 3 : nextLvl <= 6 ? 4 : nextLvl <= 8 ? 5 : nextLvl <= 10 ? 6 : nextLvl <= 12 ? 7 : nextLvl <= 14 ? 8 : nextLvl <= 17 ? 9 : 10;
   const candidates = MONSTER_TEMPLATES.filter(m => m.tier <= maxTier && !m.isBoss);
   // Prefer monsters from mid-to-high available tiers (more interesting targets)
   const preferred = candidates.filter(m => m.tier >= Math.max(0, maxTier - 1));
@@ -2774,7 +3092,7 @@ function claimQuestReward(npcId) {
   game.questsCompleted++;
   if(q.reward.gold) { game.gold += q.reward.gold; game.goldCollected += q.reward.gold; }
   if(q.reward.revealMap) { revealMapArea(game.playerPos.x, game.playerPos.y, 5); }
-  addLog(`Nagroda od ${q.npcName}: +${q.reward.gold||0} zlota!`, 'epic');
+  addLog(`Nagroda od ${q.npcName}: +${q.reward.gold||0} złota!`, 'epic');
   playSfx('quest');
 }
 
@@ -2782,14 +3100,27 @@ function renderQuestComplete(app) {
   const q = game.questCompletePopup;
   const overlay = document.createElement('div');
   overlay.className = 'quest-complete-overlay';
-  overlay.innerHTML = `<div class="quest-complete-box">
-    <div style="font-size:3em;margin-bottom:10px;">⭐</div>
-    <h2>Zadanie Wykonane!</h2>
-    <div style="color:#aaa;font-size:.95em;margin-bottom:10px;">Zadanie od: <span style="color:#bb88ff;">${q.npcName}</span></div>
-    <div class="quest-reward">Nagroda: ${q.rewardDesc}</div>
-    <div style="color:#ffd700;font-size:1.1em;margin-top:10px;font-weight:bold;">Wroc do ${q.npcName} po nagrode!</div>
-    <button class="btn btn-success" onclick="dismissQuestComplete()" style="margin-top:15px;">Rozumiem!</button>
-  </div>`;
+  if (q.isMainQuest) {
+    const isVictory = game.mainQuest.stage >= MAIN_STORY.length;
+    overlay.innerHTML = `<div class="quest-complete-box" style="border-color:#bb88ff;max-width:500px;">
+      <div style="font-size:3em;margin-bottom:10px;">${isVictory ? '🏆' : '⚔️'}</div>
+      <h2 style="color:#bb88ff;">${isVictory ? 'ZWYCIĘSTWO!' : 'Rozdział Ukończony!'}</h2>
+      <h3 style="color:#ffd700;margin-bottom:10px;">${q.title}</h3>
+      <div style="color:#ccc;font-size:.95em;margin-bottom:15px;line-height:1.5;text-align:left;padding:0 10px;">${q.text}</div>
+      <div class="quest-reward">Nagroda: ${q.rewardDesc}</div>
+      ${isVictory ? '<div style="color:#44ff44;font-size:1.1em;margin-top:10px;font-weight:bold;">Gratulacje! Ukończyłeś Klątwę Zar\'Kotha!</div>' : ''}
+      <button class="btn btn-success" onclick="dismissQuestComplete()" style="margin-top:15px;">${isVictory ? 'Kontynuuj Eksplorację' : 'Dalej →'}</button>
+    </div>`;
+  } else {
+    overlay.innerHTML = `<div class="quest-complete-box">
+      <div style="font-size:3em;margin-bottom:10px;">⭐</div>
+      <h2>Zadanie Wykonane!</h2>
+      <div style="color:#aaa;font-size:.95em;margin-bottom:10px;">Zadanie od: <span style="color:#bb88ff;">${q.npcName}</span></div>
+      <div class="quest-reward">Nagroda: ${q.rewardDesc}</div>
+      <div style="color:#ffd700;font-size:1.1em;margin-top:10px;font-weight:bold;">Wroc do ${q.npcName} po nagrode!</div>
+      <button class="btn btn-success" onclick="dismissQuestComplete()" style="margin-top:15px;">Rozumiem!</button>
+    </div>`;
+  }
   app.appendChild(overlay);
 }
 
@@ -2810,6 +3141,8 @@ function render() {
   const app = document.getElementById('app');
   if (!game || game.screen === 'menu') {
     renderMenu(app);
+  } else if (game.screen === 'intro') {
+    renderIntro(app);
   } else if (game.screen === 'board') {
     renderBoard(app);
   } else if (game.screen === 'combat') {
@@ -2830,6 +3163,56 @@ function render() {
   }
   if (game && game.questCompletePopup) {
     renderQuestComplete(app);
+  }
+}
+
+function renderIntro(app) {
+  const q = MAIN_STORY[game.mainQuest.stage];
+  const storyTitle = q ? q.title : 'Klątwa Zar\'Kotha';
+  const storyText = q ? q.introText : 'Twoja podróż się zaczyna...';
+  const objective = q ? q.objectiveDesc : '';
+  app.innerHTML = `
+    <div class="menu-screen" style="max-width:600px;">
+      <h1 style="font-size:2em;margin-bottom:5px;">⚔️ Klątwa Zar'Kotha ⚔️</h1>
+      <p style="color:#bb88ff;font-size:1.1em;margin-bottom:20px;">Główna linia fabularna</p>
+      <div style="background:#111128;border:2px solid #bb88ff;border-radius:12px;padding:20px;margin-bottom:20px;text-align:left;">
+        <h3 style="color:#ffd700;margin-bottom:10px;">Rozdzial ${q?q.id:1}: ${storyTitle}</h3>
+        <p style="color:#ccc;line-height:1.6;margin-bottom:15px;">${storyText}</p>
+        ${objective ? `<div style="background:#1a1a0e;border:1px solid #ffd700;border-radius:8px;padding:10px;"><span style="color:#ffd700;">Cel:</span> <span style="color:#fff;">${objective}</span></div>` : ''}
+      </div>
+      <button class="btn btn-success" onclick="startFromIntro()" style="font-size:1.2em;padding:15px 40px;">Wejdź do Lochów →</button>
+    </div>`;
+}
+
+function startFromIntro() {
+  game.screen = 'board';
+  generateBoard();
+  addLog('Wchodzisz do lochów pod ruinami pałacu Zar\'Kotha...', 'epic');
+  const q = MAIN_STORY[game.mainQuest.stage];
+  if (q) addLog(`Cel: ${q.objectiveDesc}`, 'info');
+  render();
+}
+
+function checkMainQuestProgress() {
+  if (!game.mainQuest || game.mainQuest.stage >= MAIN_STORY.length) return;
+  const q = MAIN_STORY[game.mainQuest.stage];
+  if (!q) return;
+  let done = false;
+  if (q.type === 'reachLevel' && game.level >= q.target) done = true;
+  if (q.type === 'killCount' && game.mainQuest.progress >= q.target) done = true;
+  if (done) {
+    // Complete this quest stage
+    if (q.reward.gold) { game.gold += q.reward.gold; game.goldCollected += q.reward.gold; }
+    if (q.reward.healFull) { const stats = getPlayerStats(); game.player.hp = stats.maxHp; }
+    if (q.reward.revealMap) { revealMapArea(game.playerPos.x, game.playerPos.y, 6); }
+    game.questCompletePopup = {isMainQuest:true, title:q.title, text:q.completeText, rewardDesc:q.rewardDesc};
+    game.mainQuest.stage++;
+    game.mainQuest.progress = 0;
+    const next = MAIN_STORY[game.mainQuest.stage];
+    if (next) addLog(`Nowy cel: ${next.objectiveDesc}`, 'epic');
+    else addLog('GRATULACJE! Ukończyłeś główną fabułę!', 'epic');
+    playSfx('quest');
+    render();
   }
 }
 
@@ -2877,14 +3260,30 @@ function renderBoard(app) {
     <div class="stat-row"><span class="stat-name">Obrona</span><span class="stat-val">${stats.def}</span></div>
     <div class="stat-row"><span class="stat-name">Szb. Ataku</span><span class="stat-val">${stats.atkSpd}</span></div>
     <div class="stat-row"><span class="stat-name">Szb. Uniku</span><span class="stat-val">${stats.dodgeSpd}</span></div>
-    <div class="stat-row"><span class="stat-name">Szczescie</span><span class="stat-val">${stats.luck}</span></div>
+    <div class="stat-row"><span class="stat-name">Szczęście</span><span class="stat-val">${stats.luck}</span></div>
     <div class="stat-row"><span class="stat-name">Zabici</span><span class="stat-val">${game.monstersKilled}</span></div>
   </div>`;
-  statsHtml += `<div class="panel"><div class="gold-display">Zloto: ${game.gold}</div>`;
+  statsHtml += `<div class="panel"><div class="gold-display">Złoto: ${game.gold}</div>`;
+  // Main quest tracker
+  if (game.mainQuest && game.mainQuest.stage < MAIN_STORY.length) {
+    const mq = MAIN_STORY[game.mainQuest.stage];
+    if (mq) {
+      const mqProg = mq.type === 'killCount' ? `${game.mainQuest.progress}/${mq.target}` : mq.type === 'reachLevel' ? `Poz.${game.level}/${mq.target}` : '';
+      statsHtml += `<div style="background:#1a1030;border:1px solid #bb88ff;border-radius:6px;padding:6px 8px;margin-top:5px;" title="${mq.progressText}">
+        <div style="color:#bb88ff;font-size:.75em;font-weight:bold;">⚔ ${mq.title}</div>
+        <div style="color:#ddd;font-size:.7em;">${mq.objectiveDesc}</div>
+        <div style="color:#ffd700;font-size:.7em;">${mqProg}</div>
+      </div>`;
+    }
+  } else if (game.mainQuest && game.mainQuest.stage >= MAIN_STORY.length) {
+    statsHtml += `<div style="background:#1a3010;border:1px solid #44ff44;border-radius:6px;padding:6px 8px;margin-top:5px;">
+      <div style="color:#44ff44;font-size:.75em;font-weight:bold;">⭐ Fabuła ukończona!</div>
+    </div>`;
+  }
   if(game.quests.filter(q=>!q.completed).length > 0) {
     statsHtml += `<h3 style="font-size:.8em;color:#ffd700;margin-top:5px;">Zadania</h3>`;
     game.quests.filter(q=>!q.completed).forEach(q => {
-      const questDesc = q.type === 'killSpecific' ? `Pokonaj ${q.target}x ${q.targetMonster}` : q.type === 'killNext' ? `Pokonaj ${q.target} potworow` : q.type === 'reachNext' ? `Dotrzyj do nastepnego poziomu` : q.desc || 'Wypelnij zadanie';
+      const questDesc = q.type === 'killSpecific' ? `Pokonaj ${q.target}x ${q.targetMonster}` : q.type === 'killNext' ? `Pokonaj ${q.target} potworów` : q.type === 'reachNext' ? `Dotrzyj do następnego poziomu` : q.desc || 'Wypełnij zadanie';
       if (q.readyForReward) {
         statsHtml += `<div class="quest-tracker" title="Wroc do ${q.npcName} po nagrode!\nNagroda: ${q.rewardDesc}" style="cursor:help;color:#44ff44;animation:treasureGlow 2s ease-in-out infinite;">Wroc do ${q.npcName}!</div>`;
       } else {
@@ -3025,7 +3424,7 @@ function renderBoard(app) {
           const rarityNames = {common:'Zwykly',uncommon:'Niezwykly',rare:'Rzadki',epic:'Epicki',legendary:'Legendarny'};
           tooltip = `${eq.name} (${rarityNames[eq.rarity]||eq.rarity})\n${eq.desc||''}`;
         } else if (cell.type === 'gold' && cell.goldAmount) {
-          tooltip = `Zloto: ${cell.goldAmount} szt.`;
+          tooltip = `Złoto: ${cell.goldAmount} szt.`;
         } else if (cell.type === 'exit') {
           tooltip = 'Wyjscie na nastepny poziom';
         } else if (cell.type === 'entrance') {
@@ -3133,7 +3532,7 @@ function renderItemFound(app) {
     else statsText += `<div>Szb. At/Un: <span style="color:#44ff44">${item.spd > 0 ? '+' : ''}${item.spd}</span></div>`;
   }
   if (item.hp) statsText += `<div>HP: <span style="color:#ff4444">+${item.hp}</span></div>`;
-  if (item.luck) statsText += `<div>Szczescie: <span style="color:#ffd700">+${item.luck}</span></div>`;
+  if (item.luck) statsText += `<div>Szczęście: <span style="color:#ffd700">+${item.luck}</span></div>`;
   if (item.ability) {
     const ai = ABILITY_INFO[item.ability];
     statsText += `<div style="margin-top:5px;color:#bb88ff;">Umiejetnosc: ${ai ? ai.name : item.ability}</div>`;
@@ -3330,7 +3729,7 @@ function renderCombatScreen(app) {
       </div>
       <div style="display:flex;align-items:center;padding:0 8px;font-size:1.3em;color:#555;">⚔️</div>
       <div style="flex:1;text-align:center;">
-        <div style="color:${cs.monster.isBoss?'#ff4488':'#ff6644'};font-weight:bold;font-size:1.1em;">${cs.monster.icon} ${cs.monster.isBoss?'BOSS: ':''}${cs.monster.name}</div>
+        <div style="color:${cs.monster.isBoss?'#ff4488':'#ff6644'};font-weight:bold;font-size:1.1em;">${cs.monster.icon} ${cs.monster.isBoss?'BOSS: ':''}${cs.monster.name}${cs.isPack?' (x'+cs.packUnits.filter(u=>u.alive).length+')':''}</div>
         <div class="combat-hp-bar" style="margin:3px 0;"><div class="combat-hp-fill monster-hp-fill" style="width:${monsterHpPct}%"></div></div>
         <div class="hp-text" style="font-size:.85em;">${cs.monster.hp}/${cs.monsterMaxHp} HP</div>
       </div>
@@ -3348,7 +3747,7 @@ function renderCombatScreen(app) {
         <div style="${isDodge?hlOn:'color:#aaa;'}">🛡️ Obrona</div>
         <div style="${isAttack?hlOn:'color:#aaa;'}">⚡ Szb. Ataku</div>
         <div style="${isDodge?hlOn:'color:#aaa;'}">💨 Szb. Uniku</div>
-        <div style="color:#aaa;">🍀 Szczescie</div>
+        <div style="color:#aaa;">🍀 Szczęście</div>
       </div>
       <div style="flex:1;text-align:left;padding-left:6px;line-height:1.5;">
         <div style="${isDodge?hlOn+cmpCol(effMAtk,effDef):hlOff}">${effMAtk}${cs.monsterAtkReduction>0?' <span style="color:#ff8888;">(-'+cs.monsterAtkReduction+')</span>':''}</div>
@@ -3438,7 +3837,7 @@ function renderCombat() {
     ctx.shadowBlur = 30;
     ctx.shadowColor = '#ff4444';
     ctx.beginPath();
-    const bx = w/2, by = h/3;
+    const bx = cs.beamOx || cs.mx, by = cs.beamOy || cs.my;
     ctx.moveTo(bx, by);
     ctx.lineTo(bx + Math.cos(cs.beamAngle) * 600, by + Math.sin(cs.beamAngle) * 600);
     ctx.stroke();
@@ -3446,7 +3845,7 @@ function renderCombat() {
 
     // Beam collision
     if (cs.pInvincible <= 0 && cs.pVisible) {
-      const dx = cs.px - w/2, dy = cs.py - h/3;
+      const dx = cs.px - bx, dy = cs.py - by;
       const beamDirX = Math.cos(cs.beamAngle), beamDirY = Math.sin(cs.beamAngle);
       const cross = Math.abs(dx * beamDirY - dy * beamDirX);
       const dot = dx * beamDirX + dy * beamDirY;
@@ -3504,6 +3903,65 @@ function renderCombat() {
     ctx.shadowBlur = 0;
   });
 
+  // Draw monster(s)
+  if (cs.isPack) {
+    cs.packUnits.forEach(u => {
+      if (!u.alive) return;
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ff6644';
+      ctx.font = '24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(u.icon, u.x, u.y);
+      // Unit HP bar
+      const bw = 30, bh = 4;
+      ctx.fillStyle = '#333';
+      ctx.fillRect(u.x-bw/2, u.y+16, bw, bh);
+      ctx.fillStyle = u.hp > u.maxHp*0.5 ? '#44ff44' : u.hp > u.maxHp*0.25 ? '#ffaa00' : '#ff4444';
+      ctx.fillRect(u.x-bw/2, u.y+16, bw * (u.hp/u.maxHp), bh);
+      ctx.restore();
+      ctx.shadowBlur = 0;
+    });
+  } else {
+    ctx.save();
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = cs.monster.isBoss ? '#ff4444' : '#ff8844';
+    ctx.font = cs.monster.isBoss ? '36px sans-serif' : '28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(cs.monster.icon, cs.mx, cs.my);
+    ctx.restore();
+    ctx.shadowBlur = 0;
+  }
+
+  // Melee range indicator during attack phase
+  if (cs.isMelee && cs.phase === 'attack' && cs.attackReady) {
+    ctx.save();
+    ctx.setLineDash([6, 4]);
+    let tgtX = cs.mx, tgtY = cs.my;
+    if (cs.isPack) { let nd=Infinity; cs.packUnits.forEach(u=>{if(!u.alive)return;const d=Math.sqrt((cs.px-u.x)**2+(cs.py-u.y)**2);if(d<nd){nd=d;tgtX=u.x;tgtY=u.y;}}); }
+    const distToMonster = Math.sqrt((cs.px-tgtX)**2 + (cs.py-tgtY)**2);
+    const inRange = distToMonster <= cs.meleeRange;
+    ctx.strokeStyle = inRange ? 'rgba(68,255,68,0.5)' : 'rgba(255,68,68,0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cs.px, cs.py, cs.meleeRange, 0, Math.PI*2);
+    ctx.stroke();
+    // Line to nearest monster
+    ctx.setLineDash([3,3]);
+    ctx.strokeStyle = inRange ? 'rgba(68,255,68,0.3)' : 'rgba(255,68,68,0.2)';
+    ctx.beginPath(); ctx.moveTo(cs.px, cs.py); ctx.lineTo(tgtX, tgtY); ctx.stroke();
+    ctx.setLineDash([]);
+    if (!inRange) {
+      ctx.fillStyle = '#ff4444';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('POZA ZASIĘGIEM!', cs.px, cs.py + cs.pSize + 18);
+    }
+    ctx.restore();
+  }
+
   // Player
   if (cs.pVisible || cs.pInvincible > 0) {
     ctx.save();
@@ -3514,17 +3972,13 @@ function renderCombat() {
       ctx.globalAlpha = 0.2;
     }
     // Player glow
-    ctx.shadowBlur = 15;
+    ctx.shadowBlur = 12;
     ctx.shadowColor = cs.rageActive ? '#ff4444' : '#44ff44';
-    ctx.fillStyle = cs.rageActive ? '#ff6644' : '#44ff44';
-    ctx.beginPath();
-    ctx.arc(cs.px, cs.py, cs.pSize, 0, Math.PI * 2);
-    ctx.fill();
-    // Inner
-    ctx.fillStyle = cs.rageActive ? '#ffaa44' : '#88ff88';
-    ctx.beginPath();
-    ctx.arc(cs.px, cs.py, cs.pSize * 0.5, 0, Math.PI * 2);
-    ctx.fill();
+    // Draw player as emoji
+    ctx.font = '20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🧙', cs.px, cs.py);
     ctx.restore();
     ctx.shadowBlur = 0;
   }
@@ -3752,8 +4206,8 @@ function renderGameOver(app) {
       <div class="stat-row"><span class="stat-name">Potwory pokonane</span><span class="stat-val">${game.monstersKilled}</span></div>
       <div class="stat-row"><span class="stat-name">Pola odkryte</span><span class="stat-val">${game.cellsExplored}</span></div>
       <div class="stat-row"><span class="stat-name">Ekwipunek znaleziony</span><span class="stat-val">${game.equipmentFound}</span></div>
-      <div class="stat-row"><span class="stat-name">Zloto zebrane</span><span class="stat-val">${game.goldCollected}</span></div>
-      <div class="stat-row"><span class="stat-name">Zadania ukonczone</span><span class="stat-val">${game.questsCompleted}</span></div>
+      <div class="stat-row"><span class="stat-name">Złoto zebrane</span><span class="stat-val">${game.goldCollected}</span></div>
+      <div class="stat-row"><span class="stat-name">Zadania ukończone</span><span class="stat-val">${game.questsCompleted}</span></div>
     </div>
     <div class="reward-display">+${game.earnedSoulPoints} Punktow Duszy</div>
     <p style="color:#888;font-size:.85em;margin-bottom:20px;">Laczne PD: ${save.soulPoints}</p>
@@ -3768,8 +4222,8 @@ function renderLevelComplete(app) {
   const isRevisit = node && node.board;
   app.innerHTML = `<div class="combat-overlay">
     <div class="level-complete">
-      <h2>${isRevisit ? 'Powrot na' : ''} Poziom ${game.level}${isRevisit ? '' : ' Ukonczony!'}</h2>
-      <p style="color:#aaa;margin-bottom:20px;">${isRevisit ? 'Wracasz na odwiedzony wczesniej poziom.' : 'Znaleziono wyjscie do nastepnego poziomu.'}</p>
+      <h2>${isRevisit ? 'Powrót na' : ''} Poziom ${game.level}${isRevisit ? '' : ' Ukończony!'}</h2>
+      <p style="color:#aaa;margin-bottom:20px;">${isRevisit ? 'Wracasz na odwiedzony wcześniej poziom.' : 'Znaleziono wyjście do następnego poziomu.'}</p>
       <div style="margin-bottom:15px;">
         <div class="hp-bar" style="width:300px;margin:0 auto;"><div class="hp-fill" style="width:${hpPct}%"></div></div>
         <div style="color:#aaa;font-size:.85em;margin-top:5px;">HP: ${game.player.hp}/${stats.maxHp} (leczenie 40% max HP + 10)</div>
@@ -3778,6 +4232,11 @@ function renderLevelComplete(app) {
         Potwory pokonane: ${game.monstersKilled}<br>
         Ekwipunek: ${game.equipmentFound}
       </div>
+      ${game.mainQuest && game.mainQuest.stage < MAIN_STORY.length ? `<div style="background:#1a1030;border:1px solid #bb88ff;border-radius:8px;padding:10px;margin-bottom:15px;text-align:left;">
+        <div style="color:#bb88ff;font-size:.85em;font-weight:bold;">⚔ ${MAIN_STORY[game.mainQuest.stage].title}</div>
+        <div style="color:#aaa;font-size:.8em;margin-top:4px;">${MAIN_STORY[game.mainQuest.stage].progressText}</div>
+        <div style="color:#ffd700;font-size:.8em;margin-top:4px;">Cel: ${MAIN_STORY[game.mainQuest.stage].objectiveDesc}</div>
+      </div>` : ''}
       <button class="btn btn-success" onclick="nextLevel()">${isRevisit ? 'Wejdz' : 'Nastepny Poziom'} →</button>
     </div>
   </div>`;

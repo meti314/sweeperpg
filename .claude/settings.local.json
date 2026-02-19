@@ -4,7 +4,8 @@
       "Bash(node:*)",
       "Bash(del:*)",
       "Bash(npm init:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(powershell:*)"
     ]
   }
 }
