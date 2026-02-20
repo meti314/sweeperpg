@@ -12,7 +12,21 @@
       "Bash(ls:*)",
       "Bash(cd:*)",
       "Bash(echo:*)",
-      "Bash(printenv:*)"
+      "Bash(printenv:*)",
+      "WebSearch",
+      "WebFetch(domain:css-tricks.com)",
+      "WebFetch(domain:didacromero.github.io)",
+      "WebFetch(domain:gameaccessibilityguidelines.com)",
+      "WebFetch(domain:www.joshwcomeau.com)",
+      "WebFetch(domain:codersblock.com)",
+      "WebFetch(domain:lospec.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:finnmercury.itch.io)",
+      "WebFetch(domain:www.galaydegames.com)",
+      "WebFetch(domain:www.dismantle.studio)",
+      "WebFetch(domain:retrostylegames.com)",
+      "WebFetch(domain:www.freecodecamp.org)",
+      "WebFetch(domain:tympanus.net)"
     ]
   }
 }
