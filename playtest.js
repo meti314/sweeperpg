@@ -804,7 +804,7 @@ async function handleDialogue(page) {
   log('NPC dialogue');
   let claimedReward = false;
   let acceptedQuest = false;
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 30; i++) {
     const screen = await page.evaluate(() => game.screen);
     if (screen !== 'dialogue') break;
 
@@ -814,7 +814,7 @@ async function handleDialogue(page) {
       const overlay = document.querySelector('.dialogue-overlay');
       if (!overlay) { closeDialogue(); return 'done'; }
 
-      // Priority: claim reward > complete quest npc talk > accept quest > finish topics > reveal map > advance > close
+      // Priority: claim reward > quest npc talk > accept quest > mood reveal > choice btn > back to topics > finish topics > select topic > advance > close
       const btns = overlay.querySelectorAll('button');
       for (const btn of btns) {
         const oc = btn.getAttribute('onclick') || '';
@@ -828,6 +828,19 @@ async function handleDialogue(page) {
         const oc = btn.getAttribute('onclick') || '';
         if (oc.includes('acceptQuest')) { btn.click(); return 'accepted'; }
       }
+      // Mood-based map reveal — always accept
+      for (const btn of btns) {
+        const oc = btn.getAttribute('onclick') || '';
+        if (oc.includes('moodRevealMap')) { btn.click(); return 'mood-revealed'; }
+      }
+      // Branching dialogue: click first choice button (usually positive mood)
+      const choiceBtns = overlay.querySelectorAll('.choice-btn');
+      if (choiceBtns.length > 0) { choiceBtns[0].click(); return 'choice-picked'; }
+      // Back to topics after reading a choice response
+      for (const btn of btns) {
+        const oc = btn.getAttribute('onclick') || '';
+        if (oc.includes('backToTopics')) { btn.click(); return 'back-to-topics'; }
+      }
       for (const btn of btns) {
         const oc = btn.getAttribute('onclick') || '';
         if (oc.includes('finishTopics')) { btn.click(); return 'topics-done'; }
@@ -836,9 +849,10 @@ async function handleDialogue(page) {
         const oc = btn.getAttribute('onclick') || '';
         if (oc.includes('showQuestNpcResponse')) { btn.click(); return 'questnpc-resp'; }
       }
+      // Click topic buttons (selectTopic)
       for (const btn of btns) {
         const oc = btn.getAttribute('onclick') || '';
-        if (oc.includes('npcRevealMap')) { btn.click(); return 'revealed'; }
+        if (oc.includes('selectTopic')) { btn.click(); return 'topic-selected'; }
       }
       for (const btn of btns) {
         const oc = btn.getAttribute('onclick') || '';
@@ -847,6 +861,11 @@ async function handleDialogue(page) {
       for (const btn of btns) {
         const oc = btn.getAttribute('onclick') || '';
         if (oc.includes('closeDialogue') || oc.includes('closePuzzle')) { btn.click(); return 'closed'; }
+      }
+      // Decline mood reveal as last resort (prefer accepting above)
+      for (const btn of btns) {
+        const oc = btn.getAttribute('onclick') || '';
+        if (oc.includes('declineMoodReveal')) { btn.click(); return 'mood-declined'; }
       }
       // Fallback: click any button
       if (btns.length > 0) { btns[0].click(); return 'clicked'; }
