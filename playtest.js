@@ -3,9 +3,10 @@ const path = require('path');
 
 const GAME_URL = 'file:///' + path.resolve(__dirname, 'index.html').replace(/\\/g, '/');
 const TICK = 150;       // ms between actions
-const COMBAT_TIMEOUT = 60000; // max ms to wait for auto-play combat
+const COMBAT_TIMEOUT = 120000; // max ms to wait for auto-play combat (2min for time-accel)
 const COMBAT_POLL = 200;      // ms between combat state polls
 const MAX_STUCK = 40;   // max ticks without progress before fallback
+const MAX_LEVEL = parseInt(process.argv[2]) || 20; // pass target level as CLI arg
 
 // Feedback collector
 const feedback = {
@@ -45,10 +46,10 @@ async function sleep(ms) {
   await page.goto(GAME_URL, { waitUntil: 'domcontentloaded' });
   await sleep(1500);
 
-  // Enable debug mode
-  await page.evaluate(() => { window.debugMode = true; });
+  // Enable debug mode + time acceleration
+  await page.evaluate(() => { window.debugMode = true; window.simSpeed = 4; });
   await page.click('#debugCheckbox');
-  log('Debug mode ON');
+  log('Debug mode ON, simSpeed=4x');
 
   // Start new game
   await sleep(500);
@@ -68,29 +69,35 @@ async function sleep(ms) {
   let lastMonstersKilled = 0;
 
   while (running) {
-    const state = await page.evaluate(() => {
-      if (!game) return { screen: 'none' };
-      return {
-        screen: game.screen,
-        level: game.level,
-        hp: game.player ? game.player.hp : 0,
-        maxHp: game.player ? getPlayerStats().maxHp : 0,
-        gold: game.gold,
-        mana: game.player ? game.player.mana : 0,
-        monstersKilled: game.monstersKilled || 0,
-        mainQuestStage: game.mainQuest ? game.mainQuest.stage : 0,
-        mainQuestProgress: game.mainQuest ? game.mainQuest.progress : 0,
-        mainQuestTotal: typeof MAIN_STORY !== 'undefined' && game.mainQuest
-          ? (MAIN_STORY[game.mainQuest.stage] ? MAIN_STORY[game.mainQuest.stage].target : '?') : '?',
-        px: game.playerPos ? game.playerPos.x : -1,
-        py: game.playerPos ? game.playerPos.y : -1,
-        boardW: game.boardW,
-        boardH: game.boardH,
-        questCount: game.quests ? game.quests.length : 0,
-        inventoryCount: game.inventory ? game.inventory.length : 0,
-        weaponName: game.equipment && game.equipment.weapon ? game.equipment.weapon.name : 'brak',
-      };
-    });
+    let state;
+    try {
+      state = await page.evaluate(() => {
+        if (!game) return { screen: 'none' };
+        return {
+          screen: game.screen,
+          level: game.level,
+          hp: game.player ? game.player.hp : 0,
+          maxHp: game.player ? getPlayerStats().maxHp : 0,
+          gold: game.gold,
+          mana: game.player ? game.player.mana : 0,
+          monstersKilled: game.monstersKilled || 0,
+          mainQuestStage: game.mainQuest ? game.mainQuest.stage : 0,
+          mainQuestProgress: game.mainQuest ? game.mainQuest.progress : 0,
+          mainQuestTotal: typeof MAIN_STORY !== 'undefined' && game.mainQuest
+            ? (MAIN_STORY[game.mainQuest.stage] ? MAIN_STORY[game.mainQuest.stage].target : '?') : '?',
+          px: game.playerPos ? game.playerPos.x : -1,
+          py: game.playerPos ? game.playerPos.y : -1,
+          boardW: game.boardW,
+          boardH: game.boardH,
+          questCount: game.quests ? game.quests.length : 0,
+          inventoryCount: game.inventory ? game.inventory.length : 0,
+          weaponName: game.equipment && game.equipment.weapon ? game.equipment.weapon.name : 'brak',
+        };
+      });
+    } catch(e) {
+      await sleep(500);
+      continue;
+    }
 
     // Track level changes
     if (state.level !== lastLevel) {
@@ -98,6 +105,11 @@ async function sleep(ms) {
       feedback.levelsReached.push(state.level);
       lastLevel = state.level;
       stuckCounter = 0;
+      if (state.level > MAX_LEVEL) {
+        log(`TARGET LEVEL ${MAX_LEVEL} REACHED — stopping session`);
+        running = false;
+        break;
+      }
     }
 
     // Track kills
@@ -155,14 +167,13 @@ async function sleep(ms) {
 
       case 'puzzle':
         stuckCounter = 0;
-        // Auto-solve puzzle (debugMode auto-solves, but just in case)
+        // Auto-solve minigame (debugMode auto-solves, but just in case)
         await page.evaluate(() => {
           if(game.puzzleState && !game.puzzleState.solved && !game.puzzleState.failed) {
-            const p = game.puzzleState.puzzle;
-            if(p.type==='input') submitPuzzleAnswer(p.correctAnswer);
-            else submitPuzzleAnswer(String(p.correctIndex));
+            if(typeof autoSolveMinigame === 'function') autoSolveMinigame();
+            else { game.puzzleState.solved = true; }
           }
-          if(game.puzzleState) closePuzzle();
+          if(game.puzzleState && (game.puzzleState.solved || game.puzzleState.failed)) closePuzzle();
         });
         await sleep(300);
         break;
@@ -205,6 +216,7 @@ async function sleep(ms) {
           game._visitedCells = {};
           game._visitedPerNode = {};
           game._exploredNodes = {};
+          game._npcsDone = {};
         });
         break;
 
@@ -369,10 +381,15 @@ async function handleBoard(page, state) {
 
     // === QUEST AWARENESS ===
     if (!game._visitedCells) game._visitedCells = {};
+    if (!game._npcsDone) game._npcsDone = {};  // NPCs fully done (reward claimed or post-quest)
 
     // Side quest: killSpecific — need to hunt a specific monster type
     const sideQuest = game.quests ? game.quests.find(q => !q.completed && q.type === 'killSpecific' && q.progress < q.target) : null;
     const questMonster = sideQuest ? sideQuest.targetMonster : null;
+
+    // Check if any quest is readyForReward (need to go back to NPC)
+    const rewardReady = game.quests ? game.quests.find(q => !q.completed && q.readyForReward) : null;
+    const rewardNpcId = rewardReady ? rewardReady.npcId : null;
 
     // Main quest: killCount — need to kill any N monsters
     const mq = game.mainQuest;
@@ -409,7 +426,20 @@ async function handleBoard(page, state) {
           if (cell.type === 'equipment') priority = 1;          // Loot first!
           else if (cell.type === 'treasure') priority = 2;      // Treasure
           else if (cell.type === 'gold') priority = 3;          // Gold
-          else if (cell.type === 'npc' && !wasVisited) priority = 5;   // NPC (quests)
+          else if (cell.type === 'npc') {
+            // Smart NPC priority based on quest state
+            const npcCell = cell;
+            const npcId = npcCell.npcId || cellKey;
+            if (game._npcsDone[npcId]) {
+              priority = 70;  // Already done — never revisit
+            } else if (rewardNpcId && npcCell.npcId === rewardNpcId) {
+              priority = 2;   // Reward ready — go claim it!
+            } else if (!wasVisited) {
+              priority = 5;   // First visit — pick up quest
+            } else {
+              priority = 70;  // Already visited, quest not ready — skip
+            }
+          }
           else if (cell.type === 'shop' && !wasVisited) priority = 6;  // Shop
           else if (cell.type === 'fountain' && !cell.used && (hpRatio < 0.7 || manaRatio < 0.5)) priority = 4; // Fountain when needed
           else if (cell.type === 'exit') {
@@ -423,22 +453,22 @@ async function handleBoard(page, state) {
             if (!childId) priority = 11;                    // NEW node — top priority!
             else if (!isExplored) priority = 11;            // Not fully explored yet
             else if (childDepth > curDepth) priority = 13;  // Deeper explored — path to frontier
-            else priority = 60;                             // Same/lower depth — avoid
+            else priority = 70;                             // Same/lower depth — avoid
           }
           else if (cell.type === 'entrance') {
-            // Going backwards — only as last resort
-            priority = 60;
+            // Going backwards — only as very last resort
+            priority = 70;
           }
           else if (cell.type === 'questItem') priority = 3;     // Quest item — important
-          else if (cell.type === 'trap') priority = 8;            // Trap — will auto-solve in debug
+          else if (cell.type === 'trap') priority = 40;           // Trap — AVOID (damage + time waste)
           else if (cell.type === 'monster' && cell.monster) {
-            // Quest target monster — worth fighting
+            // Monsters: fight them! This is a dungeon crawler.
             if (questMonster && cell.monster.name === questMonster) {
-              priority = 7;  // Quest target
+              priority = 4;   // Quest target — high priority
             } else if (mainNeedsKills) {
-              priority = 20; // Fight only if main quest needs kills
+              priority = 9;   // Main quest needs kills — go fight
             } else {
-              priority = 50; // AVOID — very low priority
+              priority = 15;  // Normal monster — fight when convenient
             }
           }
         } else {
@@ -471,11 +501,19 @@ async function handleBoard(page, state) {
           // Calculate path danger for this step
           let stepDanger = 0;
           if (nc.revealed && nc.type === 'monster') {
-            // Known monster in path — heavy penalty
-            stepDanger = 100;
-          } else if (nc.revealed && (nc.type === 'shop' || nc.type === 'npc') && game._visitedCells[nk]) {
-            // Visited shop/NPC — avoid pathing through to prevent re-entry
-            stepDanger = 50;
+            // Known monster in path — moderate penalty (fighting is OK)
+            stepDanger = 20;
+          } else if (nc.revealed && nc.type === 'trap') {
+            // Known trap in path — avoid (deals damage)
+            stepDanger = 60;
+          } else if (nc.revealed && nc.type === 'npc') {
+            const npcId2 = nc.npcId || nk;
+            if (game._npcsDone[npcId2] || game._visitedCells[nk]) {
+              stepDanger = 80;  // Done NPC — heavy penalty to avoid re-entry
+            }
+          } else if (nc.revealed && nc.type === 'shop' && game._visitedCells[nk]) {
+            // Visited shop — avoid pathing through to prevent re-entry
+            stepDanger = 80;
           } else if (!nc.revealed) {
             const safety = cellSafety[nk];
             if (safety === 'dangerous') stepDanger = 100;
@@ -579,16 +617,22 @@ async function handleCombat(page) {
   const startTime = Date.now();
   let result = 'timeout';
   while (Date.now() - startTime < COMBAT_TIMEOUT) {
-    const state = await page.evaluate(() => {
-      if (!combatState) return { phase: 'none', screen: game.screen };
-      return {
-        phase: combatState.phase,
-        screen: game.screen,
-        playerHp: game.player.hp,
-        monsterHp: combatState.monster.hp,
-        monsterMaxHp: combatState.monsterMaxHp,
-      };
-    });
+    let state;
+    try {
+      state = await page.evaluate(() => {
+        if (!combatState) return { phase: 'none', screen: game.screen };
+        return {
+          phase: combatState.phase,
+          screen: game.screen,
+          playerHp: game.player.hp,
+          monsterHp: combatState.monster.hp,
+          monsterMaxHp: combatState.monsterMaxHp,
+        };
+      });
+    } catch(e) {
+      await sleep(500);
+      continue;
+    }
 
     if (state.screen !== 'combat') {
       result = 'left_combat';
@@ -684,7 +728,7 @@ async function handleItemFound(page) {
   await page.evaluate(() => {
     if (!game.inventory || game.inventory.length === 0) return;
     function itemScore(item) {
-      let score = (item.str || 0) + (item.def || 0) + (item.spd || 0) + (item.hp || 0) / 5;
+      let score = (item.str || 0) + (item.def || 0) + (item.spd || 0) + (item.hp || 0) / 5 + (item.mana || 0) / 5 + (item.manaOnKill || 0) * 2 + (item.magicPower || 0);
       // Auto-play strongly prefers magic (ranged) weapons — melee approach is slow
       if (item.slot === 'weapon' && item.atkType === 'magic') score += 5;
       return score;
@@ -758,6 +802,8 @@ async function handleShop(page, state) {
 
 async function handleDialogue(page) {
   log('NPC dialogue');
+  let claimedReward = false;
+  let acceptedQuest = false;
   for (let i = 0; i < 15; i++) {
     const screen = await page.evaluate(() => game.screen);
     if (screen !== 'dialogue') break;
@@ -809,8 +855,30 @@ async function handleDialogue(page) {
       return 'force-closed';
     });
 
+    if (result === 'claimed') claimedReward = true;
+    if (result === 'accepted') acceptedQuest = true;
     if (result === 'done' || result === 'closed' || result === 'force-closed' || result === 'questnpc') break;
     await sleep(250);
+  }
+
+  // Mark NPC as done if reward was claimed (or just visited and accepted quest)
+  if (claimedReward || acceptedQuest) {
+    await page.evaluate((claimed) => {
+      if (!game._npcsDone) game._npcsDone = {};
+      // Mark current position NPC as done
+      const k = game.playerPos.x + ',' + game.playerPos.y;
+      const cell = game.board[game.playerPos.y] && game.board[game.playerPos.y][game.playerPos.x];
+      if (cell && cell.npcId) game._npcsDone[cell.npcId] = true;
+      game._npcsDone[k] = true;
+      if (claimed) {
+        // After claiming reward, mark ALL quest NPCs as done
+        if (game.quests) {
+          game.quests.forEach(q => {
+            if (q.completed && q.npcId) game._npcsDone[q.npcId] = true;
+          });
+        }
+      }
+    }, claimedReward);
   }
 
   // Absolute fallback: force close

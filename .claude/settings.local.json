@@ -5,7 +5,14 @@
       "Bash(del:*)",
       "Bash(npm init:*)",
       "Bash(npm install:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(for i in 1 2)",
+      "Bash(do echo \"=== SESSION $i TO LEVEL 3 ===\")",
+      "Bash(done)",
+      "Bash(ls:*)",
+      "Bash(cd:*)",
+      "Bash(echo:*)",
+      "Bash(printenv:*)"
     ]
   }
 }
